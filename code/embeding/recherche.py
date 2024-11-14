@@ -1,5 +1,6 @@
 import torch
 from torchvision import models, transforms
+from torchvision.models import ResNet18_Weights
 from PIL import Image
 import numpy as np
 import faiss
@@ -7,7 +8,7 @@ import pickle
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = models.resnet18(pretrained=True).to(device)
+model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(device)
 model.eval()
 
 preprocess = transforms.Compose([
@@ -22,10 +23,10 @@ def get_embedding(image):
         embedding = model(input_tensor)
     return embedding.squeeze().cpu().numpy()
 
-# Chargement de l'index FAISS
+
 index = faiss.read_index("index.faiss")
 
-# Chargement des titres et artistes
+
 with open("titles_artists.pkl", "rb") as f:
     titles, artists = pickle.load(f)
 
@@ -39,8 +40,8 @@ def find_most_similar_image(input_image_path, index, titles, artists, k=1):
     
     return closest_image_info
 
-# Chemin de l'image d'entrée
-input_image_path = "Mona_Lisa.jpg"
+
+input_image_path = "nuit.jpg"
 most_similar_images = find_most_similar_image(input_image_path, index, titles, artists, k=1)
 
 if most_similar_images:
