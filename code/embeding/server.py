@@ -6,6 +6,7 @@ import torch
 from torchvision import models
 from torchvision.models import ResNet18_Weights
 import faiss
+import clip
 import pickle
 import os
 
@@ -21,7 +22,7 @@ CORS(app)
 
 # Configuration du modèle et de l'appareil
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(device)
+model, preprocess = clip.load("ViT-B/32", device=device)
 model.eval()
 
 # Chargement de l'index FAISS
@@ -45,7 +46,7 @@ def predict():
 
     # Renvoie la réponse avec les informations de l'image la plus proche
     result = {
-        "prediction": similar_images[0] if similar_images else {"error": "Aucune image similaire trouvée"}
+        "prediction": similar_images[0] if similar_images else {"error": "Aucune image similaire trouvee"}
     }
     return jsonify(result)
 
