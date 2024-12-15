@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'profilagePage.dart';
+import 'package:login_firebase/camera_screen.dart';
+import 'package:login_firebase/mainPage.dart';
 
 class registrationPage extends StatefulWidget {
   const registrationPage({super.key});
@@ -106,14 +107,19 @@ class _registrationPageState extends State<registrationPage> {
         const SnackBar(content: Text("Vous avez été inscrit !")),
       );
 
-      // Redirection vers la page de profilage
+      // Redirection vers la page de profilage EN FAIT NON, VU QUE C'EST PAS IMPLEMENTE ON REDIRIGE VERS LA PAGE DE CONNEXION
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ProfilagePage()),
+        MaterialPageRoute(builder: (context) => CameraScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erreur d'inscription : $e")),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainPage()),
       );
     }
   }

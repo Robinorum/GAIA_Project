@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:login_firebase/camera_screen.dart';
 import 'registrationPage.dart';
-import 'mainPage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.title});
@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
     await _auth.signInWithEmailAndPassword(email: email, password: passwordController.text);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const MainPage()),
+      MaterialPageRoute(builder: (context) => CameraScreen()),
     );
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'camera_screen.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -130,7 +131,10 @@ class MainPage extends StatelessWidget {
       // Bouton de navigation flottant (au centre)
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Action à définir
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CameraScreen()),
+          );
         },
         child: const Icon(Icons.add),
       ),
