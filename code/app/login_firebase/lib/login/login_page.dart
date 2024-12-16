@@ -50,7 +50,8 @@ class _LoginPageState extends State<LoginPage> {
                 //bouton de connexion
                 ElevatedButton(
                   onPressed: () {
-                    if (identifierController.text.isNotEmpty && passwordController.text.isNotEmpty) {
+                    if (identifierController.text.isNotEmpty &&
+                        passwordController.text.isNotEmpty) {
                       login();
                     }
                   },
@@ -61,7 +62,8 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const registrationPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const registrationPage()),
                     );
                   },
                   child: const Text("Inscription"),
@@ -75,6 +77,15 @@ class _LoginPageState extends State<LoginPage> {
                     await signInWithGoogle();
                   },
                 ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainPage()),
+                    );
+                  },
+                  child: const Text("DevMode !!!!"),
+                )
               ],
             ),
           ),
@@ -89,7 +100,9 @@ class _LoginPageState extends State<LoginPage> {
       email = identifierController.text;
     } else {
       final userCollection = _firestore.collection('users');
-      final snapshot = await userCollection.where('username', isEqualTo: identifierController.text).get();
+      final snapshot = await userCollection
+          .where('username', isEqualTo: identifierController.text)
+          .get();
 
       if (snapshot.docs.isNotEmpty) {
         email = snapshot.docs[0]['email'];
@@ -101,17 +114,18 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
 
-   try {
-    await _auth.signInWithEmailAndPassword(email: email, password: passwordController.text);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const MainPage()),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Erreur de connexion: $e")),
-    );
-  }
+    try {
+      await _auth.signInWithEmailAndPassword(
+          email: email, password: passwordController.text);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainPage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur de connexion: $e")),
+      );
+    }
   }
 
   Future<void> signInWithGoogle() async {
@@ -120,16 +134,21 @@ class _LoginPageState extends State<LoginPage> {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return; // L'utilisateur a annulé la connexion
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
 
       // Ajouter l'utilisateur à Firestore s'il s'agit de la première connexion
-      final userDoc = await _firestore.collection('users').doc(userCredential.user?.uid).get();
+      final userDoc = await _firestore
+          .collection('users')
+          .doc(userCredential.user?.uid)
+          .get();
       if (!userDoc.exists) {
         await _firestore.collection('users').doc(userCredential.user?.uid).set({
           'email': userCredential.user?.email,
