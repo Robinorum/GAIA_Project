@@ -13,6 +13,7 @@ class _CameraScreenState extends State<CameraScreen> {
   late CameraController _cameraController;
   late List<CameraDescription> _cameras;
   bool _isCameraInitialized = false;
+  bool _isFlashOn = false;
 
   @override
   void initState() {
@@ -28,6 +29,15 @@ class _CameraScreenState extends State<CameraScreen> {
     setState(() {
       _isCameraInitialized = true;
     });
+  }
+
+  Future<void> toggleFlash() async {
+    if (_cameraController.value.isInitialized) {
+      _isFlashOn = !_isFlashOn;
+      await _cameraController.setFlashMode(
+          _isFlashOn ? FlashMode.torch : FlashMode.off);
+      setState(() {});
+    }
   }
 
   Future<void> capturePhoto() async {
@@ -97,6 +107,26 @@ class _CameraScreenState extends State<CameraScreen> {
             Positioned.fill(
               child: CameraPreview(_cameraController),
             ),
+          Positioned(
+            top: 40,
+            left: 20,
+            child: IconButton(
+              icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 28),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          Positioned(
+            bottom: 80,
+            left: 20,
+            child: IconButton(
+              icon: Icon(
+                _isFlashOn ? Icons.flash_on : Icons.flash_off,
+                color: Colors.white,
+                size: 30,
+              ),
+              onPressed: toggleFlash,
+            ),
+          ),
           Positioned(
             bottom: 80,
             left: 0,
