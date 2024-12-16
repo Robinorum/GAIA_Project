@@ -18,7 +18,7 @@ def get_embedding(image, model, device):
         embedding = embedding / embedding.norm(dim=-1, keepdim=True)
     return embedding.squeeze().cpu().numpy()
 
-def find_most_similar_image(image, index, titles, artists, model, device, k=1, threshold=0.90):
+def find_most_similar_image(image, index, titles, artists, model, device, k=1, threshold=0.60):
     """
     Trouve les images les plus similaires dans l'index FAISS.
     Si la distance minimale dépasse le seuil, renvoie "Pas de correspondance".
