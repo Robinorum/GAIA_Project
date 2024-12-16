@@ -1,29 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:login_firebase/profil_page.dart';
-import 'component/custom_bottom_nav.dart';
-import 'scan/camera_screen.dart';
+import 'package:login_firebase/pages/collection_page.dart';
+import 'package:login_firebase/pages/map_page.dart';
+import 'package:login_firebase/pages/profile_page.dart';
+import 'package:login_firebase/pages/quests_page.dart';
+import '../component/custom_bottom_nav.dart';
+import '../scan/camera_screen.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MainPageState extends State<MainPage> {
-  int _currentIndex = 0; // Gère l'état de la navigation
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
 
-  // Liste des pages à afficher dans l'IndexedStack
   final List<Widget> _pages = [
-    // Page d'accueil (avec contenu actuel)
-    const HomePage(),
-    // Autres pages à définir
-    const Placeholder(), // Remplace par ta page de localisation
-    const Placeholder(), // Remplace par ta page de favoris
-    const ProfilePage(), // Page de profil
+    HomeContent(),
+    MapPage(),
+    QuestsPage(),
+    CollectionPage(),
   ];
 
-  // Gestion du tap sur la barre de navigation
   void _onNavTap(int index) {
     setState(() {
       _currentIndex = index;
@@ -35,8 +34,8 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       body: SafeArea(
         child: IndexedStack(
-          index: _currentIndex, // Affiche la page sélectionnée
-          children: _pages, // Les pages définies plus haut
+          index: _currentIndex,
+          children: _pages,
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -51,15 +50,14 @@ class _MainPageState extends State<MainPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
-        onTap: _onNavTap, // Mise à jour de la page au clic
+        onTap: _onNavTap,
       ),
     );
   }
 }
 
-// Exemple de page d'accueil pour garder l'UI
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+class HomeContent extends StatelessWidget {
+  HomeContent({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +66,10 @@ class HomePage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
+              const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -85,10 +83,20 @@ class HomePage extends StatelessWidget {
                   ),
                 ],
               ),
-              CircleAvatar(
-                radius: 24,
-                backgroundImage: NetworkImage('https://example.com/photo.jpg'),
-              ),
+              InkWell(
+                onTap: () {
+                  // Redirection vers la page profil
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProfilePage()),
+                  );
+                },
+                child: const CircleAvatar(
+                  radius: 24,
+                  backgroundImage:
+                      NetworkImage('https://example.com/photo.jpg'),
+                ),
+              )
             ],
           ),
           const SizedBox(height: 24),
@@ -137,7 +145,6 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// Le widget PlaceCard reste inchangé
 class PlaceCard extends StatelessWidget {
   final String imageUrl;
   final String title;

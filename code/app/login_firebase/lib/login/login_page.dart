@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'registrationPage.dart';
-import '../mainPage.dart';
+import 'package:login_firebase/login/registration_page.dart';
+import '../pages/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.title});
@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const registrationPage()),
+                          builder: (context) => const RegistrationPage()),
                     );
                   },
                   child: const Text("Inscription"),
@@ -81,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const MainPage()),
+                      MaterialPageRoute(builder: (context) => const HomePage()),
                     );
                   },
                   child: const Text("DevMode !!!!"),
@@ -119,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
           email: email, password: passwordController.text);
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainPage()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

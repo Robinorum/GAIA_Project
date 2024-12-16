@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'profilagePage.dart';
+import 'profilage_page.dart';
 
-class registrationPage extends StatefulWidget {
-  const registrationPage({super.key});
+class RegistrationPage extends StatefulWidget {
+  const RegistrationPage({super.key});
 
   @override
-  State<registrationPage> createState() => _RegistrationPageState();
+  State<RegistrationPage> createState() => _RegistrationPageState();
 }
 
-class _RegistrationPageState extends State<registrationPage> {
+class _RegistrationPageState extends State<RegistrationPage> {
   // Contrôleurs pour les champs
   final emailController = TextEditingController();
   final usernameController = TextEditingController();
@@ -53,7 +53,8 @@ class _RegistrationPageState extends State<registrationPage> {
                   signUp();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Veuillez remplir tous les champs.")),
+                    const SnackBar(
+                        content: Text("Veuillez remplir tous les champs.")),
                   );
                 }
               },
@@ -89,7 +90,8 @@ class _RegistrationPageState extends State<registrationPage> {
 
       if (usernameSnapshot.docs.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Ce nom d'utilisateur est déjà utilisé")),
+          const SnackBar(
+              content: Text("Ce nom d'utilisateur est déjà utilisé")),
         );
         return;
       }
@@ -115,7 +117,10 @@ class _RegistrationPageState extends State<registrationPage> {
       );
 
       // 5. **Ajout des informations utilisateur dans Firestore**
-      await _firestore.collection('accounts').doc(userCredential.user?.uid).set({
+      await _firestore
+          .collection('accounts')
+          .doc(userCredential.user?.uid)
+          .set({
         'email': emailController.text,
         'username': usernameController.text,
         'googleAccount': false,

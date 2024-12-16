@@ -32,12 +32,12 @@ class CustomBottomNav extends StatelessWidget {
             ),
             const SizedBox(width: 48), // Espace pour le bouton flottant
             IconButton(
-              icon: Icon(Icons.favorite,
+              icon: Icon(Icons.assignment,
                   color: currentIndex == 2 ? Colors.blue : Colors.grey),
               onPressed: () => onTap(2),
             ),
             IconButton(
-              icon: Icon(Icons.person,
+              icon: Icon(Icons.apps,
                   color: currentIndex == 3 ? Colors.blue : Colors.grey),
               onPressed: () => onTap(3),
             ),

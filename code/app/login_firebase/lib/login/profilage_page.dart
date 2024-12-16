@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login_firebase/mainPage.dart';
+import 'package:login_firebase/pages/home_page.dart';
 
 class ProfilagePage extends StatelessWidget {
   const ProfilagePage({super.key});
@@ -43,9 +43,10 @@ class ProfilagePage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MainPage()),
-                    );                },
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomePage()),
+                  );
+                },
                 child: const Text("Envoyer"),
               ),
             ),
