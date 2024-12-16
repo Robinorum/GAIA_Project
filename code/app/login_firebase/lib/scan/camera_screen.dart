@@ -90,13 +90,40 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Art Scanner')),
-      body: Column(
+      backgroundColor: Colors.black,
+      body: Stack(
         children: [
-          if (_isCameraInitialized) CameraPreview(_cameraController),
-          ElevatedButton(
-            onPressed: capturePhoto,
-            child: Text('Scan'),
+          if (_isCameraInitialized)
+            Positioned.fill(
+              child: CameraPreview(_cameraController),
+            ),
+          Positioned(
+            bottom: 80,
+            left: 0,
+            right: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Tap to capture a photo',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: CircleBorder(),
+                    padding: EdgeInsets.all(20),
+                    backgroundColor: Colors.white,
+                  ),
+                  onPressed: capturePhoto,
+                  child: Icon(Icons.camera_alt, size: 36, color: Colors.black),
+                ),
+              ],
+            ),
           ),
         ],
       ),
