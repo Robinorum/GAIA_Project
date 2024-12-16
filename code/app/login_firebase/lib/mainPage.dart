@@ -1,8 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:login_firebase/profil_page.dart';
+import 'component/custom_bottom_nav.dart';
 import 'scan/camera_screen.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  int _currentIndex = 0; // Gère l'état de la navigation
+
+  void _onNavTap(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    // Ajoutez ici la logique de navigation selon l'index
+    switch (index) {
+      case 0:
+        // Logique pour la page Home
+        break;
+      case 1:
+        // Logique pour la page de Localisation
+        break;
+      case 2:
+        // Logique pour les favoris
+        break;
+      case 3:
+        // Logique pour la page Profil
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProfilePage()),
+        );
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,16 +47,17 @@ class MainPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Titre et photo de profil
+              // Le contenu principal de la page reste inchangé
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         "Hi, Thomas 👋",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 4),
                       Text(
@@ -33,23 +68,16 @@ class MainPage extends StatelessWidget {
                   ),
                   CircleAvatar(
                     radius: 24,
-                    backgroundImage: NetworkImage('https://example.com/photo.jpg'), // Remplacez par l'URL de la photo de profil
+                    backgroundImage:
+                        NetworkImage('https://example.com/photo.jpg'),
                   ),
                 ],
               ),
               const SizedBox(height: 24),
-
-              // Barre de recherche
               TextField(
                 decoration: InputDecoration(
                   hintText: "Search places",
                   prefixIcon: const Icon(Icons.search),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.filter_list),
-                    onPressed: () {
-                      // Action de filtrage
-                    },
-                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -59,68 +87,29 @@ class MainPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Section des lieux populaires
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Popular places",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "View all",
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                ],
+              const Text(
+                "Popular places",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-
-              // Filtres (Most Viewed, Nearby, Best Rate)
-              Row(
-                children: [
-                  FilterChip(
-                    label: const Text("Most Viewed"),
-                    selected: true,
-                    onSelected: (bool value) {},
-                    selectedColor: Colors.black,
-                    labelStyle: const TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(width: 8),
-                  FilterChip(
-                    label: const Text("Nearby"),
-                    selected: false,
-                    onSelected: (bool value) {},
-                  ),
-                  const SizedBox(width: 8),
-                  FilterChip(
-                    label: const Text("Best rate"),
-                    selected: false,
-                    onSelected: (bool value) {},
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Liste de lieux (Carrousel horizontal)
               Expanded(
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  children: [
+                  children: const [
                     PlaceCard(
-                      imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg', // URL de l'image du Louvre
+                      imageUrl:
+                          'https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
                       title: "Le Louvre, Paris",
                       location: "Paris, France",
                       rating: 4.8,
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: 16),
                     PlaceCard(
-                      imageUrl: 'https://example.com/mucem.jpg', // URL de l'image du MUCEM
+                      imageUrl: 'https://example.com/mucem.jpg',
                       title: "MUCEM, Marseille",
                       location: "Marseille, France",
                       rating: 4.5,
                     ),
-                    // Ajoutez d'autres cartes ici
                   ],
                 ),
               ),
@@ -128,7 +117,6 @@ class MainPage extends StatelessWidget {
           ),
         ),
       ),
-      // Bouton de navigation flottant (au centre)
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -139,40 +127,15 @@ class MainPage extends StatelessWidget {
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.home),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(Icons.location_on),
-                onPressed: () {},
-              ),
-              const SizedBox(width: 48), // Espace pour le bouton flottant
-              IconButton(
-                icon: const Icon(Icons.favorite),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(Icons.person),
-                onPressed: () {},
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: CustomBottomNav(
+        currentIndex: _currentIndex,
+        onTap: _onNavTap,
       ),
     );
   }
 }
 
-// Widget pour les cartes de lieux
+// Le widget PlaceCard reste inchangé
 class PlaceCard extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -225,7 +188,8 @@ class PlaceCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 4),
                 Text(
