@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'camera_screen.dart';
+import 'scan/camera_screen.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({Key? key}) : super(key: key);

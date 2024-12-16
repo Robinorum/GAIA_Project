@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:login_firebase/mainPage.dart';
 
 class ProfilagePage extends StatelessWidget {
   const ProfilagePage({super.key});
@@ -41,8 +42,10 @@ class ProfilagePage extends StatelessWidget {
             child: Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Logique de traitement des images sélectionnées
-                },
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainPage()),
+                    );                },
                 child: const Text("Envoyer"),
               ),
             ),

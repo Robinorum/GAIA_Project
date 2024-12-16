@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:login_firebase/camera_screen.dart';
-import 'package:login_firebase/mainPage.dart';
+import 'profilagePage.dart';
 
 class registrationPage extends StatefulWidget {
   const registrationPage({super.key});
 
   @override
-  State<registrationPage> createState() => _registrationPageState();
+  State<registrationPage> createState() => _RegistrationPageState();
 }
 
-class _registrationPageState extends State<registrationPage> {
+class _RegistrationPageState extends State<registrationPage> {
+  // Contrôleurs pour les champs
   final emailController = TextEditingController();
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+
+  // Instances Firebase
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -44,8 +46,15 @@ class _registrationPageState extends State<registrationPage> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (emailController.text.isNotEmpty && usernameController.text.isNotEmpty && passwordController.text.isNotEmpty) {
+                // Validation des champs avant de lancer l'inscription
+                if (emailController.text.isNotEmpty &&
+                    usernameController.text.isNotEmpty &&
+                    passwordController.text.isNotEmpty) {
                   signUp();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Veuillez remplir tous les champs.")),
+                  );
                 }
               },
               child: const Text("Register"),
@@ -56,10 +65,15 @@ class _registrationPageState extends State<registrationPage> {
     );
   }
 
+  /// Méthode pour inscrire l'utilisateur
   Future<void> signUp() async {
     try {
-      // Vérification de l'existence de l'email dans Firestore
-      final emailSnapshot = await _firestore.collection('users').where('email', isEqualTo: emailController.text).get();
+      // 1. **Vérification de l'email dans Firestore**
+      final emailSnapshot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: emailController.text)
+          .get();
+
       if (emailSnapshot.docs.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Cet email est déjà utilisé !")),
@@ -67,8 +81,12 @@ class _registrationPageState extends State<registrationPage> {
         return;
       }
 
-      // Vérification de l'existence du nom d'utilisateur dans Firestore
-      final usernameSnapshot = await _firestore.collection('users').where('username', isEqualTo: usernameController.text).get();
+      // 2. **Vérification du nom d'utilisateur dans Firestore**
+      final usernameSnapshot = await _firestore
+          .collection('users')
+          .where('username', isEqualTo: usernameController.text)
+          .get();
+
       if (usernameSnapshot.docs.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Ce nom d'utilisateur est déjà utilisé")),
@@ -76,50 +94,63 @@ class _registrationPageState extends State<registrationPage> {
         return;
       }
 
-      // Vérification des exigences du mot de passe
-      if (passwordController.text.length < 14 || 
-          !RegExp(r'[A-Z]').hasMatch(passwordController.text) || 
-          !RegExp(r'[a-z]').hasMatch(passwordController.text) || 
-          !RegExp(r'\d').hasMatch(passwordController.text) || 
-          !RegExp(r'[@$!%*?&]').hasMatch(passwordController.text)) { 
+      // 3. **Vérification des exigences du mot de passe**
+      if (passwordController.text.length < 14 ||
+          !RegExp(r'[A-Z]').hasMatch(passwordController.text) ||
+          !RegExp(r'[a-z]').hasMatch(passwordController.text) ||
+          !RegExp(r'\d').hasMatch(passwordController.text) ||
+          !RegExp(r'[@\$!%*?&]').hasMatch(passwordController.text)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Le mot de passe doit contenir au moins 14 caractères, une majuscule, une minuscule, un chiffre, et un caractère spécial.")),
+          const SnackBar(
+              content: Text(
+                  "Le mot de passe doit contenir au moins 14 caractères, une majuscule, une minuscule, un chiffre, et un caractère spécial.")),
         );
         return;
       }
 
-      // Création de l'utilisateur avec FirebaseAuth
+      // 4. **Création de l'utilisateur avec FirebaseAuth**
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
 
-      // Sauvegarde des informations dans Firestore
+      // 5. **Ajout des informations utilisateur dans Firestore**
       await _firestore.collection('accounts').doc(userCredential.user?.uid).set({
         'email': emailController.text,
         'username': usernameController.text,
         'googleAccount': false,
         'brands': [],
-        'collection': [], // Ajout d'une collection vide
+        'collection': [],
       });
 
+      // 6. **Message de succès et redirection**
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Vous avez été inscrit !")),
       );
 
-      // Redirection vers la page de profilage EN FAIT NON, VU QUE C'EST PAS IMPLEMENTE ON REDIRIGE VERS LA PAGE DE CONNEXION
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => CameraScreen()),
+        MaterialPageRoute(builder: (context) => const ProfilagePage()),
       );
+    } on FirebaseAuthException catch (e) {
+      // Gestion des erreurs FirebaseAuth
+      if (e.code == 'email-already-in-use') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Cet email est déjà enregistré.")),
+        );
+      } else if (e.code == 'weak-password') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Le mot de passe est trop faible.")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur: ${e.message}")),
+        );
+      }
     } catch (e) {
+      // Gestion des autres erreurs
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur d'inscription : $e")),
-      );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MainPage()),
+        SnackBar(content: Text("Erreur inattendue: $e")),
       );
     }
   }
