@@ -15,80 +15,104 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  //création des deux variables que l'on récupere dans les champs
-  final identifierController = TextEditingController();
-  final passwordController = TextEditingController();
-  //création des variables liées aux instances de firebase
+  final TextEditingController identifierController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  String? emailError;
+  String? passwordError;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Form(
-            child: Column(
-              children: [
-                //premier input pour l'email
-                TextFormField(
-                  controller: identifierController,
-                  decoration: const InputDecoration(hintText: "Email"),
-                ),
-                //deuxieme input pour le mdp
-                TextFormField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(hintText: "Password"),
-                ),
-                //bouton de connexion
-                ElevatedButton(
-                  onPressed: () {
-                    if (identifierController.text.isNotEmpty &&
-                        passwordController.text.isNotEmpty) {
-                      login();
-                    }
-                  },
-                  child: const Text("Connexion"),
-                ),
-                //bouton pour changer de page et passer sur la page d'inscription
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const RegistrationPage()),
-                    );
-                  },
-                  child: const Text("Inscription"),
-                ),
-                //bouton connexion avec google
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.login),
-                  label: const Text("Connexion avec Google"),
-                  onPressed: () async {
-                    await signInWithGoogle();
-                  },
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const HomePage()),
-                    );
-                  },
-                  child: const Text("DevMode !!!!"),
-                )
-              ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 30),
+            // Champ Email/Identifiant
+            TextFormField(
+              controller: identifierController,
+              decoration: InputDecoration(
+                hintText: "Email ou Nom d'utilisateur",
+                errorText: emailError,
+                prefixIcon: const Icon(Icons.person),
+              ),
             ),
-          ),
+            const SizedBox(height: 16),
+            // Champ Mot de passe
+            TextFormField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: "Mot de passe",
+                errorText: passwordError,
+                prefixIcon: const Icon(Icons.lock),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Bouton de connexion
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  emailError = null;
+                  passwordError = null;
+                });
+
+                if (identifierController.text.isEmpty) {
+                  setState(() {
+                    emailError = "Veuillez entrer un identifiant ou un email.";
+                  });
+                } else if (passwordController.text.isEmpty) {
+                  setState(() {
+                    passwordError = "Veuillez entrer un mot de passe.";
+                  });
+                } else {
+                  login();
+                }
+              },
+              child: const Text("Se connecter"),
+            ),
+            const SizedBox(height: 20),
+            // Lien vers l'inscription
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const RegistrationPage()),
+                );
+              },
+              child: const Text("Créer un compte"),
+            ),
+            const SizedBox(height: 20),
+            // Connexion avec Google
+            ElevatedButton.icon(
+              icon: const Icon(Icons.login),
+              label: const Text("Se connecter avec Google"),
+              onPressed: () async {
+                await signInWithGoogle();
+              },
+            ),
+            const SizedBox(height: 10),
+            // Mode "développeur"
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                );
+              },
+              child: const Text("Mode Développeur"),
+            ),
+          ],
         ),
       ),
     );
@@ -116,26 +140,28 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       await _auth.signInWithEmailAndPassword(
-          email: email, password: passwordController.text);
+        email: email,
+        password: passwordController.text,
+      );
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur de connexion: $e")),
+        SnackBar(content: Text("Erreur de connexion : ${e.toString()}")),
       );
     }
   }
 
   Future<void> signInWithGoogle() async {
     try {
-      // Authentifier avec Google
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return; // L'utilisateur a annulé la connexion
+      if (googleUser == null) return;
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -144,7 +170,6 @@ class _LoginPageState extends State<LoginPage> {
       final UserCredential userCredential =
           await _auth.signInWithCredential(credential);
 
-      // Ajouter l'utilisateur à Firestore s'il s'agit de la première connexion
       final userDoc = await _firestore
           .collection('users')
           .doc(userCredential.user?.uid)
@@ -160,6 +185,11 @@ class _LoginPageState extends State<LoginPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Connexion réussie avec Google !")),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
