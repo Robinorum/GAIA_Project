@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:login_firebase/pages/settings_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -13,18 +14,33 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Profile"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsPage(
+                    onToggleTheme: (isDarkMode) {},
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context); // Retourne à la page précédente
+            Navigator.pop(context);
           },
         ),
       ),
       body: SingleChildScrollView(
-        // Permet le défilement pour éviter le débordement
         child: Column(
           children: [
             Stack(
+              clipBehavior: Clip.none,
               children: [
                 // Image de couverture
                 Container(
@@ -37,53 +53,63 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ),
-                // Avatar flottant
                 Positioned(
-                  top: 160,
+                  top: 180,
                   left: 0,
                   right: 0,
                   child: Center(
                     child: CircleAvatar(
-                      radius: 60,
+                      radius: 65,
                       backgroundColor: Colors.white,
                       child: CircleAvatar(
-                        radius: 55,
-                        backgroundImage:
-                            NetworkImage("https://i.pravatar.cc/150?img=10"),
+                        radius: 60,
+                        backgroundImage: const NetworkImage(
+                            "https://i.pravatar.cc/150?img=10"),
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 80), // Espacement après l'avatar
-
-            // Contenu de la page de profil
+            const SizedBox(height: 100),
             Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Favour Isechap",
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    const Center(
+                      child: Text(
+                        "Favour Isechap",
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
                     ),
-                    const Text(
-                      "Product Designer",
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    const Center(
+                      child: Text(
+                        "Product Designer",
+                        style: TextStyle(color: Colors.grey, fontSize: 18),
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.location_on,
                             color: Colors.redAccent, size: 20),
@@ -109,11 +135,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     // Boutons d'action
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildButton("Edit Profile", Colors.blue),
-                        const SizedBox(width: 16),
-                        _buildButton("Share Profile", Colors.green),
+                        _buildButton("Edit Profile", Colors.blue, Icons.edit),
+                        _buildButton(
+                            "Share Profile", Colors.green, Icons.share),
                       ],
                     ),
                   ],
@@ -126,14 +152,13 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Widget pour afficher les statistiques
   static Widget _buildStatItem(String count, String label) {
     return Column(
       children: [
         Text(
           count,
           style: const TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
         ),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(color: Colors.grey)),
@@ -141,7 +166,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Séparateur vertical
   static Widget _buildDivider() {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.0),
@@ -152,16 +176,16 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Widget pour les boutons
-  static Widget _buildButton(String label, Color color) {
-    return ElevatedButton(
+  static Widget _buildButton(String label, Color color, IconData icon) {
+    return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       ),
       onPressed: () {},
-      child: Text(label),
+      icon: Icon(icon, size: 20),
+      label: Text(label),
     );
   }
 }
