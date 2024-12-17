@@ -56,8 +56,53 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
   HomeContent({Key? key}) : super(key: key);
+
+  @override
+  State<HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  int _currentImageIndex = 0;
+
+  final List<Map<String, String>> _recommendedArtworks = [
+    {
+      'imageUrl':
+          'https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
+      'title': 'Mona Lisa',
+    },
+    {
+      'imageUrl':
+          'https://upload.wikimedia.org/wikipedia/commons/4/4c/Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg',
+      'title': 'Self Portrait',
+    },
+    {
+      'imageUrl':
+          'https://upload.wikimedia.org/wikipedia/commons/9/94/Starry_Night_Over_the_Rhone.jpg',
+      'title': 'Starry Night Over the Rhône',
+    },
+  ];
+
+  PageController _pageController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentImageIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      _currentImageIndex = index % _recommendedArtworks.length;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,27 +159,43 @@ class HomeContent extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           const Text(
-            "Popular places",
+            "Recommended Artworks",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: const [
-                PlaceCard(
-                  imageUrl:
-                      'https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
-                  title: "Le Louvre, Paris",
-                  location: "Paris, France",
-                  rating: 4.8,
+            child: Column(
+              children: [
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: _onPageChanged,
+                    itemBuilder: (context, index) {
+                      final artwork = _recommendedArtworks[
+                          index % _recommendedArtworks.length];
+                      return _buildCarouselItem(
+                          artwork['imageUrl']!, artwork['title']!);
+                    },
+                  ),
                 ),
-                SizedBox(width: 16),
-                PlaceCard(
-                  imageUrl: 'https://example.com/mucem.jpg',
-                  title: "MUCEM, Marseille",
-                  location: "Marseille, France",
-                  rating: 4.5,
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    _recommendedArtworks.length,
+                    (index) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: _currentImageIndex == index ? 12 : 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: _currentImageIndex == index
+                            ? Colors.blue
+                            : Colors.grey,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -143,81 +204,38 @@ class HomeContent extends StatelessWidget {
       ),
     );
   }
-}
 
-class PlaceCard extends StatelessWidget {
-  final String imageUrl;
-  final String title;
-  final String location;
-  final double rating;
-
-  const PlaceCard({
-    Key? key,
-    required this.imageUrl,
-    required this.title,
-    required this.location,
-    required this.rating,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+  Widget _buildCarouselItem(String imageUrl, String title) {
+    return Column(
+      children: [
+        Container(
+          height: 200, // Fixed height for smaller images
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                blurRadius: 6,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
             child: Image.network(
               imageUrl,
-              height: 120,
-              width: double.infinity,
               fit: BoxFit.cover,
+              width: double.infinity,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  location,
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 16),
-                    const SizedBox(width: 4),
-                    Text(rating.toString()),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 }
