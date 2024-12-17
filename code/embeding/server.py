@@ -9,9 +9,19 @@ import faiss
 import clip
 import pickle
 import os
+import subprocess
 
 # Import des fonctions de recherche
 from recherche import find_most_similar_image
+
+def configure_adb_reverse():
+    try:
+        subprocess.run(["adb", "reverse", "tcp:5000", "tcp:5000"], check=True)
+        print("Configuration adb reverse réussie : port 5000 redirigé.")
+    except subprocess.CalledProcessError:
+        print("Erreur lors de la configuration d'adb reverse")
+    except FileNotFoundError:
+        print("ADB n'est pas installé ou accessible dans le PATH.")
 
 # Configuration de l'environnement pour éviter les problèmes liés à faiss
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
