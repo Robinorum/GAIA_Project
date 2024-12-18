@@ -1,1 +1,0 @@
-// C'est ici que l'on mettra toutes les constantes globales, comme les couleurs, tailles, etc.. pour un code propre !!
