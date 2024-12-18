@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 //import 'package:GAIA/login/login_page.dart';
 import 'package:GAIA/provider/userProvider.dart';
-import 'package:GAIA/auth_gate.dart';
+import 'package:GAIA/widgets/auth_gate.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -23,7 +23,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => UserProvider()), // Point 3 ajouté ici
+        ChangeNotifierProvider(
+            create: (context) => UserProvider()), // Point 3 ajouté ici
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
