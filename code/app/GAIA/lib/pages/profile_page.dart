@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login_firebase/pages/settings_page.dart';
+import 'package:GAIA/pages/settings_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);

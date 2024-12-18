@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:login_firebase/model/artwork.dart';
-import 'package:login_firebase/pages/detail_page.dart';
+import 'package:GAIA/model/artwork.dart';
+import 'package:GAIA/pages/detail_page.dart';
 
 class CollectionPage extends StatelessWidget {
   CollectionPage({Key? key}) : super(key: key);

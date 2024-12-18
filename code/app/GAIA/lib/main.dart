@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:login_firebase/login/login_page.dart';
-import 'package:login_firebase/provider/userProvider.dart';
+import 'package:GAIA/login/login_page.dart';
+import 'package:GAIA/provider/userProvider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {

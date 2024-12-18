@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:login_firebase/provider/userProvider.dart';
+import 'package:GAIA/provider/userProvider.dart';
 import 'package:provider/provider.dart';
-import 'package:login_firebase/pages/collection_page.dart';
-import 'package:login_firebase/pages/map_page.dart';
-import 'package:login_firebase/pages/profile_page.dart';
-import 'package:login_firebase/pages/quests_page.dart';
+import 'package:GAIA/pages/collection_page.dart';
+import 'package:GAIA/pages/map_page.dart';
+import 'package:GAIA/pages/profile_page.dart';
+import 'package:GAIA/pages/quests_page.dart';
 import '../component/custom_bottom_nav.dart';
 import '../scan/camera_screen.dart';
 

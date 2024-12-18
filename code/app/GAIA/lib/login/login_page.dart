@@ -2,11 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:login_firebase/login/registration_page.dart';
+import 'package:GAIA/login/registration_page.dart';
 import 'package:provider/provider.dart';
 import '../pages/home_page.dart';
-import 'package:login_firebase/model/appUser'; // Modèle AppUser
-import 'package:login_firebase/provider/userProvider.dart';
+import 'package:GAIA/model/appUser'; // Modèle AppUser
+import 'package:GAIA/provider/userProvider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.title});

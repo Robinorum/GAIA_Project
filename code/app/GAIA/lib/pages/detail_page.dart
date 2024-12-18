@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login_firebase/model/artwork.dart';
+import 'package:GAIA/model/artwork.dart';
 
 class DetailPage extends StatelessWidget {
   final Artwork artwork;

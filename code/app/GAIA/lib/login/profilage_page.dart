@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login_firebase/pages/home_page.dart';
+import 'package:GAIA/pages/home_page.dart';
 
 void main() {
   runApp(const MyApp());
