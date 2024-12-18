@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:login_firebase/provider/userProvider.dart';
+import 'package:provider/provider.dart';
 import 'package:login_firebase/pages/collection_page.dart';
 import 'package:login_firebase/pages/map_page.dart';
 import 'package:login_firebase/pages/profile_page.dart';
@@ -106,6 +108,9 @@ class _HomeContentState extends State<HomeContent> {
 
   @override
   Widget build(BuildContext context) {
+    // Récupération de l'utilisateur via UserProvider
+    final user = Provider.of<UserProvider>(context).user;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -114,11 +119,12 @@ class _HomeContentState extends State<HomeContent> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Affichage du pseudo de l'utilisateur
                   Text(
-                    "Hi, Thomas 👋",
+                    'Hi, ${user?.username ?? "Guest"} 👋', // Affichage du pseudo ou "Guest"
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 4),
@@ -136,10 +142,9 @@ class _HomeContentState extends State<HomeContent> {
                     MaterialPageRoute(builder: (context) => ProfilePage()),
                   );
                 },
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 24,
-                  backgroundImage:
-                      NetworkImage('https://example.com/photo.jpg'),
+                  backgroundImage: NetworkImage(user?.id ?? 'https://example.com/photo.jpg'), // Photo de profil
                 ),
               )
             ],
@@ -171,8 +176,7 @@ class _HomeContentState extends State<HomeContent> {
                     controller: _pageController,
                     onPageChanged: _onPageChanged,
                     itemBuilder: (context, index) {
-                      final artwork = _recommendedArtworks[
-                          index % _recommendedArtworks.length];
+                      final artwork = _recommendedArtworks[ index % _recommendedArtworks.length];
                       return _buildCarouselItem(
                           artwork['imageUrl']!, artwork['title']!);
                     },
