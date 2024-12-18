@@ -4,7 +4,7 @@ import json
 app = Flask(__name__)
 
 # Charger les données JSON avec les images encodées en base64
-with open("artworks.json", "r") as file:
+with open("code/backend/API_tableaux/artworks.json", "r") as file:
     artworks = json.load(file)
 
 @app.route("/api/artworks", methods=["GET"])
