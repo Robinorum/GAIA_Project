@@ -93,7 +93,7 @@ class _ProfilagePageState extends State<ProfilagePage> with SingleTickerProvider
               child: GestureDetector(
                 onPanUpdate: (details) {
                   setState(() {
-                    offset = details.localPosition.dx; // Déplacer la carte
+                    offset += details.delta.dx; // Déplacer la carte
                     angle = offset / 10; // Appliquer une rotation proportionnelle
                   });
                 },
