@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:GAIA/pages/settings_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:GAIA/login/login_page.dart';
 //import 'package:GAIA/login/login_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -160,9 +162,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-              onPressed: () {
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const LoginPage(title: 'Login Page')),
+                );
                 // Fonction de déconnexion
               //  MaterialPageRoute(builder: (context) => LoginPage(title: 'GAIA',));
+
               },
               icon: const Icon(Icons.logout, size: 18),
               label: const Text(

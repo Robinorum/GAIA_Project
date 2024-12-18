@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:GAIA/login/login_page.dart';
+//import 'package:GAIA/login/login_page.dart';
 import 'package:GAIA/provider/userProvider.dart';
+import 'package:GAIA/auth_gate.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: const LoginPage(title: 'Login Page'),
+        home: AuthGate(),
       ),
     );
   }
