@@ -7,6 +7,8 @@ import 'package:GAIA/pages/profile_page.dart';
 import 'package:GAIA/pages/quests_page.dart';
 import '../component/custom_bottom_nav.dart';
 import '../scan/camera_screen.dart';
+import '../services/artwork_service.dart';
+import '../model/artwork.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -66,49 +68,17 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  int _currentImageIndex = 0;
-
-  final List<Map<String, String>> _recommendedArtworks = [
-    {
-      'imageUrl':
-          'https://upload.wikimedia.org/wikipedia/commons/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg',
-      'title': 'Mona Lisa',
-    },
-    {
-      'imageUrl':
-          'https://upload.wikimedia.org/wikipedia/commons/4/4c/Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project_%28454045%29.jpg',
-      'title': 'Self Portrait',
-    },
-    {
-      'imageUrl':
-          'https://upload.wikimedia.org/wikipedia/commons/9/94/Starry_Night_Over_the_Rhone.jpg',
-      'title': 'Starry Night Over the Rhône',
-    },
-  ];
-
-  PageController _pageController = PageController();
+  late Future<List<Artwork>> _recommendedArtworks;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: _currentImageIndex);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  void _onPageChanged(int index) {
-    setState(() {
-      _currentImageIndex = index % _recommendedArtworks.length;
-    });
+    _recommendedArtworks =
+        ArtworkService().fetchArtworks(); // Récupération via l'API
   }
 
   @override
   Widget build(BuildContext context) {
-    // Récupération de l'utilisateur via UserProvider
     final user = Provider.of<UserProvider>(context).user;
 
     return Padding(
@@ -122,13 +92,13 @@ class _HomeContentState extends State<HomeContent> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Affichage du pseudo de l'utilisateur
                   Text(
-                    'Hi, ${user?.username ?? "Guest"} 👋', // Affichage du pseudo ou "Guest"
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    'Hi, ${user?.username ?? "Guest"} 👋',
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 4),
-                  Text(
+                  const SizedBox(height: 4),
+                  const Text(
                     "Explore the museum",
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
@@ -136,7 +106,6 @@ class _HomeContentState extends State<HomeContent> {
               ),
               InkWell(
                 onTap: () {
-                  // Redirection vers la page profil
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => ProfilePage()),
@@ -144,7 +113,8 @@ class _HomeContentState extends State<HomeContent> {
                 },
                 child: CircleAvatar(
                   radius: 24,
-                  backgroundImage: NetworkImage(user?.id ?? 'https://example.com/photo.jpg'), // Photo de profil
+                  backgroundImage:
+                      NetworkImage(user?.id ?? 'https://example.com/photo.jpg'),
                 ),
               )
             ],
@@ -169,39 +139,31 @@ class _HomeContentState extends State<HomeContent> {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: Column(
-              children: [
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    onPageChanged: _onPageChanged,
-                    itemBuilder: (context, index) {
-                      final artwork = _recommendedArtworks[ index % _recommendedArtworks.length];
-                      return _buildCarouselItem(
-                          artwork['imageUrl']!, artwork['title']!);
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    _recommendedArtworks.length,
-                    (index) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: _currentImageIndex == index ? 12 : 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: _currentImageIndex == index
-                            ? Colors.blue
-                            : Colors.grey,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+            child: FutureBuilder<List<Artwork>>(
+              future: _recommendedArtworks,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      "Error loading artworks: ${snapshot.error}",
+                      style: const TextStyle(color: Colors.red),
                     ),
-                  ),
-                ),
-              ],
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No artworks found."));
+                }
+
+                final artworks = snapshot.data!;
+                return PageView.builder(
+                  itemCount: artworks.length,
+                  itemBuilder: (context, index) {
+                    final artwork = artworks[index];
+                    return _buildCarouselItem(artwork.toImage(), artwork.title);
+                  },
+                );
+              },
             ),
           ),
         ],
@@ -209,11 +171,11 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  Widget _buildCarouselItem(String imageUrl, String title) {
+  Widget _buildCarouselItem(Image image, String title) {
     return Column(
       children: [
         Container(
-          height: 200, // Fixed height for smaller images
+          height: 200,
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
@@ -227,11 +189,7 @@ class _HomeContentState extends State<HomeContent> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              width: double.infinity,
-            ),
+            child: image,
           ),
         ),
         const SizedBox(height: 8),

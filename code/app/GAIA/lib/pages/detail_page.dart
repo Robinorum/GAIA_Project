@@ -10,16 +10,15 @@ class DetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(artwork.title), // Titre de l'œuvre
+        title: Text(artwork.title),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Image.network(artwork.imageUrl), // Image de l'œuvre
+            Center(
+              child: artwork.toImage(),
             ),
             const SizedBox(height: 16),
             Text(
@@ -32,12 +31,12 @@ class DetailPage extends StatelessWidget {
               style: const TextStyle(fontSize: 18, color: Colors.grey),
             ),
             Text(
-              "Year: ${artwork.year}",
+              "Year: ${artwork.date}",
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 16),
             Text(
-              artwork.description, // Description de l'œuvre
+              artwork.description,
               style: const TextStyle(fontSize: 16),
             ),
           ],
