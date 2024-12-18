@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:GAIA/provider/userProvider.dart';
 import 'package:GAIA/pages/settings_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -11,6 +13,8 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserProvider>(context).user;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Profile"),
@@ -39,12 +43,12 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // Couverture + Photo de profil
             Stack(
               clipBehavior: Clip.none,
               children: [
-                // Image de couverture
                 Container(
-                  height: 250,
+                  height: 180, // Réduction de la hauteur de la couverture
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: NetworkImage(
@@ -54,16 +58,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 Positioned(
-                  top: 180,
+                  top: 120, // Position ajustée pour remonter l'image
                   left: 0,
                   right: 0,
                   child: Center(
                     child: CircleAvatar(
-                      radius: 65,
+                      radius: 50,
                       backgroundColor: Colors.white,
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundImage: const NetworkImage(
+                      child: const CircleAvatar(
+                        radius: 45,
+                        backgroundImage: NetworkImage(
                             "https://i.pravatar.cc/150?img=10"),
                       ),
                     ),
@@ -71,13 +75,40 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ],
             ),
-            const SizedBox(height: 100),
+
+            // Section Informations utilisateur
+            const SizedBox(height: 50), // Espacement ajusté
+            Text(
+              user?.username ?? "Guest",
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const Text(
+              "Product Designer",
+              style: TextStyle(color: Colors.grey, fontSize: 16),
+            ),
+            const SizedBox(height: 5),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.location_on, color: Colors.redAccent, size: 18),
+                SizedBox(width: 4),
+                Text("Taraba, Nigeria",
+                    style: TextStyle(color: Colors.grey, fontSize: 14)),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Conteneur avec stats et actions
             Container(
               width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
+              margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.2),
@@ -87,39 +118,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(15.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Center(
-                      child: Text(
-                        "Favour Isechap",
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    const Center(
-                      child: Text(
-                        "Product Designer",
-                        style: TextStyle(color: Colors.grey, fontSize: 18),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.location_on,
-                            color: Colors.redAccent, size: 20),
-                        SizedBox(width: 4),
-                        Text("Taraba, Nigeria",
-                            style: TextStyle(color: Colors.grey)),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
                     // Statistiques
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -131,7 +132,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         _buildStatItem("68", "Points"),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
                     // Boutons d'action
                     Row(
@@ -146,10 +147,39 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+
+            // Bouton Sign Out
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              onPressed: () {
+                // Fonction de déconnexion
+                _signOut();
+              },
+              icon: const Icon(Icons.logout, size: 18),
+              label: const Text(
+                "Sign Out",
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 20), // Espacement final
           ],
         ),
       ),
     );
+  }
+
+  void _signOut() {
+    // Logique de déconnexion ici
+    print("User signed out");
+    Navigator.pop(context);
   }
 
   static Widget _buildStatItem(String count, String label) {
@@ -158,19 +188,19 @@ class _ProfilePageState extends State<ProfilePage> {
         Text(
           count,
           style: const TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blue),
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
         ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.grey)),
+        const SizedBox(height: 2),
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
       ],
     );
   }
 
   static Widget _buildDivider() {
     return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 8.0),
       child: SizedBox(
-        height: 30,
+        height: 25,
         child: VerticalDivider(color: Colors.grey, thickness: 0.5),
       ),
     );
@@ -180,12 +210,13 @@ class _ProfilePageState extends State<ProfilePage> {
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
       onPressed: () {},
-      icon: Icon(icon, size: 20),
-      label: Text(label),
+      icon: Icon(icon, size: 18),
+      label: Text(label, style: const TextStyle(fontSize: 14)),
     );
   }
 }
+
