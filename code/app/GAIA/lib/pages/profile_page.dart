@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:GAIA/pages/settings_page.dart';
+//import 'package:GAIA/login/login_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -161,7 +162,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               onPressed: () {
                 // Fonction de déconnexion
-                _signOut();
+              //  MaterialPageRoute(builder: (context) => LoginPage(title: 'GAIA',));
               },
               icon: const Icon(Icons.logout, size: 18),
               label: const Text(
@@ -176,11 +177,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _signOut() {
-    // Logique de déconnexion ici
-    print("User signed out");
-    Navigator.pop(context);
-  }
 
   static Widget _buildStatItem(String count, String label) {
     return Column(
@@ -219,4 +215,3 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
-
