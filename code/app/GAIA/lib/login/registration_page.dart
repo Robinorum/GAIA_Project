@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'profilage_page.dart';
+import 'package:GAIA/model/appUser'; // Modèle AppUser
+import 'package:GAIA/provider/userProvider.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -132,6 +135,34 @@ class _RegistrationPageState extends State<RegistrationPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Vous avez été inscrit !")),
       );
+
+
+      final User firebaseUser = userCredential.user!;
+
+      // Récupération des informations utilisateur depuis Firestore
+      final userDoc =
+          await _firestore.collection('accounts').doc(firebaseUser.uid).get();
+
+      if (!userDoc.exists) {
+        throw Exception("L'utilisateur n'existe pas dans Firestore");
+      }
+
+
+      final userData = userDoc.data() as Map<String, dynamic>;
+
+    // Création d'un objet AppUser
+      AppUser user = AppUser(
+        id: firebaseUser.uid,
+        email: userData['email'],
+        username: userData['username'],
+        googleAccount: userData['googleAccount'] ?? false,
+        liked: List<String>.from(userData['liked'] ?? []),
+        collection: List<String>.from(userData['collection'] ?? []),
+        visitedMuseum: userData['visitedMuseum'] ?? '',
+        profilePhoto: userData['profilePhoto'] ?? '',
+      );
+
+      Provider.of<UserProvider>(context, listen: false).setUser(user);
 
       Navigator.pushReplacement(
         context,
