@@ -1,4 +1,11 @@
+import sys
+import os
+
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI_scan')))
+
 from flask import Flask, request, jsonify
+import json
 from flask_cors import CORS
 from PIL import Image
 import io
@@ -11,8 +18,9 @@ import pickle
 import os
 import subprocess
 
+
 # Import des fonctions de recherche
-from recherche import find_most_similar_image
+from AI_scan.recherche import find_most_similar_image
 
 def configure_adb_reverse():
     try:
@@ -36,10 +44,10 @@ model, preprocess = clip.load("ViT-B/32", device=device)
 model.eval()
 
 # Chargement de l'index FAISS
-index = faiss.read_index("index.faiss")
+index = faiss.read_index("code/backend/AI_scan/index.faiss")
 
 # Chargement des métadonnées (titres et artistes)
-with open("titles_artists.pkl", "rb") as f:
+with open("code/backend/AI_scan/titles_artists.pkl", "rb") as f:
     titles, artists = pickle.load(f)
 
 @app.route('/predict', methods=['POST'])
@@ -59,6 +67,19 @@ def predict():
         "prediction": similar_images[0] if similar_images else {"error": "Aucune image similaire trouvee"}
     }
     return jsonify(result)
+
+
+with open("code/backend/API_tableaux/artworks.json", "r") as file:
+    artworks = json.load(file)
+
+@app.route("/api/artworks", methods=["GET"])
+def get_artworks():
+    # Transmettre directement les données en base64
+    for key, artwork in artworks.items():
+        if isinstance(artwork["image"], str):
+            # Charger l'objet JSON dans le champ image
+            artwork["image"] = json.loads(artwork["image"])
+    return jsonify({"success": True, "data": artworks})
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1')
