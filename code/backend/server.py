@@ -82,4 +82,5 @@ def get_artworks():
     return jsonify({"success": True, "data": artworks})
 
 if __name__ == '__main__':
+    configure_adb_reverse()
     app.run(debug=True, host='127.0.0.1')
