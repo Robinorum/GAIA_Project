@@ -44,10 +44,10 @@ model, preprocess = clip.load("ViT-B/32", device=device)
 model.eval()
 
 # Chargement de l'index FAISS
-index = faiss.read_index("code/backend/AI_scan/index.faiss")
+index = faiss.read_index("AI_scan/index.faiss")
 
 # Chargement des métadonnées (titres et artistes)
-with open("code/backend/AI_scan/titles_artists.pkl", "rb") as f:
+with open("AI_scan/titles_artists.pkl", "rb") as f:
     titles, artists = pickle.load(f)
 
 @app.route('/predict', methods=['POST'])
@@ -69,7 +69,7 @@ def predict():
     return jsonify(result)
 
 
-with open("code/backend/API_tableaux/artworks.json", "r") as file:
+with open("API_tableaux/artworks.json", "r") as file:
     artworks = json.load(file)
 
 @app.route("/api/artworks", methods=["GET"])
