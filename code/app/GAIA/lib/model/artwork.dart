@@ -47,7 +47,15 @@ class Artwork {
   }
 
   Image toImage() {
-    final decodedBytes = base64Decode(image);
-    return Image.memory(decodedBytes, fit: BoxFit.cover);
+    if (image.isEmpty) {
+      return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover);
+    }
+
+    try {
+      final decodedBytes = base64Decode(image);
+      return Image.memory(decodedBytes, fit: BoxFit.cover);
+    } catch (e) {
+      return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover);
+    }
   }
 }

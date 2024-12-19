@@ -20,5 +20,77 @@
     },
     "location": { "latitude": 40.7614, "longitude": -73.9776 },
     "place": "Museum of Modern Art, New York"
+  },
+  "3": {
+    "title": "The Persistence of Memory",
+    "artist": "Salvador Dalí",
+    "date": "1931",
+    "description": "A surreal depiction of melting clocks in a dream-like landscape.",
+    "image": { "bytes": "" },
+    "location": { "latitude": 40.7615, "longitude": -73.9777 },
+    "place": "Museum of Modern Art, New York"
+  },
+  "4": {
+    "title": "The Scream",
+    "artist": "Edvard Munch",
+    "date": "1893",
+    "description": "An iconic work representing existential angst and despair.",
+    "image": { "bytes": "" },
+    "location": { "latitude": 59.917, "longitude": 10.727 },
+    "place": "National Gallery, Oslo"
+  },
+  "5": {
+    "title": "Girl with a Pearl Earring",
+    "artist": "Johannes Vermeer",
+    "date": "1665",
+    "description": "Often referred to as the 'Mona Lisa of the North'.",
+    "image": { "bytes": "" },
+    "location": { "latitude": 52.0809, "longitude": 4.3146 },
+    "place": "Mauritshuis, The Hague"
+  },
+  "6": {
+    "title": "The Birth of Venus",
+    "artist": "Sandro Botticelli",
+    "date": "1485",
+    "description": "A celebration of beauty and love, depicting Venus emerging from the sea.",
+    "image": { "bytes": "" },
+    "location": { "latitude": 43.7696, "longitude": 11.2558 },
+    "place": "Uffizi Gallery, Florence"
+  },
+  "7": {
+    "title": "The Last Supper",
+    "artist": "Leonardo da Vinci",
+    "date": "1495",
+    "description": "Depicts Jesus and his disciples at the moment Jesus announces his betrayal.",
+    "image": { "bytes": "" },
+    "location": { "latitude": 45.4642, "longitude": 9.1916 },
+    "place": "Santa Maria delle Grazie, Milan"
+  },
+  "8": {
+    "title": "Guernica",
+    "artist": "Pablo Picasso",
+    "date": "1937",
+    "description": "A powerful anti-war statement depicting the bombing of Guernica.",
+    "image": { "bytes": "" },
+    "location": { "latitude": 40.4138, "longitude": -3.6922 },
+    "place": "Museo Reina Sofía, Madrid"
+  },
+  "9": {
+    "title": "The Creation of Adam",
+    "artist": "Michelangelo",
+    "date": "1512",
+    "description": "Part of the Sistine Chapel ceiling, depicting the biblical creation of Adam.",
+    "image": { "bytes": "" },
+    "location": { "latitude": 41.9029, "longitude": 12.4534 },
+    "place": "Sistine Chapel, Vatican City"
+  },
+  "10": {
+    "title": "The Kiss",
+    "artist": "Gustav Klimt",
+    "date": "1907",
+    "description": "A sensual representation of love and intimacy in Art Nouveau style.",
+    "image": { "bytes": "" },
+    "location": { "latitude": 48.203, "longitude": 16.368 },
+    "place": "Belvedere Museum, Vienna"
   }
 }
