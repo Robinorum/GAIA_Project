@@ -2,6 +2,9 @@ import sys
 import os
 
 
+import firebase_admin
+from firebase_admin import credentials, firestore
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI_scan')))
 
 from flask import Flask, request, jsonify
@@ -17,7 +20,8 @@ import clip
 import pickle
 import os
 import subprocess
-
+cred = credentials.Certificate('logintest-3342f-firebase-adminsdk-ahw4r-a935280551.json')
+firebase_admin.initialize_app(cred)
 
 # Import des fonctions de recherche
 from AI_scan.recherche import find_most_similar_image
@@ -92,21 +96,72 @@ def get_artwork_by_id(id):
         return jsonify({"success": True, "data": artwork})
     else:
         return jsonify({"success": False, "error": "Artwork not found"}), 404
-@app.route("/api/profilage/", methods=["POST"])
 
-def modify_brands_by_id(idTab,uid):
-    #prend id du tableau 
-    #ajoute à ma collection : 
+from collections import defaultdict
+from firebase_admin import firestore
+
+@app.route("/api/profilage/", methods=["POST"])
+def modify_brands_by_id():
+    data = request.get_json()
     
+    if 'artworkId' not in data or 'uid' not in data:
+        return "Missing artworkId or uid", 400 
+
+    artworkId = data['artworkId']
+    uid = data['uid']
     
-    profilage()
-    return 
+    db = firestore.client()
+    doc_ref = db.collection('accounts').document(uid)
+    doc = doc_ref.get()
     
-def profilage() :
-    
-    
-    return
-    # récupère les données de firestore
+    if doc.exists:
+        data = doc.to_dict()
+        if 'brands' in data:
+            brands = data['brands']
+            if artworkId in brands:
+                brands.remove(artworkId)
+            else:
+                brands.append(artworkId)
+            doc_ref.update({'brands': brands})
+        else:
+            doc_ref.update({'brands': [artworkId]})
+        profilage(uid)
+    else:
+        return f"Le document pour l'utilisateur {uid} n'existe pas.", 404
+    return "Brands updated successfully", 200
+
+
+def profilage():
+    with open("API_tableaux/artworks.json", "r") as file:
+        artworks = json.load(file)
+    db = firestore.client()
+    uid = "exemple_uid"  
+    doc_ref = db.collection('accounts').document(uid)
+    doc = doc_ref.get()
+    if doc.exists:
+        data = doc.to_dict()
+        if 'brands' in data:
+            brands = data['brands']
+            movementScores = defaultdict(int)
+            likedMovements = data.get('brands', [])
+            for movement in likedMovements:
+                movementScores[movement] += 1
+            for artwork_id in brands:
+                if artwork_id in artworks:
+                    artwork = artworks[artwork_id]
+                    movement = artwork.get('movement')
+                    if movement:
+                        movementScores[movement] += 1
+            doc_ref.update({
+                'preferences.movement': dict(movementScores)
+            })
+            print("Mouvements mis à jour avec succès dans Firestore.")
+        else:
+            print("L'utilisateur n'a pas de 'brands' définis.")
+    else:
+        print(f"Le document pour l'utilisateur {uid} n'existe pas.")
+    return None
+
 if __name__ == '__main__':
     configure_adb_reverse()
     app.run(debug=True, host='127.0.0.1')

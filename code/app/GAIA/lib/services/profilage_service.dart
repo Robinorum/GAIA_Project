@@ -2,33 +2,29 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ProfilageService {
-  final String baseUrl=  "http://127.0.0.1:5000/api/profilage";
+  final String baseUrl = "http://127.0.0.1:5000/api/profilage/";
 
-  ProfilageService();
-
-  /// Aime une œuvre d'art pour un utilisateur donné
-  Future<void> likeArtwork(String userId, String artworkId) async {
-    final url = Uri.parse('$baseUrl/user/$userId/like');
+  // Fonction pour modifier les marques d'un utilisateur
+  Future<String> modifyBrands(String artworkId, String uid) async {
     final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'artwork_id': artworkId}),
+      Uri.parse(baseUrl),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'artworkId': artworkId,
+        'uid': uid,
+      }),
     );
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to like artwork: ${response.body}');
+    if (response.statusCode == 200) {
+      return "Brands updated successfully";
+    } else if (response.statusCode == 400) {
+      throw Exception("Missing artworkId or uid");
+    } else {
+      throw Exception("Failed to update brands");
     }
   }
 
-  /// Récupère les scores des mouvements artistiques pour un utilisateur donné
-  Future<Map<String, double>> getMovementScores(String userId) async {
-    final url = Uri.parse('$baseUrl/user/$userId/movements');
-    final response = await http.get(url);
-
-    if (response.statusCode != 200) {
-      throw Exception('Failed to fetch movements: ${response.body}');
-    }
-
-    return Map<String, double>.from(jsonDecode(response.body));
-  }
+  // Ajouter d'autres méthodes si nécessaire (ex. récupérer le profil, etc.)
 }
