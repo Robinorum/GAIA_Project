@@ -16,6 +16,7 @@ class GeoPoint {
 }
 
 class Artwork {
+  final String id;  // Ajout de l'id
   final String title;
   final String artist;
   final String date;
@@ -23,8 +24,10 @@ class Artwork {
   final String image;
   final GeoPoint location;
   final String place;
+  final String movement;
 
   Artwork({
+    required this.id,  // Initialisation de l'id
     required this.title,
     required this.artist,
     required this.date,
@@ -32,10 +35,13 @@ class Artwork {
     required this.image,
     required this.location,
     required this.place,
+    required this.movement
   });
 
-  factory Artwork.fromJson(Map<String, dynamic> json) {
+  factory Artwork.fromJson(Map<String, dynamic> json, String id) {
+    // Utilisation de l'id passé en paramètre (clé principale)
     return Artwork(
+      id: id,  // Affectation de l'id
       title: json['title'],
       artist: json['artist'],
       date: json['date'],
@@ -43,6 +49,7 @@ class Artwork {
       image: json['image']['bytes'],
       location: GeoPoint.fromJson(json['location']),
       place: json['place'],
+      movement: json['movement'],
     );
   }
 
