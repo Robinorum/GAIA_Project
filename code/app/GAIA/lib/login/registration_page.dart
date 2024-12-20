@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'profilage_page.dart';
-import 'package:GAIA/model/appUser'; // Modèle AppUser
+import 'package:GAIA/model/appUser.dart'; // Modèle AppUser
 import 'package:GAIA/provider/userProvider.dart';
 
 class RegistrationPage extends StatefulWidget {
@@ -45,7 +45,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
             TextFormField(
               controller: passwordController,
               obscureText: true,
-              decoration: const InputDecoration(hintText: "Mot de passe "),
+              decoration: const InputDecoration(hintText: "Mot de passe"),
             ),
             ElevatedButton(
               onPressed: () {
@@ -56,12 +56,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   signUp();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text("Veuillez remplir tous les champs.")),
+                    const SnackBar(content: Text("Veuillez remplir tous les champs.")),
                   );
                 }
               },
-              child: const Text("Register"),
+              child: const Text("S'inscrire"),
             ),
           ],
         ),
@@ -69,7 +68,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
-  /// Méthode pour inscrire l'utilisateur
   Future<void> signUp() async {
     try {
       // 1. **Vérification de l'email dans Firestore**
@@ -93,8 +91,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
       if (usernameSnapshot.docs.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Ce nom d'utilisateur est déjà utilisé")),
+          const SnackBar(content: Text("Ce nom d'utilisateur est déjà utilisé")),
         );
         return;
       }
@@ -106,9 +103,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           !RegExp(r'\d').hasMatch(passwordController.text) ||
           !RegExp(r'[@\$!%*?&]').hasMatch(passwordController.text)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text(
-                  "Le mot de passe doit contenir au moins 14 caractères, une majuscule, une minuscule, un chiffre, et un caractère spécial.")),
+          const SnackBar(content: Text("Mot de passe trop faible")),
         );
         return;
       }
@@ -120,15 +115,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
       );
 
       // 5. **Ajout des informations utilisateur dans Firestore**
-      await _firestore
-          .collection('accounts')
-          .doc(userCredential.user?.uid)
-          .set({
+      await _firestore.collection('accounts').doc(userCredential.user?.uid).set({
         'email': emailController.text,
         'username': usernameController.text,
         'googleAccount': false,
         'brands': [],
         'collection': [],
+        'preferences': {
+          'movement': {
+            // Ajoute ici d'autres mouvements et leurs valeurs
+          },
+        },
       });
 
       // 6. **Message de succès et redirection**
@@ -136,21 +133,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
         const SnackBar(content: Text("Vous avez été inscrit !")),
       );
 
-
       final User firebaseUser = userCredential.user!;
 
       // Récupération des informations utilisateur depuis Firestore
-      final userDoc =
-          await _firestore.collection('accounts').doc(firebaseUser.uid).get();
+      final userDoc = await _firestore.collection('accounts').doc(firebaseUser.uid).get();
 
       if (!userDoc.exists) {
         throw Exception("L'utilisateur n'existe pas dans Firestore");
       }
 
-
       final userData = userDoc.data() as Map<String, dynamic>;
 
-    // Création d'un objet AppUser
+      // Création d'un objet AppUser
       AppUser user = AppUser(
         id: firebaseUser.uid,
         email: userData['email'],
@@ -160,10 +154,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
         collection: List<String>.from(userData['collection'] ?? []),
         visitedMuseum: userData['visitedMuseum'] ?? '',
         profilePhoto: userData['profilePhoto'] ?? '',
+        preferences: userData['preferences'] ?? {}, // Ajout des préférences
+        movements: Map<String, double>.from(userData['preferences']?['movement'] ?? {}), // Ajout des préférences liées aux mouvements
       );
 
+      // Mettre l'utilisateur dans le provider
       Provider.of<UserProvider>(context, listen: false).setUser(user);
 
+      // Redirection vers la page de profilage
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const ProfilagePage()),
