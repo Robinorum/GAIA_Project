@@ -22,7 +22,7 @@ class _CollectionPageState extends State<CollectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Collection")),
+      appBar: AppBar(title: const Text("Collection"), automaticallyImplyLeading: false,),
       body: FutureBuilder<List<Artwork>>(
         future: _artworks,
         builder: (context, snapshot) {
