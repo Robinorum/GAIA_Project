@@ -81,6 +81,32 @@ def get_artworks():
             artwork["image"] = json.loads(artwork["image"])
     return jsonify({"success": True, "data": artworks})
 
+@app.route("/api/artworks/<id>", methods=["GET"])
+def get_artwork_by_id(id):
+    # Récupérer une œuvre par son ID
+    if id in artworks:
+        artwork = artworks[id]
+        if isinstance(artwork["image"], str):
+            # Charger l'objet JSON dans le champ image
+            artwork["image"] = json.loads(artwork["image"])
+        return jsonify({"success": True, "data": artwork})
+    else:
+        return jsonify({"success": False, "error": "Artwork not found"}), 404
+@app.route("/api/profilage/", methods=["POST"])
+
+def modify_brands_by_id(idTab,uid):
+    #prend id du tableau 
+    #ajoute à ma collection : 
+    
+    
+    profilage()
+    return 
+    
+def profilage() :
+    
+    
+    return
+    # récupère les données de firestore
 if __name__ == '__main__':
     configure_adb_reverse()
     app.run(debug=True, host='127.0.0.1')
