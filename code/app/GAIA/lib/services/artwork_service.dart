@@ -10,7 +10,10 @@ class ArtworkService {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = jsonDecode(response.body)['data'];
-      return data.values.map((json) => Artwork.fromJson(json)).toList();
+
+      return data.entries.map((entry) {
+        return Artwork.fromJson(entry.value, entry.key);
+      }).toList();
     } else {
       throw Exception("Failed to load artworks");
     }
