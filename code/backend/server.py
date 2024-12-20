@@ -4,6 +4,7 @@ import os
 
 import firebase_admin
 from firebase_admin import credentials, firestore
+from collections import Counter
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI_scan')))
 
@@ -131,36 +132,38 @@ def modify_brands_by_id():
     return "Brands updated successfully", 200
 
 
-def profilage():
-    with open("API_tableaux/artworks.json", "r") as file:
-        artworks = json.load(file)
+def profilage(uid):
     db = firestore.client()
-    uid = "exemple_uid"  
     doc_ref = db.collection('accounts').document(uid)
     doc = doc_ref.get()
+
     if doc.exists:
         data = doc.to_dict()
         if 'brands' in data:
             brands = data['brands']
-            movementScores = defaultdict(int)
-            likedMovements = data.get('brands', [])
-            for movement in likedMovements:
-                movementScores[movement] += 1
-            for artwork_id in brands:
-                if artwork_id in artworks:
-                    artwork = artworks[artwork_id]
-                    movement = artwork.get('movement')
-                    if movement:
-                        movementScores[movement] += 1
-            doc_ref.update({
-                'preferences.movement': dict(movementScores)
-            })
-            print("Mouvements mis à jour avec succès dans Firestore.")
+            movements = []
+
+            for brand in brands:
+                artwork = get_artwork_by_id(brand).get_json()  # Récupération des mouvements des œuvres
+                if 'data' in artwork and 'movement' in artwork['data']:
+                    movements.append(artwork['data']['movement'])
+
+            # Comptage des occurrences de chaque mouvement
+            movement_counts = Counter(movements)
+
+            # Calcul du total des mouvements
+            total_movements = len(movements)
+
+            # Création du dictionnaire des ratios
+            ratios = {movement: count / total_movements for movement, count in movement_counts.items()}
+
+            # Mise à jour dans Firestore
+            doc_ref.update({'preferences.movements': ratios})
+            print(f"Ratios {ratios} mis à jour pour l'utilisateur {uid}")
         else:
-            print("L'utilisateur n'a pas de 'brands' définis.")
+            print(f"Aucune marque trouvée pour l'utilisateur {uid}")
     else:
         print(f"Le document pour l'utilisateur {uid} n'existe pas.")
-    return None
 
 if __name__ == '__main__':
     configure_adb_reverse()
