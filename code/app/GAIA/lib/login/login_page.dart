@@ -5,7 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:GAIA/login/registration_page.dart';
 import 'package:provider/provider.dart';
 import '../pages/home_page.dart';
-import 'package:GAIA/model/appUser'; // Modèle AppUser
+import 'package:GAIA/model/appUser.dart'; // Modèle AppUser
 import 'package:GAIA/provider/userProvider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -170,6 +170,8 @@ class _LoginPageState extends State<LoginPage> {
       collection: List<String>.from(userData['collection'] ?? []),
       visitedMuseum: userData['visitedMuseum'] ?? '',
       profilePhoto: userData['profilePhoto'] ?? '',
+      preferences: userData['preferences'] ?? {}, // Ajout des préférences
+      movements: Map<String, double>.from(userData['preferences']?['mouvement'] ?? {}), // Ajout des préférences liées aux mouvements
     );
 
     // Mise à jour du UserProvider avec l'utilisateur connecté
