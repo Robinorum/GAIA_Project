@@ -10,4 +10,9 @@ class UserProvider extends ChangeNotifier {
     _user = newUser;
     notifyListeners();
   }
+
+  void clearUser() {
+    _user = AppUser.empty();
+    notifyListeners();
+  }
 }

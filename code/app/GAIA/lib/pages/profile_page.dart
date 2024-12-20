@@ -164,8 +164,10 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
-                Navigator.of(context).pushReplacement(
+                Provider.of<UserProvider>(context, listen: false).clearUser();
+                Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (context) => const LoginPage(title: 'Login Page')),
+                  (Route<dynamic> route) => false,
                 );
                 // Fonction de déconnexion
               //  MaterialPageRoute(builder: (context) => LoginPage(title: 'GAIA',));

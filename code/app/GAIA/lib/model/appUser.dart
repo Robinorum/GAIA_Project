@@ -26,6 +26,22 @@ class AppUser {
     required this.movements,
   });
 
+
+  static AppUser empty() {
+    return AppUser(
+      id: '',
+      email: '',
+      username: '',
+      googleAccount: false,
+      liked: [],
+      collection: [],
+      visitedMuseum: '',
+      profilePhoto: '',
+      preferences: {},
+      movements: {},
+    );
+  }
+
   // Méthode pour récupérer un utilisateur depuis Firebase Auth et Firestore
   static Future<AppUser> fromAuth(User firebaseUser) async {
     final firestore = FirebaseFirestore.instance;

@@ -93,7 +93,7 @@ class _HomeContentState extends State<HomeContent> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Hi, ${user?.username ?? "Guest"} 👋',
+                    'Hi, ${user != null && user.username.isNotEmpty ? user.username : "Guest"} 👋',
                     style: const TextStyle(
                         fontSize: 24, fontWeight: FontWeight.bold),
                   ),
