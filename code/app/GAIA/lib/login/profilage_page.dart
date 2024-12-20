@@ -46,8 +46,71 @@ class _ProfilagePageState extends State<ProfilagePage> {
       }
     }
   }
+Future<Map<String, double>> profilage(List<Artwork> artworks) async {
+  if (_firebaseUser != null) {
+    // 1. Récupérer les identifiants des œuvres likées de l'utilisateur
+    final docSnapshot = await _firestore.collection('accounts').doc(_firebaseUser!.uid).get();
+    if (docSnapshot.exists) {
+      final data = docSnapshot.data();
+      final likedArtworks = List<String>.from(data?['brands'] ?? []); // Identifiants des œuvres likées
+      final preferencesData = data?['preferences'] ?? {}; // Récupérer les préférences actuelles
+      final movementsData = Map<String, double>.from(preferencesData['movement'] ?? {});
 
-  void handleSwipe(String direction, String artworkId) {
+      // 2. Récupérer les mouvements des œuvres likées
+      List<String> likedMovements = [];
+      for (String artworkId in likedArtworks) {
+        // Utiliser 'firstWhere' pour trouver l'œuvre correspondant à l'ID
+        final artwork = artworks.firstWhere((artwork) => artwork.id == artworkId);
+        if (artwork != null) {
+          likedMovements.add(artwork.movement); // Ajouter le mouvement de l'œuvre likée
+        } else {
+          // Si une œuvre avec l'ID donné n'existe pas, vous pouvez éventuellement ajouter un log
+          print("Œuvre avec l'ID $artworkId non trouvée.");
+        }
+      }
+
+      // Vérifier que tous les mouvements ont bien été récupérés
+      print("Liked Movements: $likedMovements");
+
+      // 3. Calculer le score pour chaque mouvement
+      Map<String, double> movementScores = {};
+      int totalLikes = likedMovements.length;
+
+      if (totalLikes > 0) {
+        // Comptabiliser les occurrences de chaque mouvement
+        for (var movement in likedMovements) {
+          if (movementScores.containsKey(movement)) {
+            movementScores[movement] = movementScores[movement]! + 1;
+          } else {
+            movementScores[movement] = 1;
+          }
+        }
+
+        // Calculer le score pour chaque mouvement (nombre de likes divisés par totalLikes)
+        movementScores = movementScores.map((movement, count) {
+          return MapEntry(movement, count / totalLikes);
+        });
+
+        // 4. Mettre à jour les préférences dans Firestore avec les scores calculés
+        await _firestore.collection('accounts').doc(_firebaseUser!.uid).update({
+          'preferences.movement': movementScores, // Mettre à jour les préférences de mouvement
+        });
+
+        // Log pour déboguer
+        print("Movement Scores: $movementScores");
+
+        // Retourner les scores des mouvements
+        return movementScores;
+      }
+    }
+  }
+
+  // Si l'utilisateur n'est pas trouvé ou il n'a pas liké d'œuvres, retourner un map vide
+  return {};
+}
+
+
+  void handleSwipe(String direction, String artworkId) async {
     setState(() {
       if (direction == 'right') {
         // Log pour vérifier le ID avant d'ajouter
@@ -62,11 +125,18 @@ class _ProfilagePageState extends State<ProfilagePage> {
       angle = 0; // Réinitialisation de l'angle
 
       if (currentIndex == 5) {
-        // Redirection vers MainPage une fois que toutes les cartes sont traitées
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
+        // L'appel à la fonction de profilage lorsque 5 œuvres ont été traitées
+        _recommendedArtworks.then((artworks) async {
+          final movementScores = await profilage(artworks);
+          // Log des scores de mouvement calculés
+          print("Movement Scores après 5 artworks: $movementScores");
+
+          // Redirection vers MainPage une fois que toutes les cartes sont traitées
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        });
       }
     });
   }
@@ -178,13 +248,12 @@ class _ProfilagePageState extends State<ProfilagePage> {
                     onPressed: () => handleSwipe('left', artwork.id),
                     icon: const Icon(Icons.close, color: Colors.red, size: 40),
                   ),
-                  const SizedBox(width: 50),
                   IconButton(
                     onPressed: () => handleSwipe('right', artwork.id),
                     icon: const Icon(Icons.favorite, color: Colors.green, size: 40),
                   ),
                 ],
-              ),
+              )
             ],
           ),
         ),
