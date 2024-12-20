@@ -1,5 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AppUser {
   final String id;
@@ -10,6 +10,8 @@ class AppUser {
   final List<String> collection;
   final String visitedMuseum;
   final String profilePhoto; // Ajout de la photo de profil
+  final Map<String, dynamic> preferences; // Ajout des préférences complètes
+  final Map<String, double> movements; // Ajout des préférences liées aux mouvements artistiques
 
   AppUser({
     required this.id,
@@ -20,6 +22,8 @@ class AppUser {
     required this.collection,
     required this.visitedMuseum,
     required this.profilePhoto,
+    required this.preferences,
+    required this.movements,
   });
 
   // Méthode pour récupérer un utilisateur depuis Firebase Auth et Firestore
@@ -27,13 +31,16 @@ class AppUser {
     final firestore = FirebaseFirestore.instance;
 
     // Récupérer les données de Firestore
-    final doc = await firestore.collection('users').doc(firebaseUser.uid).get();
+    final doc = await firestore.collection('accounts').doc(firebaseUser.uid).get();
 
     if (!doc.exists) {
       throw Exception("Utilisateur introuvable dans la base de données");
     }
 
     final data = doc.data() as Map<String, dynamic>;
+
+    // Récupérer les préférences de mouvement (s'ils existent)
+    final movementsData = Map<String, double>.from(data['preferences']?['movement'] ?? {});
 
     return AppUser(
       id: doc.id,
@@ -44,6 +51,8 @@ class AppUser {
       collection: List<String>.from(data['collection'] ?? []),
       visitedMuseum: data['visitedMuseum'] ?? '',
       profilePhoto: data['profilePhoto'] ?? '',
+      preferences: data['preferences'] ?? {}, // Récupération des préférences
+      movements: movementsData, // Récupération des préférences liées aux mouvements
     );
   }
 }
