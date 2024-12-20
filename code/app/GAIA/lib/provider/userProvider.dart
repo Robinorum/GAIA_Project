@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/appUser'; // Ton fichier avec la classe AppUser
+import '../model/appUser.dart'; // Ton fichier avec la classe AppUser
 
 class UserProvider extends ChangeNotifier {
   AppUser? _user;
