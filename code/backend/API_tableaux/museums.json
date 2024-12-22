@@ -1,0 +1,83 @@
+{
+    "1": {
+      "title": "Louvre Museum",
+      "style": "Various (Renaissance, Baroque, Classical, etc.)",
+      "country": "France",
+      "city": "Paris",
+      "location": { "latitude": 48.8606, "longitude": 2.3376 },
+      "place": "Louvre Museum, Paris"
+    },
+    "2": {
+      "title": "Museum of Modern Art",
+      "style": "Modern Art",
+      "country": "USA",
+      "city": "New York",
+      "location": { "latitude": 40.7614, "longitude": -73.9776 },
+      "place": "Museum of Modern Art, New York"
+    },
+    "3": {
+      "title": "The Met",
+      "style": "Various (Classical, Modern, Ancient)",
+      "country": "USA",
+      "city": "New York",
+      "location": { "latitude": 40.7794, "longitude": -73.9632 },
+      "place": "The Met, New York"
+    },
+    "4": {
+      "title": "National Gallery",
+      "style": "Romanticism and Realism",
+      "country": "Norway",
+      "city": "Oslo",
+      "location": { "latitude": 59.9171, "longitude": 10.7312 },
+      "place": "National Gallery, Oslo"
+    },
+    "5": {
+      "title": "Rijksmuseum",
+      "style": "Dutch Golden Age",
+      "country": "Netherlands",
+      "city": "Amsterdam",
+      "location": { "latitude": 52.3597, "longitude": 4.8852 },
+      "place": "Rijksmuseum, Amsterdam"
+    },
+    "6": {
+      "title": "Belvedere Museum",
+      "style": "Baroque and Austrian Art",
+      "country": "Austria",
+      "city": "Vienna",
+      "location": { "latitude": 48.1913, "longitude": 16.3804 },
+      "place": "Belvedere Museum, Vienna"
+    },
+    "7": {
+      "title": "Museo Reina Sofia",
+      "style": "Modern and Contemporary Art",
+      "country": "Spain",
+      "city": "Madrid",
+      "location": { "latitude": 40.4087, "longitude": -3.6945 },
+      "place": "Museo Reina Sofia, Madrid"
+    },
+    "8": {
+      "title": "Mauritshuis",
+      "style": "Dutch Golden Age",
+      "country": "Netherlands",
+      "city": "The Hague",
+      "location": { "latitude": 52.0809, "longitude": 4.3148 },
+      "place": "Mauritshuis, The Hague"
+    },
+    "9": {
+      "title": "Art Institute of Chicago",
+      "style": "Various (Impressionism, Modern Art, etc.)",
+      "country": "USA",
+      "city": "Chicago",
+      "location": { "latitude": 41.8796, "longitude": -87.6237 },
+      "place": "Art Institute of Chicago, Chicago"
+    },
+    "10": {
+      "title": "Santa Maria delle Grazie",
+      "style": "Renaissance",
+      "country": "Italy",
+      "city": "Milan",
+      "location": { "latitude": 45.4642, "longitude": 9.1700 },
+      "place": "Santa Maria delle Grazie, Milan"
+    }
+  }
+  

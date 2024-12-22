@@ -97,6 +97,15 @@ def get_artwork_by_id(id):
         return jsonify({"success": True, "data": artwork})
     else:
         return jsonify({"success": False, "error": "Artwork not found"}), 404
+    
+
+with open("API_tableaux/museums.json", "r") as file:
+    museums = json.load(file)
+
+@app.route("/api/museums", methods=["GET"])
+def get_museums():
+    # Transmettre directement les données en base64
+    return jsonify({"success": True, "data": museums})
 
 from collections import defaultdict
 from firebase_admin import firestore

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:GAIA/model/museum.dart';
+import 'dart:convert'; // Pour parser le JSON
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -13,16 +15,72 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   LatLng? _currentLocation;
   bool _loading = true;
+  List<Museum> _museums = []; // Liste pour stocker les musées
 
   @override
   void initState() {
     super.initState();
+    _loadMuseums();
     _getUserLocation();
+  }
+
+  Future<void> _loadMuseums() async {
+    // Simule un chargement de données JSON
+    const jsonData = '''
+    {
+      "data": {
+        "1": {
+          "city": "Paris",
+          "country": "France",
+          "location": {
+            "latitude": 48.8606,
+            "longitude": 2.3376
+          },
+          "place": "Louvre Museum, Paris",
+          "style": "Various (Renaissance, Baroque, Classical, etc.)",
+          "title": "Louvre Museum"
+        },
+        "10": {
+          "city": "Milan",
+          "country": "Italy",
+          "location": {
+            "latitude": 45.4642,
+            "longitude": 9.17
+          },
+          "place": "Santa Maria delle Grazie, Milan",
+          "style": "Renaissance",
+          "title": "Santa Maria delle Grazie"
+        },
+        "2": {
+          "city": "New York",
+          "country": "USA",
+          "location": {
+            "latitude": 40.7614,
+            "longitude": -73.9776
+          },
+          "place": "Museum of Modern Art, New York",
+          "style": "Modern Art",
+          "title": "Museum of Modern Art"
+        }
+      }
+    }
+    ''';
+
+    final Map<String, dynamic> json = jsonDecode(jsonData);
+
+    final List<Museum> museums = (json['data'] as Map<String, dynamic>)
+        .entries
+        .map((entry) => Museum.fromJson(entry.value, entry.key))
+        .toList();
+
+    setState(() {
+      _museums = museums;
+    });
   }
 
   Future<void> _getUserLocation() async {
     try {
-      // Check and request location permissions
+      // Vérification et demande des permissions de localisation
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -31,7 +89,7 @@ class _MapPageState extends State<MapPage> {
         throw Exception("Location permissions are permanently denied.");
       }
 
-      // Get current position
+      // Obtention de la position actuelle
       final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
@@ -54,7 +112,8 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("User Location Map"),automaticallyImplyLeading: false,
+        title: const Text("User Location Map"),
+        automaticallyImplyLeading: false,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -73,14 +132,32 @@ class _MapPageState extends State<MapPage> {
                     ),
                     MarkerLayer(
                       markers: [
+                        // Marqueur pour l'utilisateur
                         Marker(
                           point: _currentLocation!,
                           builder: (ctx) => const Icon(
-                            Icons.location_on,
-                            color: Colors.red,
+                            Icons.my_location,
+                            color: Colors.blue,
                             size: 40,
                           ),
                         ),
+                        // Marqueurs pour les musées
+                        ..._museums.map((museum) {
+                          return Marker(
+                            point: LatLng(
+                              museum.location.latitude,
+                              museum.location.longitude,
+                            ),
+                            builder: (ctx) => Tooltip(
+                              message: museum.title,
+                              child: const Icon(
+                                Icons.location_on,
+                                color: Colors.red,
+                                size: 40,
+                              ),
+                            ),
+                          );
+                        }).toList(),
                       ],
                     ),
                   ],
