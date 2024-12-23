@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:GAIA/model/museum.dart';
-import 'dart:convert'; // Pour parser le JSON
+import 'package:GAIA/services/museum_service.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -16,66 +16,31 @@ class _MapPageState extends State<MapPage> {
   LatLng? _currentLocation;
   bool _loading = true;
   List<Museum> _museums = []; // Liste pour stocker les musées
+  final MuseumService _museumService = MuseumService(); // Instance du service
 
   @override
   void initState() {
     super.initState();
-    _loadMuseums();
-    _getUserLocation();
+    _getUserLocation(); // Obtenir la position de l'utilisateur
+    _loadMuseums(); // Charger les musées dynamiquement
   }
 
   Future<void> _loadMuseums() async {
-    // Simule un chargement de données JSON
-    const jsonData = '''
-    {
-      "data": {
-        "1": {
-          "city": "Paris",
-          "country": "France",
-          "location": {
-            "latitude": 48.8606,
-            "longitude": 2.3376
-          },
-          "place": "Louvre Museum, Paris",
-          "style": "Various (Renaissance, Baroque, Classical, etc.)",
-          "title": "Louvre Museum"
-        },
-        "10": {
-          "city": "Milan",
-          "country": "Italy",
-          "location": {
-            "latitude": 45.4642,
-            "longitude": 9.17
-          },
-          "place": "Santa Maria delle Grazie, Milan",
-          "style": "Renaissance",
-          "title": "Santa Maria delle Grazie"
-        },
-        "2": {
-          "city": "New York",
-          "country": "USA",
-          "location": {
-            "latitude": 40.7614,
-            "longitude": -73.9776
-          },
-          "place": "Museum of Modern Art, New York",
-          "style": "Modern Art",
-          "title": "Museum of Modern Art"
-        }
-      }
+    try {
+      final museums = await _museumService.fetchMuseums();
+
+      setState(() {
+        _museums = museums;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to load museums: $e")),
+      );
+    } finally {
+      setState(() {
+        _loading = false;
+      });
     }
-    ''';
-
-    final Map<String, dynamic> json = jsonDecode(jsonData);
-
-    final List<Museum> museums = (json['data'] as Map<String, dynamic>)
-        .entries
-        .map((entry) => Museum.fromJson(entry.value, entry.key))
-        .toList();
-
-    setState(() {
-      _museums = museums;
-    });
   }
 
   Future<void> _getUserLocation() async {
@@ -96,15 +61,15 @@ class _MapPageState extends State<MapPage> {
 
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
-        _loading = false;
       });
     } catch (e) {
-      setState(() {
-        _loading = false;
-      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error getting location: $e")),
       );
+    } finally {
+      setState(() {
+        _loading = false;
+      });
     }
   }
 

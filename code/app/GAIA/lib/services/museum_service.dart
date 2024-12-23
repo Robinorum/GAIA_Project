@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../model/museum.dart';
 
 class MuseumService {
-  final String baseUrl = "http://127.0.0.1:5000/api/museum";
+  final String baseUrl = "http://127.0.0.1:5000/api/museums";
 
   // Fonction pour récupérer toutes les œuvres
   Future<List<Museum>> fetchMuseums() async {
@@ -16,7 +16,7 @@ class MuseumService {
         return Museum.fromJson(entry.value, entry.key);
       }).toList();
     } else {
-      throw Exception("Failed to load artworks");
+      throw Exception("Failed to load museums");
     }
   }
 
