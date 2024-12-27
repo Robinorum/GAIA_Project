@@ -3,7 +3,7 @@ import os
 
 
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, auth 
 from collections import Counter
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI_scan')))
@@ -173,6 +173,95 @@ def profilage(uid):
             print(f"Aucune marque trouvée pour l'utilisateur {uid}")
     else:
         print(f"Le document pour l'utilisateur {uid} n'existe pas.")
+
+
+@app.route("/api/registration/", methods=["POST"])
+def register_user():
+    data = request.get_json()
+
+    email = data['email']
+    password = data['password']
+    username = data['username']
+
+    db = firestore.client()
+    users_ref = db.collection('accounts')
+    email_query = users_ref.where('email', '==', email).get()
+
+    if email_query:
+        return jsonify({"error": "Cet email est déjà utilisé !"}), 400  
+
+    if len(password) < 14 or not any(c.isupper() for c in password) or not any(c.islower() for c in password) or not any(c.isdigit() for c in password) or not any(c in '@$!%*?&' for c in password):
+        return jsonify({"error": "Mot de passe trop faible. Il doit avoir au moins 14 caractères, inclure une majuscule, une minuscule, un chiffre et un caractère spécial."}), 400
+
+    try:
+        user = auth.create_user(
+            email=email,
+            password=password,
+            display_name=username
+        )
+
+        user_data = {
+            'email': email,
+            'username': username,
+            'googleAccount': False,
+            'brands': [],
+            'collection': [],
+            'preferences': {
+                'movement': {}
+            }
+        }
+
+        # Ajout du document à la collection Firestore
+        user_doc = users_ref.document(user.uid)
+        user_doc.set(user_data)
+
+        # 6. Envoi d'une réponse de succès
+        return jsonify({
+            "success": True,
+            "message": "Utilisateur enregistré avec succès",
+            "uid": user.uid
+        }), 201
+    except Exception as e:
+        return jsonify({"error": f"Erreur inattendue: {str(e)}"}), 500
+    
+@app.route("/api/login/", methods=["POST"])
+def login_user():
+    data = request.get_json()
+
+    email = data.get('email')
+    password = data.get('password')
+
+    if not email or not password:
+        return jsonify({"error": "Email ou mot de passe manquant"}), 400
+
+    try:
+        # Vérification des informations utilisateur via Firebase Authentication
+        user = auth.get_user_by_email(email)
+
+        # Utilisation de Firebase Auth pour authentifier l'utilisateur
+        firebase_auth = firebase_admin.auth
+        token = firebase_auth.create_custom_token(user.uid)
+        
+        # Vérification dans Firestore pour récupérer les données utilisateur
+        db = firestore.client()
+        user_doc = db.collection('accounts').document(user.uid).get()
+
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            return jsonify({
+                "success": True,
+                "message": "Connexion réussie",
+                "uid": user.uid,
+                "user_data": user_data,
+                "token": token.decode()  # Conversion du token pour le client
+            }), 200
+        else:
+            return jsonify({"error": "Utilisateur non trouvé dans la base de données"}), 404
+    except Exception as e:
+        return jsonify({"error": f"Erreur lors de la connexion : {str(e)}"}), 500
+
+
+
 
 if __name__ == '__main__':
     configure_adb_reverse()

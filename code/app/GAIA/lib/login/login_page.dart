@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import '../pages/home_page.dart';
 import 'package:GAIA/model/appUser.dart'; // Modèle AppUser
 import 'package:GAIA/provider/userProvider.dart';
+import 'package:GAIA/services/authentification_service.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.title});
@@ -23,9 +25,11 @@ class _LoginPageState extends State<LoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final AuthentificationService _loginService = AuthentificationService();
 
   String? emailError;
   String? passwordError;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -63,22 +67,71 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 20),
             // Bouton de connexion
             ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  emailError = null;
-                  passwordError = null;
-                });
+              onPressed: () async {
+                if (identifierController.text.isNotEmpty &&
+                    passwordController.text.isNotEmpty) {
+                  final result = await _loginService.loginUser(
+                    identifierController.text,
+                    passwordController.text,
+                  );
 
-                if (identifierController.text.isEmpty) {
-                  setState(() {
-                    emailError = "Veuillez entrer un email.";
-                  });
-                } else if (passwordController.text.isEmpty) {
-                  setState(() {
-                    passwordError = "Veuillez entrer un mot de passe.";
-                  });
+                  if (result['success'] == true) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("user connected !")),
+                    );
+
+                    // Récupérer l'utilisateur et l'ajouter au UserProvider
+                    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+                    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+                    final String IdUser = result['uid']; // Récupérer l'UID depuis le résultat de l'API
+
+                    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+                          email: identifierController.text,
+                          password: passwordController.text,
+                        );
+
+                    final User firebaseUser = userCredential.user!;
+                    if (firebaseUser != null) {
+                      final userDoc = await _firestore.collection('accounts').doc(firebaseUser.uid).get();
+
+                      if (userDoc.exists) {
+                        final userData = userDoc.data() as Map<String, dynamic>;
+
+                        // Créer un objet AppUser
+                        AppUser user = AppUser(
+                          id: firebaseUser.uid,
+                          email: userData['email'],
+                          username: userData['username'],
+                          googleAccount: userData['googleAccount'] ?? false,
+                          liked: List<String>.from(userData['liked'] ?? []),
+                          collection: List<String>.from(userData['collection'] ?? []),
+                          visitedMuseum: userData['visitedMuseum'] ?? '',
+                          profilePhoto: userData['profilePhoto'] ?? '',
+                          preferences: userData['preferences'] ?? {},
+                          movements: Map<String, double>.from(userData['preferences']?['movement'] ?? {}),
+                        );
+
+                        // Ajouter l'utilisateur au UserProvider
+                        Provider.of<UserProvider>(context, listen: false).setUser(user);
+
+                        // Redirection vers la page de profilage
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const HomePage()),
+                        );
+                      }
+                    }
+                  } else {
+                    // Affichage du message d'erreur en fonction du retour de l'API
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(result['message'])),
+                    );
+                  }
                 } else {
-                  login();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Veuillez remplir tous les champs.")),
+                  );
                 }
               },
               child: const Text("Se connecter"),
@@ -101,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
               icon: const Icon(Icons.login),
               label: const Text("Se connecter avec Google"),
               onPressed: () async {
-                await signInWithGoogle();
+             //   await signInWithGoogle();
               },
             ),
             const SizedBox(height: 10),
@@ -120,74 +173,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-
-  Future<void> login() async {
-    String email;
-    if (identifierController.text.contains('@')) {
-      email = identifierController.text;
-    } else {
-      final userCollection = _firestore.collection('users');
-      final snapshot = await userCollection
-          .where('username', isEqualTo: identifierController.text)
-          .get();
-
-      if (snapshot.docs.isNotEmpty) {
-        email = snapshot.docs[0]['email'];
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Email non trouvé")),
-        );
-        return;
-      }
-    }
-
-    try {
-    // Authentification avec Firebase
-    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: passwordController.text,
-    );
-
-    final User firebaseUser = userCredential.user!;
-
-    // Récupération des informations utilisateur depuis Firestore
-    final userDoc =
-        await _firestore.collection('accounts').doc(firebaseUser.uid).get();
-
-    if (!userDoc.exists) {
-      throw Exception("L'utilisateur n'existe pas dans Firestore");
-    }
-
-    final userData = userDoc.data() as Map<String, dynamic>;
-
-    // Création d'un objet AppUser
-    AppUser user = AppUser(
-      id: firebaseUser.uid,
-      email: userData['email'],
-      username: userData['username'],
-      googleAccount: userData['googleAccount'] ?? false,
-      liked: List<String>.from(userData['liked'] ?? []),
-      collection: List<String>.from(userData['collection'] ?? []),
-      visitedMuseum: userData['visitedMuseum'] ?? '',
-      profilePhoto: userData['profilePhoto'] ?? '',
-      preferences: userData['preferences'] ?? {}, // Ajout des préférences
-      movements: Map<String, double>.from(userData['preferences']?['mouvement'] ?? {}), // Ajout des préférences liées aux mouvements
-    );
-
-    // Mise à jour du UserProvider avec l'utilisateur connecté
-    Provider.of<UserProvider>(context, listen: false).setUser(user);
-
-    // Redirection vers la page d'accueil
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomePage()),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Erreur de connexion : ${e.toString()}")),
-    );
-  }
-}
+/*
 
   Future<void> signInWithGoogle() async {
     try {
@@ -231,5 +217,5 @@ class _LoginPageState extends State<LoginPage> {
         SnackBar(content: Text("Erreur de connexion avec Google : $e")),
       );
     }
-  }
+  }*/
 }
