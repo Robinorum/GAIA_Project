@@ -211,15 +211,12 @@ def register_user():
             }
         }
 
-        # Ajout du document à la collection Firestore
         user_doc = users_ref.document(user.uid)
         user_doc.set(user_data)
 
-        # 6. Envoi d'une réponse de succès
         return jsonify({
             "success": True,
             "message": "Utilisateur enregistré avec succès",
-            "uid": user.uid
         }), 201
     except Exception as e:
         return jsonify({"error": f"Erreur inattendue: {str(e)}"}), 500
@@ -235,14 +232,10 @@ def login_user():
         return jsonify({"error": "Email ou mot de passe manquant"}), 400
 
     try:
-        # Vérification des informations utilisateur via Firebase Authentication
         user = auth.get_user_by_email(email)
 
-        # Utilisation de Firebase Auth pour authentifier l'utilisateur
         firebase_auth = firebase_admin.auth
         token = firebase_auth.create_custom_token(user.uid)
-        
-        # Vérification dans Firestore pour récupérer les données utilisateur
         db = firestore.client()
         user_doc = db.collection('accounts').document(user.uid).get()
 
@@ -251,9 +244,6 @@ def login_user():
             return jsonify({
                 "success": True,
                 "message": "Connexion réussie",
-                "uid": user.uid,
-                "user_data": user_data,
-                "token": token.decode()  # Conversion du token pour le client
             }), 200
         else:
             return jsonify({"error": "Utilisateur non trouvé dans la base de données"}), 404
