@@ -157,16 +157,9 @@ def profilage(uid):
                 if 'data' in artwork and 'movement' in artwork['data']:
                     movements.append(artwork['data']['movement'])
 
-            # Comptage des occurrences de chaque mouvement
             movement_counts = Counter(movements)
-
-            # Calcul du total des mouvements
             total_movements = len(movements)
-
-            # Création du dictionnaire des ratios
             ratios = {movement: count / total_movements for movement, count in movement_counts.items()}
-
-            # Mise à jour dans Firestore
             doc_ref.update({'preferences.movements': ratios})
             print(f"Ratios {ratios} mis à jour pour l'utilisateur {uid}")
         else:
@@ -177,8 +170,8 @@ def profilage(uid):
 
 @app.route("/api/registration/", methods=["POST"])
 def register_user():
+    
     data = request.get_json()
-
     email = data['email']
     password = data['password']
     username = data['username']
@@ -199,7 +192,6 @@ def register_user():
             password=password,
             display_name=username
         )
-
         user_data = {
             'email': email,
             'username': username,
@@ -210,16 +202,12 @@ def register_user():
                 'movement': {}
             }
         }
-
-        # Ajout du document à la collection Firestore
         user_doc = users_ref.document(user.uid)
         user_doc.set(user_data)
 
-        # 6. Envoi d'une réponse de succès
         return jsonify({
             "success": True,
             "message": "Utilisateur enregistré avec succès",
-            "uid": user.uid
         }), 201
     except Exception as e:
         return jsonify({"error": f"Erreur inattendue: {str(e)}"}), 500
@@ -235,33 +223,21 @@ def login_user():
         return jsonify({"error": "Email ou mot de passe manquant"}), 400
 
     try:
-        # Vérification des informations utilisateur via Firebase Authentication
         user = auth.get_user_by_email(email)
-
-        # Utilisation de Firebase Auth pour authentifier l'utilisateur
         firebase_auth = firebase_admin.auth
         token = firebase_auth.create_custom_token(user.uid)
-        
-        # Vérification dans Firestore pour récupérer les données utilisateur
         db = firestore.client()
         user_doc = db.collection('accounts').document(user.uid).get()
-
         if user_doc.exists:
             user_data = user_doc.to_dict()
             return jsonify({
                 "success": True,
                 "message": "Connexion réussie",
-                "uid": user.uid,
-                "user_data": user_data,
-                "token": token.decode()  # Conversion du token pour le client
             }), 200
         else:
             return jsonify({"error": "Utilisateur non trouvé dans la base de données"}), 404
     except Exception as e:
         return jsonify({"error": f"Erreur lors de la connexion : {str(e)}"}), 500
-
-
-
 
 if __name__ == '__main__':
     configure_adb_reverse()

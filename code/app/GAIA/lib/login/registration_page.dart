@@ -37,12 +37,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
             ),
             TextFormField(
               controller: usernameController,
-              decoration: const InputDecoration(hintText: "Nom d'utilisateur"),
+              decoration: const InputDecoration(hintText: "Username"),
             ),
             TextFormField(
               controller: passwordController,
               obscureText: true,
-              decoration: const InputDecoration(hintText: "Mot de passe"),
+              decoration: const InputDecoration(hintText: "Password"),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -69,7 +69,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           password: passwordController.text,
                         );
 
-                    final User firebaseUser = userCredential.user!;
+                    final User? firebaseUser = userCredential.user!;
                     if (firebaseUser != null) {
                       final userDoc = await _firestore.collection('accounts').doc(firebaseUser.uid).get();
 
@@ -90,10 +90,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           movements: Map<String, double>.from(userData['preferences']?['movement'] ?? {}),
                         );
 
-                        // Ajouter l'utilisateur au UserProvider
                         Provider.of<UserProvider>(context, listen: false).setUser(user);
 
-                        // Redirection vers la page de profilage
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const ProfilagePage()),
@@ -101,18 +99,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       }
                     }
                   } else {
-                    // Affichage du message d'erreur en fonction du retour de l'API
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(result['message'])),
                     );
                   }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Veuillez remplir tous les champs.")),
+                    const SnackBar(content: Text("Please fill in all the fields.")),
                   );
                 }
               },
-              child: const Text("S'inscrire"),
+              child: const Text("Sign in"),
             ),
           ],
         ),

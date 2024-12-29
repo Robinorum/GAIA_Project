@@ -1,11 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:GAIA/login/registration_page.dart';
 import 'package:provider/provider.dart';
 import '../pages/home_page.dart';
-import 'package:GAIA/model/appUser.dart'; // Modèle AppUser
+import 'package:GAIA/model/appUser.dart'; 
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:GAIA/services/authentification_service.dart';
 
@@ -22,9 +21,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController identifierController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
   final AuthentificationService _loginService = AuthentificationService();
 
   String? emailError;
@@ -44,28 +40,25 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 30),
-            // Champ Email/Identifiant
             TextFormField(
               controller: identifierController,
               decoration: InputDecoration(
-                hintText: "Email ou Nom d'utilisateur",
+                hintText: "Email",
                 errorText: emailError,
                 prefixIcon: const Icon(Icons.person),
               ),
             ),
             const SizedBox(height: 16),
-            // Champ Mot de passe
             TextFormField(
               controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
-                hintText: "Mot de passe",
+                hintText: "Password",
                 errorText: passwordError,
                 prefixIcon: const Icon(Icons.lock),
               ),
             ),
             const SizedBox(height: 20),
-            // Bouton de connexion
             ElevatedButton(
               onPressed: () async {
                 if (identifierController.text.isNotEmpty &&
@@ -84,14 +77,12 @@ class _LoginPageState extends State<LoginPage> {
                     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
                     final FirebaseAuth _auth = FirebaseAuth.instance;
 
-                    final String IdUser = result['uid']; // Récupérer l'UID depuis le résultat de l'API
-
                     UserCredential userCredential = await _auth.signInWithEmailAndPassword(
                           email: identifierController.text,
                           password: passwordController.text,
                         );
 
-                    final User firebaseUser = userCredential.user!;
+                    final User? firebaseUser = userCredential.user!;
                     if (firebaseUser != null) {
                       final userDoc = await _firestore.collection('accounts').doc(firebaseUser.uid).get();
 
@@ -112,10 +103,8 @@ class _LoginPageState extends State<LoginPage> {
                           movements: Map<String, double>.from(userData['preferences']?['movement'] ?? {}),
                         );
 
-                        // Ajouter l'utilisateur au UserProvider
                         Provider.of<UserProvider>(context, listen: false).setUser(user);
 
-                        // Redirection vers la page de profilage
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const HomePage()),
@@ -130,11 +119,11 @@ class _LoginPageState extends State<LoginPage> {
                   }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Veuillez remplir tous les champs.")),
+                    const SnackBar(content: Text("Please fill in all the fields.")),
                   );
                 }
               },
-              child: const Text("Se connecter"),
+              child: const Text("Log in"),
             ),
             const SizedBox(height: 20),
             // Lien vers l'inscription
@@ -146,15 +135,14 @@ class _LoginPageState extends State<LoginPage> {
                       builder: (context) => const RegistrationPage()),
                 );
               },
-              child: const Text("Créer un compte"),
+              child: const Text("Create an account"),
             ),
             const SizedBox(height: 20),
             // Connexion avec Google
             ElevatedButton.icon(
               icon: const Icon(Icons.login),
-              label: const Text("Se connecter avec Google"),
+              label: const Text("Log in with Google"),
               onPressed: () async {
-             //   await signInWithGoogle();
               },
             ),
             const SizedBox(height: 10),
@@ -166,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                   MaterialPageRoute(builder: (context) => const HomePage()),
                 );
               },
-              child: const Text("Mode Développeur"),
+              child: const Text("Dev Mod"),
             ),
           ],
         ),
