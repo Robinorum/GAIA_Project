@@ -153,7 +153,7 @@ def profilage(uid):
             movements = []
 
             for brand in brands:
-                artwork = get_artwork_by_id(brand).get_json()  # Récupération des mouvements des œuvres
+                artwork = get_artwork_by_id(brand).get_json() 
                 if 'data' in artwork and 'movement' in artwork['data']:
                     movements.append(artwork['data']['movement'])
 

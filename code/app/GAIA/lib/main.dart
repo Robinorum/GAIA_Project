@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-//import 'package:GAIA/login/login_page.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:GAIA/widgets/auth_gate.dart';
 import 'package:provider/provider.dart';
+import 'package:GAIA/provider/themeProvider.dart';  // Import du ThemeProvider
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => UserProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),  // Ajout du ThemeProvider ici
+      ],
       child: MyApp(),
     ),
   );
@@ -21,20 +24,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-            create: (context) => UserProvider()), // Point 3 ajouté ici
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Camera Prediction App',
-        theme: ThemeData.light().copyWith(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
-        home: AuthGate(),
-      ),
+    // Accéder au provider pour obtenir le thème actuel
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Camera Prediction App',
+      theme: themeProvider.currentTheme,  // Utilisation du thème dynamique
+      home: AuthGate(),
     );
   }
 }

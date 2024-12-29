@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:GAIA/provider/themeProvider.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
   final Function(bool isDarkMode) onToggleTheme;
@@ -10,12 +12,13 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _isDarkMode = false;
   bool _isNotificationsEnabled = true;
   String _selectedLanguage = 'English';
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
@@ -31,12 +34,10 @@ class _SettingsPageState extends State<SettingsPage> {
             _buildListTile(
               title: "Dark Mode",
               trailing: Switch(
-                value: _isDarkMode,
+                value: themeProvider.isDarkMode,
                 onChanged: (value) {
-                  setState(() {
-                    _isDarkMode = value;
-                  });
-                  widget.onToggleTheme(value);
+                  themeProvider.toggleTheme(value);
+                  widget.onToggleTheme(value);  // Passer le changement de thème
                 },
               ),
             ),
@@ -91,11 +92,11 @@ class _SettingsPageState extends State<SettingsPage> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  _isDarkMode = false;
                   _isNotificationsEnabled = true;
                   _selectedLanguage = 'English';
                 });
-                widget.onToggleTheme(false);
+                themeProvider.toggleTheme(false); // Réinitialiser le thème à clair
+                widget.onToggleTheme(false); // Passer le changement de thème à `false`
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Settings reset to default")),
                 );
