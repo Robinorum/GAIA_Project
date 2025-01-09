@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -17,12 +18,19 @@ class _MapPageState extends State<MapPage> {
   bool _loading = true;
   List<Museum> _museums = []; // Liste pour stocker les musées
   final MuseumService _museumService = MuseumService(); // Instance du service
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   @override
   void initState() {
     super.initState();
     _getUserLocation(); // Obtenir la position de l'utilisateur
     _loadMuseums(); // Charger les musées dynamiquement
+  }
+
+  @override
+  void dispose() {
+    _positionStreamSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadMuseums() async {
@@ -55,12 +63,18 @@ class _MapPageState extends State<MapPage> {
       }
 
       // Obtention de la position actuelle
-      final Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      final Position position = await Geolocator.getCurrentPosition();
 
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
+      });
+
+      // Écouter les changements de position en temps réel
+      _positionStreamSubscription =
+          Geolocator.getPositionStream().listen((Position position) {
+        setState(() {
+          _currentLocation = LatLng(position.latitude, position.longitude);
+        });
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -71,6 +85,15 @@ class _MapPageState extends State<MapPage> {
         _loading = false;
       });
     }
+  }
+
+  double _calculateDistance(LatLng start, LatLng end) {
+    return Geolocator.distanceBetween(
+      start.latitude,
+      start.longitude,
+      end.latitude,
+      end.longitude,
+    );
   }
 
   @override
@@ -87,7 +110,9 @@ class _MapPageState extends State<MapPage> {
               : FlutterMap(
                   options: MapOptions(
                     center: _currentLocation,
-                    zoom: 15.0,
+                    zoom: 5.0,
+                    maxZoom: 17.0,
+                    interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                   ),
                   children: [
                     TileLayer(
@@ -108,13 +133,21 @@ class _MapPageState extends State<MapPage> {
                         ),
                         // Marqueurs pour les musées
                         ..._museums.map((museum) {
+                          final distance = _calculateDistance(
+                            _currentLocation!,
+                            LatLng(
+                              museum.location.latitude,
+                              museum.location.longitude,
+                            ),
+                          );
                           return Marker(
                             point: LatLng(
                               museum.location.latitude,
                               museum.location.longitude,
                             ),
                             builder: (ctx) => Tooltip(
-                              message: museum.title,
+                              message:
+                                  "${museum.title}\nDistance: ${(distance/1000).toStringAsFixed(2)} kilometers",
                               child: const Icon(
                                 Icons.location_on,
                                 color: Colors.red,
