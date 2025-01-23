@@ -8,7 +8,11 @@ import 'package:GAIA/pages/quests_page.dart';
 import '../component/custom_bottom_nav.dart';
 import '../scan/camera_screen.dart';
 import '../services/artwork_service.dart';
+import '../services/museum_service.dart';
 import '../model/artwork.dart';
+import '../model/museum.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -69,107 +73,184 @@ class HomeContent extends StatefulWidget {
 
 class _HomeContentState extends State<HomeContent> {
   late Future<List<Artwork>> _recommendedArtworks;
+  late Future<List<Museum>> _recommendedMuseums;
+  LatLng? _currentLocation;
 
   @override
   void initState() {
     super.initState();
-    _recommendedArtworks =
-        ArtworkService().fetchArtworks(); // Récupération via l'API
+    _recommendedArtworks = ArtworkService().fetchArtworks();
+    _recommendedMuseums = MuseumService().fetchMuseums();
+    _getUserLocation();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final user = Provider.of<UserProvider>(context).user;
+  Future<void> _getUserLocation() async {
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      setState(() {
+        _currentLocation = LatLng(position.latitude, position.longitude);
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error getting location: $e")),
+      );
+    }
+  }
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Hi, ${user != null && user.username.isNotEmpty ? user.username : "Guest"} 👋',
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    "Explore the museum",
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                ],
-              ),
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfilePage()),
-                  );
-                },
-                child: CircleAvatar(
-                  radius: 24,
-                  backgroundImage:
-                      NetworkImage(user?.id ?? 'https://example.com/photo.jpg'),
-                ),
-              )
-            ],
-          ),
-          const SizedBox(height: 24),
-          TextField(
-            decoration: InputDecoration(
-              hintText: "Search places",
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: Colors.grey[200],
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            "Recommended Artworks",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: FutureBuilder<List<Artwork>>(
-              future: _recommendedArtworks,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      "Error loading artworks: ${snapshot.error}",
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No artworks found."));
-                }
-
-                final artworks = snapshot.data!;
-                return PageView.builder(
-                  itemCount: artworks.length,
-                  itemBuilder: (context, index) {
-                    final artwork = artworks[index];
-                    return _buildCarouselItem(artwork.toImage(), artwork.title);
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+  double _calculateDistance(LatLng start, LatLng end) {
+    return Geolocator.distanceBetween(
+      start.latitude,
+      start.longitude,
+      end.latitude,
+      end.longitude,
     );
   }
+
+@override
+Widget build(BuildContext context) {
+  final user = Provider.of<UserProvider>(context).user;
+
+return Padding(
+  padding: const EdgeInsets.all(16.0),
+  child: ListView(
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hi, ${user != null && user.username.isNotEmpty ? user.username : "Guest"} 👋',
+                style: const TextStyle(
+                    fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                "Explore the museum",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            ],
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfilePage()),
+              );
+            },
+            child: CircleAvatar(
+              radius: 24,
+              backgroundImage:
+                  NetworkImage(user?.id ?? 'https://example.com/photo.jpg'),
+            ),
+          )
+        ],
+      ),
+      const SizedBox(height: 24),
+      TextField(
+        decoration: InputDecoration(
+          hintText: "Search places",
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+      ),
+      const SizedBox(height: 24),
+      const Text(
+        "Recommended Artworks",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 16),
+      SizedBox(
+        height: 250,
+        child: FutureBuilder<List<Artwork>>(
+          future: _recommendedArtworks,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  "Error loading artworks: ${snapshot.error}",
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text("No artworks found."));
+            }
+
+            final artworks = snapshot.data!;
+            return PageView.builder(
+              itemCount: artworks.length,
+              itemBuilder: (context, index) {
+                final artwork = artworks[index];
+                return _buildCarouselItem(artwork.toImage(), artwork.title);
+              },
+            );
+          },
+        ),
+      ),
+      const SizedBox(height: 24),
+      const Text(
+        "Recommended Museums",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 16),
+      SizedBox(
+        height: 280,
+        child: FutureBuilder<List<Museum>>(
+          future: _recommendedMuseums,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  "Error loading museums: ${snapshot.error}",
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text("No museums found."));
+            }
+
+            final museums = snapshot.data!;
+            return PageView.builder(
+              itemCount: museums.length,
+              itemBuilder: (context, index) {
+                final museum = museums[index];
+                final distance = _currentLocation != null
+                    ? _calculateDistance(
+                        _currentLocation!,
+                        LatLng(
+                          museum.location.latitude,
+                          museum.location.longitude,
+                        ),
+                      )
+                    : null;
+                return _buildCarouselItemWithDistance(
+                  museum.toImage(),
+                  museum.title,
+                  distance,
+                );
+              },
+            );
+          },
+        ),
+      ),
+    ],
+  ),
+);
+
+}
+
 
   Widget _buildCarouselItem(Image image, String title) {
     return Column(
@@ -200,4 +281,45 @@ class _HomeContentState extends State<HomeContent> {
       ],
     );
   }
+
+Widget _buildCarouselItemWithDistance(Image image, String title, double? distance) {
+  return Column(
+    children: [
+      Container(
+        height: 180, // Reduced from 200 to 180 to leave more space for text
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              blurRadius: 6,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: image,
+        ),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        title,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      if (distance != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            "${(distance/1000).toStringAsFixed(2)} kilometers away",
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+        ),
+    ],
+  );
+}
 }

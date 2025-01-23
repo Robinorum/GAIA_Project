@@ -1,4 +1,7 @@
 
+import 'package:flutter/material.dart';
+import 'dart:convert';
+
 class GeoPoint {
   final double latitude;
   final double longitude;
@@ -47,5 +50,11 @@ class Museum {
     );
 
   }
+
+
+    Image toImage() {
+    return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover);
+  }
+
 
 }
