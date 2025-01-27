@@ -40,15 +40,17 @@ class Artwork {
 
   factory Artwork.fromJson(Map<String, dynamic> json) {
     return Artwork(
-      id: json['id'],
-      title: json['title'],
-      artist: json['artist'],
-      date: json['date'],
-      description: json['description'],
+      id: json['id'] ?? 'Unknown ID',
+      title: json['title'] ?? 'Unknown Title',
+      artist: json['artist'] ?? 'Unknown Artist',
+      date: json['date'] ?? 'Unknown Date',
+      description: json['description'] ?? 'No description',
       image: json['image'] ?? '',
-      location: GeoPoint.fromJson(json['location']),
-      place: json['place'],
-      movement: json['movement'],
+      location: json['location'] != null
+          ? GeoPoint.fromJson(json['location'])
+          : GeoPoint(latitude: 0.0, longitude: 0.0),
+      place: json['place'] ?? 'Unknown Place',
+      movement: json['movement'] ?? 'Unknown Movement',
     );
   }
 

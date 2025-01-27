@@ -86,7 +86,8 @@ class _HomeContentState extends State<HomeContent> {
   // Fonction pour charger les recommandations
   void _loadRecommendations() {
     setState(() {
-      _recommendedArtworks = ArtworkService().fetchArtworks();
+      _recommendedArtworks =
+          ArtworkService().fetchRecommendations("Bnv2PMDRbeVvYzeLdAB4A01gDPW2");
       _recommendedMuseums = MuseumService().fetchMuseums();
     });
   }
