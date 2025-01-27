@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'profilage_page.dart';
-import 'package:GAIA/services/authentification_service.dart';
-import 'package:GAIA/model/appUser.dart';
-import 'package:GAIA/provider/userProvider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'profilage_page.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -18,19 +14,20 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final emailController = TextEditingController();
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-
-  final AuthentificationService _registrationService = AuthentificationService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("sign up"),
+        title: const Text("Sign Up"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            // Text fields for email, username, and password
             TextFormField(
               controller: emailController,
               decoration: const InputDecoration(hintText: "Email"),
@@ -44,76 +41,107 @@ class _RegistrationPageState extends State<RegistrationPage> {
               obscureText: true,
               decoration: const InputDecoration(hintText: "Password"),
             ),
+            const SizedBox(
+                height: 16), // Add spacing between input fields and button
             ElevatedButton(
-              onPressed: () async {
+              onPressed: () {
                 if (emailController.text.isNotEmpty &&
                     usernameController.text.isNotEmpty &&
                     passwordController.text.isNotEmpty) {
-                  final result = await _registrationService.registerUser(
-                    emailController.text,
-                    passwordController.text,
-                    usernameController.text,
-                  );
-
-                  if (result['success'] == true) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("user registered !")),
-                    );
-
-                    // Récupérer l'utilisateur et l'ajouter au UserProvider
-                    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-                    final FirebaseAuth _auth = FirebaseAuth.instance;
-
-                    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-                          email: emailController.text,
-                          password: passwordController.text,
-                        );
-
-                    final User? firebaseUser = userCredential.user!;
-                    if (firebaseUser != null) {
-                      final userDoc = await _firestore.collection('accounts').doc(firebaseUser.uid).get();
-
-                      if (userDoc.exists) {
-                        final userData = userDoc.data() as Map<String, dynamic>;
-
-                        // Créer un objet AppUser
-                        AppUser user = AppUser(
-                          id: firebaseUser.uid,
-                          email: userData['email'],
-                          username: userData['username'],
-                          googleAccount: userData['googleAccount'] ?? false,
-                          liked: List<String>.from(userData['liked'] ?? []),
-                          collection: List<String>.from(userData['collection'] ?? []),
-                          visitedMuseum: userData['visitedMuseum'] ?? '',
-                          profilePhoto: userData['profilePhoto'] ?? '',
-                          preferences: userData['preferences'] ?? {},
-                          movements: Map<String, double>.from(userData['preferences']?['movement'] ?? {}),
-                        );
-
-                        Provider.of<UserProvider>(context, listen: false).setUser(user);
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ProfilagePage()),
-                        );
-                      }
-                    }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(result['message'])),
-                    );
-                  }
+                  signUp();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please fill in all the fields.")),
+                    const SnackBar(
+                        content: Text("Please fill in all the fields.")),
                   );
                 }
               },
-              child: const Text("Sign in"),
+              child: const Text("Sign Up"),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> signUp() async {
+    try {
+      // Check if the email already exists
+      final emailSnapshot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: emailController.text)
+          .get();
+      if (emailSnapshot.docs.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("This email is already in use.")),
+        );
+        return;
+      }
+
+      // Check if the username already exists
+      final usernameSnapshot = await _firestore
+          .collection('users')
+          .where('username', isEqualTo: usernameController.text)
+          .get();
+      if (usernameSnapshot.docs.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("This username is already in use.")),
+        );
+        return;
+      }
+
+      // Validate password
+      if (passwordController.text.length < 14 ||
+          !RegExp(r'[A-Z]').hasMatch(passwordController.text) ||
+          !RegExp(r'[a-z]').hasMatch(passwordController.text) ||
+          !RegExp(r'\d').hasMatch(passwordController.text) ||
+          !RegExp(r'[@$!%*?&]').hasMatch(passwordController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Password must be at least 14 characters, include an uppercase letter, a lowercase letter, a number, and a special character.",
+            ),
+          ),
+        );
+        return;
+      }
+
+      // Create user with FirebaseAuth
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+
+      // Save user data to Firestore
+      await _firestore
+          .collection('accounts')
+          .doc(userCredential.user?.uid)
+          .set({
+        'email': emailController.text,
+        'username': usernameController.text,
+        'googleAccount': false,
+        'brands': [],
+        'reco': [],
+        'previous_reco': [],
+        'collection': [],
+        'visitedMuseum': '',
+        'profilePhoto': '',
+        'preferences': {'movements': {}},
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("User registered successfully!")),
+      );
+
+      // Navigate to ProfilagePage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ProfilagePage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Registration error: $e")),
+      );
+    }
   }
 }

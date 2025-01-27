@@ -1,17 +1,16 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../model/museum.dart';
+import 'http_service.dart';
 
 class MuseumService {
-  final String baseUrl = "http://127.0.0.1:5000/api/museums";
+  final String baseUrl = "http://127.0.0.1:5000/museum/api/museums";
 
-  // Fonction pour récupérer toutes les œuvres
   Future<List<Museum>> fetchMuseums() async {
-    final response = await http.get(Uri.parse(baseUrl));
+    HttpService httpService = HttpService();
+    final response = await httpService.get(baseUrl);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = jsonDecode(response.body)['data'];
-
       return data.entries.map((entry) {
         return Museum.fromJson(entry.value, entry.key);
       }).toList();
@@ -19,6 +18,4 @@ class MuseumService {
       throw Exception("Failed to load museums");
     }
   }
-
-
 }

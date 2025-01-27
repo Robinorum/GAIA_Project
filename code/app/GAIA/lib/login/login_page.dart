@@ -1,13 +1,9 @@
+import 'package:GAIA/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:GAIA/login/registration_page.dart';
-import 'package:provider/provider.dart';
-import '../pages/home_page.dart';
-import 'package:GAIA/model/appUser.dart'; 
-import 'package:GAIA/provider/userProvider.dart';
-import 'package:GAIA/services/authentification_service.dart';
-
+import 'package:google_sign_in/google_sign_in.dart';
+import 'registration_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.title});
@@ -19,20 +15,25 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  // Contrôleurs pour les champs de saisie
   final TextEditingController identifierController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final AuthentificationService _loginService = AuthentificationService();
 
+  // Firebase instances
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  // Gestion des erreurs d'affichage
   String? emailError;
   String? passwordError;
-  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -40,93 +41,34 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 30),
+            // Champ pour l'email ou le nom d'utilisateur
             TextFormField(
               controller: identifierController,
               decoration: InputDecoration(
-                hintText: "Email",
+                hintText: "Email ou Nom d'utilisateur",
                 errorText: emailError,
                 prefixIcon: const Icon(Icons.person),
               ),
             ),
             const SizedBox(height: 16),
+            // Champ pour le mot de passe
             TextFormField(
               controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
-                hintText: "Password",
+                hintText: "Mot de passe",
                 errorText: passwordError,
                 prefixIcon: const Icon(Icons.lock),
               ),
             ),
             const SizedBox(height: 20),
+            // Bouton de connexion
             ElevatedButton(
-              onPressed: () async {
-                if (identifierController.text.isNotEmpty &&
-                    passwordController.text.isNotEmpty) {
-                  final result = await _loginService.loginUser(
-                    identifierController.text,
-                    passwordController.text,
-                  );
-
-                  if (result['success'] == true) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("user connected !")),
-                    );
-
-                    // Récupérer l'utilisateur et l'ajouter au UserProvider
-                    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-                    final FirebaseAuth _auth = FirebaseAuth.instance;
-
-                    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-                          email: identifierController.text,
-                          password: passwordController.text,
-                        );
-
-                    final User? firebaseUser = userCredential.user!;
-                    if (firebaseUser != null) {
-                      final userDoc = await _firestore.collection('accounts').doc(firebaseUser.uid).get();
-
-                      if (userDoc.exists) {
-                        final userData = userDoc.data() as Map<String, dynamic>;
-
-                        // Créer un objet AppUser
-                        AppUser user = AppUser(
-                          id: firebaseUser.uid,
-                          email: userData['email'],
-                          username: userData['username'],
-                          googleAccount: userData['googleAccount'] ?? false,
-                          liked: List<String>.from(userData['liked'] ?? []),
-                          collection: List<String>.from(userData['collection'] ?? []),
-                          visitedMuseum: userData['visitedMuseum'] ?? '',
-                          profilePhoto: userData['profilePhoto'] ?? '',
-                          preferences: userData['preferences'] ?? {},
-                          movements: Map<String, double>.from(userData['preferences']?['movement'] ?? {}),
-                        );
-
-                        Provider.of<UserProvider>(context, listen: false).setUser(user);
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const HomePage()),
-                        );
-                      }
-                    }
-                  } else {
-                    // Affichage du message d'erreur en fonction du retour de l'API
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(result['message'])),
-                    );
-                  }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please fill in all the fields.")),
-                  );
-                }
-              },
-              child: const Text("Log in"),
+              onPressed: () => login(),
+              child: const Text("Connexion"),
             ),
             const SizedBox(height: 20),
-            // Lien vers l'inscription
+            // Lien vers la page d'inscription
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -135,38 +77,70 @@ class _LoginPageState extends State<LoginPage> {
                       builder: (context) => const RegistrationPage()),
                 );
               },
-              child: const Text("Create an account"),
+              child: const Text("Créer un compte"),
             ),
             const SizedBox(height: 20),
             // Connexion avec Google
             ElevatedButton.icon(
               icon: const Icon(Icons.login),
-              label: const Text("Log in with Google"),
+              label: const Text("Connexion avec Google"),
               onPressed: () async {
+                await signInWithGoogle();
               },
-            ),
-            const SizedBox(height: 10),
-            // Mode "développeur"
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                );
-              },
-              child: const Text("Dev Mod"),
             ),
           ],
         ),
       ),
     );
   }
-/*
 
+  /// Fonction de connexion avec email ou nom d'utilisateur
+  Future<void> login() async {
+    String email;
+    if (identifierController.text.contains('@')) {
+      email = identifierController.text;
+    } else {
+      final userCollection = _firestore.collection('users');
+      final snapshot = await userCollection
+          .where('username', isEqualTo: identifierController.text)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        email = snapshot.docs[0]['email'];
+      } else {
+        setState(() {
+          emailError = "Nom d'utilisateur non trouvé";
+        });
+        return;
+      }
+    }
+
+    try {
+      // Authentification Firebase
+      final UserCredential userCredential =
+          await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: passwordController.text,
+      );
+
+      // Navigation vers la page d'accueil
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } catch (e) {
+      setState(() {
+        passwordError = "Erreur de connexion : $e";
+      });
+    }
+  }
+
+  /// Fonction de connexion avec Google
   Future<void> signInWithGoogle() async {
     try {
+      // Authentification Google
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return;
+      if (googleUser == null) return; // L'utilisateur a annulé la connexion
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
@@ -179,23 +153,21 @@ class _LoginPageState extends State<LoginPage> {
       final UserCredential userCredential =
           await _auth.signInWithCredential(credential);
 
+      // Ajouter l'utilisateur à Firestore s'il s'agit de la première connexion
       final userDoc = await _firestore
           .collection('users')
           .doc(userCredential.user?.uid)
           .get();
+
       if (!userDoc.exists) {
         await _firestore.collection('users').doc(userCredential.user?.uid).set({
           'email': userCredential.user?.email,
           'username': userCredential.user?.displayName,
           'googleAccount': true,
-          'brands': [],
         });
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Connexion réussie avec Google !")),
-      );
-
+      // Redirection vers la page d'accueil
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
@@ -205,5 +177,5 @@ class _LoginPageState extends State<LoginPage> {
         SnackBar(content: Text("Erreur de connexion avec Google : $e")),
       );
     }
-  }*/
+  }
 }
