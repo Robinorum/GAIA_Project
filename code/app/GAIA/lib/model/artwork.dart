@@ -16,7 +16,7 @@ class GeoPoint {
 }
 
 class Artwork {
-  final String id;  // Ajout de l'id
+  final String id; // Ajout de l'id
   final String title;
   final String artist;
   final String date;
@@ -27,7 +27,7 @@ class Artwork {
   final String movement;
 
   Artwork({
-    required this.id,  // Initialisation de l'id
+    required this.id, // Initialisation de l'id
     required this.title,
     required this.artist,
     required this.date,
@@ -35,18 +35,17 @@ class Artwork {
     required this.image,
     required this.location,
     required this.place,
-    required this.movement
+    required this.movement,
   });
 
-  factory Artwork.fromJson(Map<String, dynamic> json, String id) {
-    // Utilisation de l'id passé en paramètre (clé principale)
+  factory Artwork.fromJson(Map<String, dynamic> json) {
     return Artwork(
-      id: id,  // Affectation de l'id
+      id: json['id'],
       title: json['title'],
       artist: json['artist'],
       date: json['date'],
       description: json['description'],
-      image: json['image']['bytes'],
+      image: json['image'] ?? '',
       location: GeoPoint.fromJson(json['location']),
       place: json['place'],
       movement: json['movement'],
@@ -55,14 +54,16 @@ class Artwork {
 
   Image toImage() {
     if (image.isEmpty) {
-      return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover);
+      return Image.asset('assets/images/placeholder.png',
+          fit: BoxFit.cover); // Image par défaut si vide
     }
 
     try {
       final decodedBytes = base64Decode(image);
       return Image.memory(decodedBytes, fit: BoxFit.cover);
     } catch (e) {
-      return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover);
+      return Image.asset('assets/images/placeholder.png',
+          fit: BoxFit.cover); // Image par défaut en cas d'erreur de décodage
     }
   }
 }

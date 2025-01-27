@@ -266,7 +266,6 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-
   Widget _buildCarouselItem(Image image, String title) {
     return Column(
       children: [
@@ -297,44 +296,45 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-Widget _buildCarouselItemWithDistance(Image image, String title, double? distance) {
-  return Column(
-    children: [
-      Container(
-        height: 180, // Reduced from 200 to 180 to leave more space for text
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              blurRadius: 6,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: image,
-        ),
-      ),
-      const SizedBox(height: 8),
-      Text(
-        title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        textAlign: TextAlign.center,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      if (distance != null)
-        Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            "${(distance/1000).toStringAsFixed(2)} kilometers away",
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
+  Widget _buildCarouselItemWithDistance(
+      Image image, String title, double? distance) {
+    return Column(
+      children: [
+        Container(
+          height: 180, // Reduced from 200 to 180 to leave more space for text
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                blurRadius: 6,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: image,
           ),
         ),
-    ],
-  );
-}
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (distance != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              "${(distance / 1000).toStringAsFixed(2)} kilometers away",
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ),
+      ],
+    );
+  }
 }

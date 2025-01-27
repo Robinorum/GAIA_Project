@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-import 'dart:convert';
 
 class GeoPoint {
   final double latitude;
@@ -17,7 +15,7 @@ class GeoPoint {
 }
 
 class Museum {
-  final String id;  // Ajout de l'id
+  final String id; // Ajout de l'id
   final String city;
   final String country;
   final GeoPoint location;
@@ -25,22 +23,20 @@ class Museum {
   final String style;
   final String title;
 
-  Museum({
-    required this.id,  // Initialisation de l'id
-    required this.city,
-    required this.country,
-    required this.location,
-    required this.place,
-    required this.style,
-    required this.title
-  });
- 
+  Museum(
+      {required this.id, // Initialisation de l'id
+      required this.city,
+      required this.country,
+      required this.location,
+      required this.place,
+      required this.style,
+      required this.title});
+
   factory Museum.fromJson(Map<String, dynamic> json, String id) {
     // Utilisation de l'id passé en paramètre (clé principale)
 
-
     return Museum(
-      id: id,  // Affectation de l'id
+      id: id, // Affectation de l'id
       city: json['city'],
       country: json['country'],
       location: GeoPoint.fromJson(json['location']),
@@ -48,13 +44,9 @@ class Museum {
       style: json['style'],
       title: json['title'],
     );
-
   }
 
-
-    Image toImage() {
+  Image toImage() {
     return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover);
   }
-
-
 }
