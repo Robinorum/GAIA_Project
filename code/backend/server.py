@@ -5,6 +5,8 @@ import os
 import firebase_admin
 from firebase_admin import credentials, firestore, auth 
 from collections import Counter
+import random
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../AI_scan')))
 
@@ -60,14 +62,11 @@ def predict():
     if 'file' not in request.files:
         return jsonify({"error": "Aucune image envoyée"}), 400
 
-    # Récupération et préparation de l'image envoyée
     file = request.files['file']
     image = Image.open(io.BytesIO(file.read())).convert("RGB")
 
-    # Recherche des images similaires
     similar_images = find_most_similar_image(image, index, titles, artists, model, device, k=1)
 
-    # Renvoie la réponse avec les informations de l'image la plus proche
     result = {
         "prediction": similar_images[0] if similar_images else {"error": "Aucune image similaire trouvee"}
     }
@@ -199,7 +198,7 @@ def register_user():
             'brands': [],
             'collection': [],
             'preferences': {
-                'movement': {}
+                'movements': {}
             }
         }
         user_doc = users_ref.document(user.uid)
@@ -238,6 +237,166 @@ def login_user():
             return jsonify({"error": "Utilisateur non trouvé dans la base de données"}), 404
     except Exception as e:
         return jsonify({"error": f"Erreur lors de la connexion : {str(e)}"}), 500
+    
+def get_user_preferences(uid):
+    try:
+        db = firestore.client()
+        doc_ref = db.collection('accounts').document(uid)
+        doc = doc_ref.get()
+
+        if doc.exists:
+            data = doc.to_dict()
+            movements = data.get('preferences', {}).get('movements', {})
+            for movement, score in movements.items():
+                print(f"User {uid} likes {movement} with score {score}")
+            return movements  # Retourne un dictionnaire des mouvements et scores
+        else:
+            print(f"Document for UID {uid} does not exist.")
+            return {}
+    except Exception as e:
+        print(f"Error retrieving user preferences for UID {uid}: {e}")
+        return {}
+
+    
+def get_previous_recommendations(uid):
+
+    try:
+        db = firestore.client()
+        doc_ref = db.collection('accounts').document(uid)
+        doc = doc_ref.get()
+
+        if doc.exists:
+            data = doc.to_dict()
+            collection = data.get('previous_reco', [])
+            if isinstance(collection, list):
+                print(f"Previous recommendations for user {uid}: {collection}")
+                return collection
+            else:
+                print(f"'collection' field for UID {uid} is not a list.")
+                return []
+        else:
+            print(f"Document for UID {uid} does not exist.")
+            return []
+    except Exception as e:
+        print(f"Error retrieving previous recommendations for UID {uid}: {e}")
+        return []
+
+def get_user_collection(uid):
+    try:
+        db = firestore.client()
+        doc_ref = db.collection('accounts').document(uid)
+        doc = doc_ref.get()
+
+        if doc.exists:
+            data = doc.to_dict()
+            collection = data.get('collection', [])
+            if isinstance(collection, list):
+                print(f"collection for user {uid}: {collection}")
+                return collection
+            else:
+                print(f"'collection' field for UID {uid} is not a list.")
+                return []
+        else:
+            print(f"Document for UID {uid} does not exist.")
+            return []
+    except Exception as e:
+        print(f"Error retrieving previous recommendations for UID {uid}: {e}")
+        return []
+
+
+def get_artworks():
+    try:
+        db = firestore.client()
+        artworks_ref = db.collection('artworks')
+        artworks = artworks_ref.stream()  # Récupère tous les documents de la collection
+
+        result = []
+        for artwork in artworks:
+            artwork_data = artwork.to_dict()
+            artwork_data['id'] = artwork.id  # Inclure l'ID du document si nécessaire
+            result.append(artwork_data)
+
+        print(f"Successfully retrieved {len(result)} artworks.")
+        return result
+    except Exception as e:
+        print(f"Error retrieving artworks: {e}")
+        return []
+
+
+def maj_recommendation(uid, previous_recommendations, new_recommendations):
+
+    # Ajouter les nouvelles recommandations aux anciennes
+    updated_reco = previous_recommendations[-2:] + [art['id'] for art in new_recommendations]
+    
+    
+    # Limiter à un nombre raisonnable de recommandations (par exemple 20)
+    # plus tard on mettra 20 
+    
+    # Mettre à jour Firestore avec les nouvelles recommandations
+    db = firestore.client()
+    doc_ref = db.collection('accounts').document(uid)
+    doc_ref.update({'previous_reco': updated_reco})
+    
+    return updated_reco
+
+
+def get_recommendations():
+    uid = "FG0cnXK99MNiIXSKdFOmToDVxym1"
+    
+    user_preferences = get_user_preferences(uid)
+    previous_recommendations = get_previous_recommendations(uid)
+    user_collection = get_user_collection(uid)
+    artworks = get_artworks()
+
+    new_artworks = [art for art in artworks if art["id"] not in previous_recommendations and art["id"] not in user_collection]
+    
+    
+    scored_artworks = []
+    for art in new_artworks:
+        style = art["movement"]  
+        score = user_preferences.get(style, 0) 
+        scored_artworks.append({"art": art, "score": score})
+     
+
+    recommendations = []
+
+    relevant_artworks = sorted(scored_artworks, key=lambda x: x["score"], reverse=True)
+    recommendations.extend([art["art"] for art in relevant_artworks[:2]])  # 2 œuvres pertinentes
+    print("new_artworks")
+    for art in new_artworks:
+        print(art["id"])
+    
+    print("Recommandations pertinentes")
+    for art in recommendations:
+        print(art["id"])
+
+    recommendationsid = [art["id"] for art in recommendations]  # Liste des IDs des recommandations
+    
+    new_artworks2 = [art for art in new_artworks if art["id"] not in recommendationsid]
+    
+    # Recommandations créatives (exploration de nouveaux styles)
+    unexplored_movements = [movement for movement, score in user_preferences.items() if score <= 0.3]
+    print("Mouvements peu explorés")
+    for movement in unexplored_movements:
+        print(movement)
+    for art in new_artworks2:
+        print(art["movement"])
+    creative_artworks = [art for art in new_artworks2 if art["movement"] in unexplored_movements]
+    if creative_artworks:
+        recommendations.append(random.choice(creative_artworks))  # 1 œuvre aléatoire d'un mouvement peu exploré
+
+    print("new_artworks2")
+    for art in new_artworks2:  
+        print(art["id"])
+
+    print("Recommandations all")
+    for art in recommendations:
+        print(art["id"])
+        
+
+    maj_recommendation(uid, previous_recommendations, recommendations)
+
+    return 0
 
 if __name__ == '__main__':
     configure_adb_reverse()

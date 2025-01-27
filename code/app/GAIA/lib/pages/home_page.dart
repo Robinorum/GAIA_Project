@@ -79,9 +79,16 @@ class _HomeContentState extends State<HomeContent> {
   @override
   void initState() {
     super.initState();
-    _recommendedArtworks = ArtworkService().fetchArtworks();
-    _recommendedMuseums = MuseumService().fetchMuseums();
+    _loadRecommendations();
     _getUserLocation();
+  }
+
+  // Fonction pour charger les recommandations
+  void _loadRecommendations() {
+    setState(() {
+      _recommendedArtworks = ArtworkService().fetchArtworks();
+      _recommendedMuseums = MuseumService().fetchMuseums();
+    });
   }
 
   Future<void> _getUserLocation() async {
@@ -108,148 +115,156 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-@override
-Widget build(BuildContext context) {
-  final user = Provider.of<UserProvider>(context).user;
+  @override
+  Widget build(BuildContext context) {
+    final user = Provider.of<UserProvider>(context).user;
 
-return Padding(
-  padding: const EdgeInsets.all(16.0),
-  child: ListView(
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ListView(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Hi, ${user != null && user.username.isNotEmpty ? user.username : "Guest"} 👋',
-                style: const TextStyle(
-                    fontSize: 24, fontWeight: FontWeight.bold),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hi, ${user != null && user.username.isNotEmpty ? user.username : "Guest"} 👋',
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    "Explore the museum",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              const Text(
-                "Explore the museum",
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _loadRecommendations,
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProfilePage()),
+                      );
+                    },
+                    child: CircleAvatar(
+                      radius: 24,
+                      backgroundImage: NetworkImage(
+                        user?.id ?? 'https://example.com/photo.jpg',
+                      ),
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ProfilePage()),
-              );
-            },
-            child: CircleAvatar(
-              radius: 24,
-              backgroundImage:
-                  NetworkImage(user?.id ?? 'https://example.com/photo.jpg'),
+          const SizedBox(height: 24),
+          TextField(
+            decoration: InputDecoration(
+              hintText: "Search places",
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.grey[200],
             ),
-          )
-        ],
-      ),
-      const SizedBox(height: 24),
-      TextField(
-        decoration: InputDecoration(
-          hintText: "Search places",
-          prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
           ),
-          filled: true,
-          fillColor: Colors.grey[200],
-        ),
-      ),
-      const SizedBox(height: 24),
-      const Text(
-        "Recommended Artworks",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(height: 16),
-      SizedBox(
-        height: 250,
-        child: FutureBuilder<List<Artwork>>(
-          future: _recommendedArtworks,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  "Error loading artworks: ${snapshot.error}",
-                  style: const TextStyle(color: Colors.red),
-                ),
-              );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text("No artworks found."));
-            }
+          const SizedBox(height: 24),
+          const Text(
+            "Recommended Artworks",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 250,
+            child: FutureBuilder<List<Artwork>>(
+              future: _recommendedArtworks,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      "Error loading artworks: ${snapshot.error}",
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No artworks found."));
+                }
 
-            final artworks = snapshot.data!;
-            return PageView.builder(
-              itemCount: artworks.length,
-              itemBuilder: (context, index) {
-                final artwork = artworks[index];
-                return _buildCarouselItem(artwork.toImage(), artwork.title);
-              },
-            );
-          },
-        ),
-      ),
-      const SizedBox(height: 24),
-      const Text(
-        "Recommended Museums",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      const SizedBox(height: 16),
-      SizedBox(
-        height: 280,
-        child: FutureBuilder<List<Museum>>(
-          future: _recommendedMuseums,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  "Error loading museums: ${snapshot.error}",
-                  style: const TextStyle(color: Colors.red),
-                ),
-              );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text("No museums found."));
-            }
-
-            final museums = snapshot.data!;
-            return PageView.builder(
-              itemCount: museums.length,
-              itemBuilder: (context, index) {
-                final museum = museums[index];
-                final distance = _currentLocation != null
-                    ? _calculateDistance(
-                        _currentLocation!,
-                        LatLng(
-                          museum.location.latitude,
-                          museum.location.longitude,
-                        ),
-                      )
-                    : null;
-                return _buildCarouselItemWithDistance(
-                  museum.toImage(),
-                  museum.title,
-                  distance,
+                final artworks = snapshot.data!;
+                return PageView.builder(
+                  itemCount: artworks.length,
+                  itemBuilder: (context, index) {
+                    final artwork = artworks[index];
+                    return _buildCarouselItem(artwork.toImage(), artwork.title);
+                  },
                 );
               },
-            );
-          },
-        ),
-      ),
-    ],
-  ),
-);
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            "Recommended Museums",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 280,
+            child: FutureBuilder<List<Museum>>(
+              future: _recommendedMuseums,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      "Error loading museums: ${snapshot.error}",
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No museums found."));
+                }
 
-}
+                final museums = snapshot.data!;
+                return PageView.builder(
+                  itemCount: museums.length,
+                  itemBuilder: (context, index) {
+                    final museum = museums[index];
+                    final distance = _currentLocation != null
+                        ? _calculateDistance(
+                            _currentLocation!,
+                            LatLng(
+                              museum.location.latitude,
+                              museum.location.longitude,
+                            ),
+                          )
+                        : null;
+                    return _buildCarouselItemWithDistance(
+                      museum.toImage(),
+                      museum.title,
+                      distance,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
 
   Widget _buildCarouselItem(Image image, String title) {
