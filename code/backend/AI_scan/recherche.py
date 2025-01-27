@@ -18,20 +18,32 @@ def get_embedding(image, model, device):
         embedding = embedding / embedding.norm(dim=-1, keepdim=True)
     return embedding.squeeze().cpu().numpy()
 
-def find_most_similar_image(image, index, titles, artists, model, device, k=1, threshold=0.60):
-    """
-    Trouve les images les plus similaires dans l'index FAISS.
-    Si la distance minimale dépasse le seuil, renvoie "Pas de correspondance".
-    """
-    input_embedding = get_embedding(image, model, device).astype("float32")
+
+
+
+
+def find_most_similar_image(image, index, titles, artists, model, device, k=1, threshold=0.75):
+
+    results = []
     
-    # Recherche dans l'index avec FAISS
-    distances, indices = index.search(np.array([input_embedding]), k)
+    for angle in [0, 90, 180, 270]:
+        
+        rotated_image = image.rotate(angle, expand=True)
+        
+        input_embedding = get_embedding(rotated_image, model, device).astype("float32")
+        distances, indices = index.search(np.array([input_embedding]), k)
+        
+        
+        results.append({
+            'distance': distances[0][0],
+            'indices': indices[0],
+            'angle': angle
+        })
     
-    # Vérifier la distance minimale
-    if distances[0][0] < threshold:
-        return False
+    results.sort(key=lambda x: x['distance'], reverse=True)
+    print(f"Meilleure distance: {results[0]['distance']} (angle: {results[0]['angle']}°)")
     
-    # Retourner les informations de l'image la plus proche
-    closest_image_info = [(titles[i], artists[i]) for i in indices[0]]
-    return closest_image_info
+    if results[0]['distance'] > threshold:
+        return [(titles[i], artists[i]) for i in results[0]['indices']]
+    
+    return False
