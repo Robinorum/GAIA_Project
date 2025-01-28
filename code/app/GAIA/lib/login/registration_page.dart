@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import 'profilage_page.dart';
+import 'package:GAIA/provider/userProvider.dart';
+import 'package:GAIA/model/appUser.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -41,8 +44,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               obscureText: true,
               decoration: const InputDecoration(hintText: "Password"),
             ),
-            const SizedBox(
-                height: 16), // Add spacing between input fields and button
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
                 if (emailController.text.isNotEmpty &&
@@ -128,6 +130,31 @@ class _RegistrationPageState extends State<RegistrationPage> {
         'profilePhoto': '',
         'preferences': {'movements': {}},
       });
+
+      // Fetch the created user's data
+      final userDoc = await _firestore
+          .collection('accounts')
+          .doc(userCredential.user?.uid)
+          .get();
+      final userData = userDoc.data() as Map<String, dynamic>;
+
+      // Create AppUser object
+      AppUser user = AppUser(
+        id: userCredential.user!.uid,
+        email: userData['email'],
+        username: userData['username'],
+        googleAccount: userData['googleAccount'] ?? false,
+        liked: List<String>.from(userData['liked'] ?? []),
+        collection: List<String>.from(userData['collection'] ?? []),
+        visitedMuseum: userData['visitedMuseum'] ?? '',
+        profilePhoto: userData['profilePhoto'] ?? '',
+        preferences: userData['preferences'] ?? {},
+        movements: Map<String, double>.from(
+            userData['preferences']?['movements'] ?? {}),
+      );
+
+      // Add the user to the UserProvider
+      Provider.of<UserProvider>(context, listen: false).setUser(user);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("User registered successfully!")),
