@@ -93,6 +93,15 @@ class _HomeContentState extends State<HomeContent> {
     });
   }
 
+  void _updateRecommendations() {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final uid = user?.id ?? "default_uid"; // Use a default UID if user is null
+    setState(() {
+      RecommendationService().majRecommendations(uid);
+      _recommendedArtworks = RecommendationService().fetchRecommendations(uid);
+    });
+  }
+
   Future<void> _getUserLocation() async {
     try {
       final position = await Geolocator.getCurrentPosition(
@@ -147,7 +156,8 @@ class _HomeContentState extends State<HomeContent> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.refresh),
-                    onPressed: _loadRecommendations,
+                    onPressed: _updateRecommendations,
+                    color: Colors.blue,
                   ),
                   InkWell(
                     onTap: () {

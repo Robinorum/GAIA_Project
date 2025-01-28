@@ -146,6 +146,21 @@ def get_artwork_by_id(artwork_id):
         return jsonify({"success": True, "data": artwork_data})
     else:
         return jsonify({"success": False, "message": "Artwork not found"}), 404
+    
+@app.route("/api/artworks/", methods=["GET"])
+def get_all_artworks():
+    db = firestore.client()
+
+    artworks_ref = db.collection('artworks')
+    artworks = artworks_ref.stream()
+
+    all_artworks = []
+    for artwork in artworks:
+        artwork_data = artwork.to_dict()
+        artwork_data['id'] = artwork.id
+        all_artworks.append(artwork_data)
+
+    return jsonify({"success": True, "data": all_artworks})
 
 if __name__ == "__main__":
     app.run(debug=True, port=5002)

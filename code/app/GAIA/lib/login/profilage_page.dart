@@ -2,7 +2,6 @@ import 'package:GAIA/services/profilage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/artwork_service.dart';
 import '../model/artwork.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:GAIA/pages/home_page.dart';
@@ -25,7 +24,7 @@ class _ProfilagePageState extends State<ProfilagePage> {
   @override
   void initState() {
     super.initState();
-    _recommendedArtworks = ArtworkService().fetchArtworks();
+    _recommendedArtworks = ProfilageService().fetchArtworks();
     _auth = FirebaseAuth.instance;
     _firebaseUser = _auth.currentUser;
   }

@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:GAIA/model/artwork.dart';
+
 import '../services/http_service.dart';
 
 class ProfilageService {
@@ -17,6 +21,22 @@ class ProfilageService {
       throw Exception("Missing artworkId or uid");
     } else {
       throw Exception("Failed to update brands");
+    }
+  }
+
+  // Fonction pour récupérer les artworks d'un utilisateur
+  Future<List<Artwork>> fetchArtworks() async {
+    final response =
+        await _httpService.get("http://127.0.0.1:5000/profiling/api/artworks");
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body)['data'];
+
+      return data.map((item) {
+        return Artwork.fromJson(item);
+      }).toList();
+    } else {
+      throw Exception("Failed to load artworks: ${response.statusCode}");
     }
   }
 

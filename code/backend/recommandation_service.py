@@ -31,7 +31,6 @@ def get_user_preferences(uid):
 
     
 def get_previous_recommendations(uid):
-
     try:
         db = firestore.client()
         doc_ref = db.collection('accounts').document(uid)
@@ -87,7 +86,6 @@ def get_artworks():
             artwork_data = artwork.to_dict()
             artwork_data['id'] = artwork.id  # Inclure l'ID du document si nécessaire
             result.append(artwork_data)
-
         print(f"Successfully retrieved {len(result)} artworks.")
         return result
     except Exception as e:
@@ -96,11 +94,18 @@ def get_artworks():
 
 
 def update(uid, previous_recommendations, new_recommendations):
-
+    """
+    Met à jour les recommandations dans Firestore en ajoutant de nouvelles recommandations.
+    
+    Args:
+        uid (str): ID de l'utilisateur.
+        previous_recommendations (list): Liste des recommandations précédentes.
+        new_recommendations (list): Liste des nouvelles recommandations.
+    """
     # Ajouter les nouvelles recommandations aux anciennes
     updated_reco = previous_recommendations[-2:] + [art['id'] for art in new_recommendations]
     
-    
+    new_recommendationsid= [art['id'] for art in new_recommendations]
     # Limiter à un nombre raisonnable de recommandations (par exemple 20)
     # plus tard on mettra 20 
     
@@ -108,66 +113,56 @@ def update(uid, previous_recommendations, new_recommendations):
     db = firestore.client()
     doc_ref = db.collection('accounts').document(uid)
     doc_ref.update({'previous_reco': updated_reco})
+    doc_ref.update({'reco': new_recommendationsid})
     
     return updated_reco
 
-@app.route("/api/recom_maj/", methods=["POST"])
+@app.route("/api/recom_maj/<uid>", methods=["GET"])
 def maj_recommendation(uid):
-    
-    user_preferences = get_user_preferences(uid)
-    previous_recommendations = get_previous_recommendations(uid)
-    user_collection = get_user_collection(uid)
-    artworks = get_artworks()
+    try:
+        user_preferences = get_user_preferences(uid)
+        previous_recommendations = get_previous_recommendations(uid)
+        user_collection = get_user_collection(uid)
+        artworks = get_artworks()
 
-    new_artworks = [art for art in artworks if art["id"] not in previous_recommendations and art["id"] not in user_collection]
-    
-    
-    scored_artworks = []
-    for art in new_artworks:
-        style = art["movement"]  
-        score = user_preferences.get(style, 0) 
-        scored_artworks.append({"art": art, "score": score})
-     
-
-    recommendations = []
-
-    relevant_artworks = sorted(scored_artworks, key=lambda x: x["score"], reverse=True)
-    recommendations.extend([art["art"] for art in relevant_artworks[:2]])  # 2 œuvres pertinentes
-    print("new_artworks")
-    for art in new_artworks:
-        print(art["id"])
-    
-    print("Recommandations pertinentes")
-    for art in recommendations:
-        print(art["id"])
-
-    recommendationsid = [art["id"] for art in recommendations]  # Liste des IDs des recommandations
-    
-    new_artworks2 = [art for art in new_artworks if art["id"] not in recommendationsid]
-    
-    # Recommandations créatives (exploration de nouveaux styles)
-    unexplored_movements = [movement for movement, score in user_preferences.items() if score <= 0.3]
-    print("Mouvements peu explorés")
-    for movement in unexplored_movements:
-        print(movement)
-    for art in new_artworks2:
-        print(art["movement"])
-    creative_artworks = [art for art in new_artworks2 if art["movement"] in unexplored_movements]
-    if creative_artworks:
-        recommendations.append(random.choice(creative_artworks))  # 1 œuvre aléatoire d'un mouvement peu exploré
-
-    print("new_artworks2")
-    for art in new_artworks2:  
-        print(art["id"])
-
-    print("Recommandations all")
-    for art in recommendations:
-        print(art["id"])
+        new_artworks = [art for art in artworks if art["id"] not in previous_recommendations and art["id"] not in user_collection]
         
+        scored_artworks = []
+        for art in new_artworks:
+            style = art["movement"]  
+            score = user_preferences.get(style, 0) 
+            scored_artworks.append({"art": art, "score": score})
+        
+        recommendations = []
+        relevant_artworks = sorted(scored_artworks, key=lambda x: x["score"], reverse=True)
+        recommendations.extend([art["art"] for art in relevant_artworks[:2]])
 
-    update(uid, previous_recommendations, recommendations)
+        recommendationsid = [art["id"] for art in recommendations]
+        
+        new_artworks2 = [art for art in new_artworks if art["id"] not in recommendationsid]
+        
+        unexplored_movements = [movement for movement, score in user_preferences.items() if score <= 0.3]
 
-    return 0
+        creative_artworks = [art for art in new_artworks2 if art["movement"] in unexplored_movements]
+
+        if creative_artworks:
+            creative_artwork = random.choice(creative_artworks)
+            recommendations.append(creative_artwork)
+        elif new_artworks2:
+            random_artwork = random.choice(new_artworks2)
+            recommendations.append(random_artwork)
+
+        update(uid, previous_recommendations, recommendations)
+        return {
+            "success": True,
+            "recommendations": [art["id"] for art in recommendations]
+        }, 200
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }, 500
+
 
 @app.route("/api/recom_get/<uid>", methods=["GET"])
 def get_recommendations(uid):
@@ -204,24 +199,22 @@ def get_recommendations(uid):
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-@app.route("/api/artworks", methods=["GET"])
 def get_artworks():
-    # Connexion à Firestore
-    db = firestore.client()
+    try:
+        db = firestore.client()
+        artworks_ref = db.collection('artworks')
+        artworks = artworks_ref.stream() 
+        result = []
+        for artwork in artworks:
+            artwork_data = artwork.to_dict()
+            artwork_data['id'] = artwork.id
+            result.append(artwork_data)
 
-    # Récupérer toutes les œuvres d'art depuis la collection 'artworks'
-    artworks_ref = db.collection('artworks')
-    artworks = artworks_ref.stream()
-
-    # Préparer une liste des artworks
-    artworks_list = []
-    for artwork in artworks:
-        artwork_data = artwork.to_dict()
-        artwork_data['id'] = artwork.id  # Ajouter l'ID de l'œuvre d'art
-
-        artworks_list.append(artwork_data)
-
-    return jsonify({"success": True, "data": artworks_list})
+        print(f"Successfully retrieved {len(result)} artworks.")
+        return result
+    except Exception as e:
+        print(f"Error retrieving artworks: {e}")
+        return []
 
 if __name__ == "__main__":
     app.run(debug=True, port=5003)
