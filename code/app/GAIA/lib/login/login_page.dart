@@ -1,8 +1,11 @@
+import 'package:GAIA/model/appUser.dart';
+import 'package:GAIA/provider/userProvider.dart';
 import 'package:GAIA/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 import 'registration_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,16 +18,13 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Contrôleurs pour les champs de saisie
   final TextEditingController identifierController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  // Firebase instances
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  // Gestion des erreurs d'affichage
   String? emailError;
   String? passwordError;
 
@@ -41,7 +41,6 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 30),
-            // Champ pour l'email ou le nom d'utilisateur
             TextFormField(
               controller: identifierController,
               decoration: InputDecoration(
@@ -51,7 +50,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 16),
-            // Champ pour le mot de passe
             TextFormField(
               controller: passwordController,
               obscureText: true,
@@ -62,13 +60,11 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Bouton de connexion
             ElevatedButton(
-              onPressed: () => login(),
+              onPressed: () => login(context),
               child: const Text("Connexion"),
             ),
             const SizedBox(height: 20),
-            // Lien vers la page d'inscription
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -80,27 +76,34 @@ class _LoginPageState extends State<LoginPage> {
               child: const Text("Créer un compte"),
             ),
             const SizedBox(height: 20),
-            // Connexion avec Google
             ElevatedButton.icon(
               icon: const Icon(Icons.login),
               label: const Text("Connexion avec Google"),
               onPressed: () async {
-                await signInWithGoogle();
+                await signInWithGoogle(context);
               },
             ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                );
+              },
+              child: const Text("Dev Mode !!!"),
+            )
           ],
         ),
       ),
     );
   }
 
-  /// Fonction de connexion avec email ou nom d'utilisateur
-  Future<void> login() async {
+  Future<void> login(BuildContext context) async {
     String email;
     if (identifierController.text.contains('@')) {
       email = identifierController.text;
     } else {
-      final userCollection = _firestore.collection('users');
+      final userCollection = _firestore.collection('accounts');
       final snapshot = await userCollection
           .where('username', isEqualTo: identifierController.text)
           .get();
@@ -116,18 +119,45 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      // Authentification Firebase
       final UserCredential userCredential =
           await _auth.signInWithEmailAndPassword(
         email: email,
         password: passwordController.text,
       );
 
-      // Navigation vers la page d'accueil
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
+      final User? firebaseUser = userCredential.user;
+      if (firebaseUser != null) {
+        final userDoc =
+            await _firestore.collection('accounts').doc(firebaseUser.uid).get();
+
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+
+          // Créer un objet AppUser
+          AppUser user = AppUser(
+            id: firebaseUser.uid,
+            email: userData['email'],
+            username: userData['username'],
+            googleAccount: userData['googleAccount'] ?? false,
+            liked: List<String>.from(userData['liked'] ?? []),
+            collection: List<String>.from(userData['collection'] ?? []),
+            visitedMuseum: userData['visitedMuseum'] ?? '',
+            profilePhoto: userData['profilePhoto'] ?? '',
+            preferences: userData['preferences'] ?? {},
+            movements: Map<String, double>.from(
+                userData['preferences']?['movement'] ?? {}),
+          );
+
+          // Ajouter l'utilisateur au UserProvider
+          Provider.of<UserProvider>(context, listen: false).setUser(user);
+
+          // Redirection vers la page d'accueil
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        }
+      }
     } catch (e) {
       setState(() {
         passwordError = "Erreur de connexion : $e";
@@ -135,12 +165,10 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  /// Fonction de connexion avec Google
-  Future<void> signInWithGoogle() async {
+  Future<void> signInWithGoogle(BuildContext context) async {
     try {
-      // Authentification Google
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return; // L'utilisateur a annulé la connexion
+      if (googleUser == null) return;
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
@@ -153,25 +181,43 @@ class _LoginPageState extends State<LoginPage> {
       final UserCredential userCredential =
           await _auth.signInWithCredential(credential);
 
-      // Ajouter l'utilisateur à Firestore s'il s'agit de la première connexion
-      final userDoc = await _firestore
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .get();
+      final User? firebaseUser = userCredential.user;
 
-      if (!userDoc.exists) {
-        await _firestore.collection('users').doc(userCredential.user?.uid).set({
-          'email': userCredential.user?.email,
-          'username': userCredential.user?.displayName,
-          'googleAccount': true,
-        });
+      if (firebaseUser != null) {
+        final userDoc =
+            await _firestore.collection('accounts').doc(firebaseUser.uid).get();
+
+        if (!userDoc.exists) {
+          await _firestore.collection('accounts').doc(firebaseUser.uid).set({
+            'email': firebaseUser.email,
+            'username': firebaseUser.displayName,
+            'googleAccount': true,
+          });
+        }
+
+        final userData = userDoc.data() as Map<String, dynamic>;
+
+        AppUser user = AppUser(
+          id: firebaseUser.uid,
+          email: userData['email'],
+          username: userData['username'],
+          googleAccount: true,
+          liked: List<String>.from(userData['liked'] ?? []),
+          collection: List<String>.from(userData['collection'] ?? []),
+          visitedMuseum: userData['visitedMuseum'] ?? '',
+          profilePhoto: userData['profilePhoto'] ?? '',
+          preferences: userData['preferences'] ?? {},
+          movements: Map<String, double>.from(
+              userData['preferences']?['movement'] ?? {}),
+        );
+
+        Provider.of<UserProvider>(context, listen: false).setUser(user);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
       }
-
-      // Redirection vers la page d'accueil
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erreur de connexion avec Google : $e")),
