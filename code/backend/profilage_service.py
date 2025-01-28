@@ -1,12 +1,11 @@
 from flask import Flask, request, jsonify
 from collections import Counter
-from common import initialize_firebase
-from firebase_admin import firestore
-import requests
+from firebase_admin import firestore, credentials
+import firebase_admin
 
 app = Flask(__name__)
-initialize_firebase()
-
+cred = credentials.Certificate('logintest-3342f-firebase-adminsdk-ahw4r-a935280551.json')
+firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 @app.route("/api/profilage/", methods=["POST"])

@@ -7,7 +7,7 @@ import 'package:GAIA/pages/profile_page.dart';
 import 'package:GAIA/pages/quests_page.dart';
 import '../component/custom_bottom_nav.dart';
 import '../scan/camera_screen.dart';
-import '../services/artwork_service.dart';
+import '../services/recommendation_service.dart';
 import '../services/museum_service.dart';
 import '../model/artwork.dart';
 import '../model/museum.dart';
@@ -85,9 +85,10 @@ class _HomeContentState extends State<HomeContent> {
 
   // Fonction pour charger les recommandations
   void _loadRecommendations() {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final uid = user?.id ?? "default_uid"; // Use a default UID if user is null
     setState(() {
-      _recommendedArtworks =
-          ArtworkService().fetchRecommendations("Bnv2PMDRbeVvYzeLdAB4A01gDPW2");
+      _recommendedArtworks = RecommendationService().fetchRecommendations(uid);
       _recommendedMuseums = MuseumService().fetchMuseums();
     });
   }

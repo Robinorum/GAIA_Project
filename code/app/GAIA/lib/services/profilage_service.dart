@@ -1,21 +1,15 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import '../services/http_service.dart';
 
 class ProfilageService {
-  final String baseUrl = "http://127.0.0.1:5000/api/profilage/";
+  final HttpService _httpService = HttpService();
+  final String baseUrl = "http://127.0.0.1:5000/profiling/api/profilage/";
 
   // Fonction pour modifier les marques d'un utilisateur
   Future<String> modifyBrands(String artworkId, String uid) async {
-    final response = await http.post(
-      Uri.parse(baseUrl),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'artworkId': artworkId,
-        'uid': uid,
-      }),
-    );
+    final response = await _httpService.post(baseUrl, body: {
+      'artworkId': artworkId,
+      'uid': uid,
+    });
 
     if (response.statusCode == 200) {
       return "Brands updated successfully";
@@ -26,5 +20,5 @@ class ProfilageService {
     }
   }
 
-  // Ajouter d'autres méthodes si nécessaire (ex. récupérer le profil, etc.)
+  // Ajouter d'autres méthodes si nécessaire
 }

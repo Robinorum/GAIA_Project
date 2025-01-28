@@ -1,7 +1,5 @@
 from flask import Flask, request, jsonify
 import requests
-import jwt
-from jwt.exceptions import InvalidTokenError
 
 import firebase_admin
 from firebase_admin import credentials, auth
@@ -17,7 +15,7 @@ MICROSERVICES = {
     "profiling": "http://localhost:5002",
     "reco": "http://localhost:5003",
     "museum": "http://localhost:5004",
-    "artwork": "http://localhost:5005",
+    #"artwork": "http://localhost:5005",
 }
 
 def verify_firebase_jwt(token):
