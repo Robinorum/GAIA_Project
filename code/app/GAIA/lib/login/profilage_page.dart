@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../model/artwork.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:GAIA/pages/home_page.dart';
+import '../services/recommendation_service.dart';
 
 class ProfilagePage extends StatefulWidget {
   const ProfilagePage({super.key});
@@ -42,6 +43,10 @@ class _ProfilagePageState extends State<ProfilagePage> {
       angle = 0;
 
       if (currentIndex == 5) {
+        final user = Provider.of<UserProvider>(context, listen: false).user;
+        final uid = user?.id ?? 'Default-uid';
+        print(uid);
+        RecommendationService().majRecommendations(uid);
         _recommendedArtworks.then((artworks) async {
           Navigator.pushReplacement(
             context,

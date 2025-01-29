@@ -1,16 +1,15 @@
 import 'dart:convert';
-
 import 'package:GAIA/model/artwork.dart';
-
-import '../services/http_service.dart';
+import 'package:GAIA/services/http_service.dart';
+import 'package:GAIA/config/ip_config.dart';
 
 class ProfilageService {
   final HttpService _httpService = HttpService();
-  final String baseUrl = "http://127.0.0.1:5000/profiling/api/profilage/";
 
   // Fonction pour modifier les marques d'un utilisateur
   Future<String> modifyBrands(String artworkId, String uid) async {
-    final response = await _httpService.post(baseUrl, body: {
+    final response =
+        await _httpService.post(IpConfig.profilingProfilage, body: {
       'artworkId': artworkId,
       'uid': uid,
     });
@@ -26,8 +25,7 @@ class ProfilageService {
 
   // Fonction pour récupérer les artworks d'un utilisateur
   Future<List<Artwork>> fetchArtworks() async {
-    final response =
-        await _httpService.get("http://127.0.0.1:5000/profiling/api/artworks");
+    final response = await _httpService.get(IpConfig.profilingArtworks);
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body)['data'];

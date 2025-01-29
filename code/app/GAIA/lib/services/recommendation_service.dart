@@ -1,15 +1,15 @@
 import 'dart:convert';
+import 'package:GAIA/config/ip_config.dart';
 import 'package:GAIA/model/artwork.dart';
 import '../services/http_service.dart';
 
 class RecommendationService {
-  final String baseUrl = "http://127.0.0.1:5000/reco/api";
   final HttpService _httpService = HttpService();
 
   Future<List<Artwork>> fetchRecommendations(String uid) async {
     try {
       final response = await _httpService.get(
-        '$baseUrl/recom_get/$uid',
+        '${IpConfig.recoGet}$uid',
       );
 
       if (response.statusCode == 200) {
@@ -32,7 +32,7 @@ class RecommendationService {
 
   Future<List<Artwork>> majRecommendations(String uid) async {
     try {
-      final response = await _httpService.get('$baseUrl/recom_maj/$uid');
+      final response = await _httpService.get('${IpConfig.recoMaj}$uid');
 
       if (response.statusCode == 200) {
         throw Exception("Recommendations updated successfully");

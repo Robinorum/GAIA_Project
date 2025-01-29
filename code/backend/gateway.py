@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
-
+from config import MICROSERVICES
 import firebase_admin
 from firebase_admin import credentials, auth
 
@@ -9,14 +9,6 @@ cred = credentials.Certificate("logintest-3342f-firebase-adminsdk-ahw4r-a9352805
 firebase_admin.initialize_app(cred)
 
 app = Flask(__name__)
-
-MICROSERVICES = {
-    "scan": "http://localhost:5001",
-    "profiling": "http://localhost:5002",
-    "reco": "http://localhost:5003",
-    "museum": "http://localhost:5004",
-    #"artwork": "http://localhost:5005",
-}
 
 def verify_firebase_jwt(token):
     try:

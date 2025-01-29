@@ -1,13 +1,12 @@
 import 'dart:convert';
 import '../model/museum.dart';
 import 'http_service.dart';
+import 'package:GAIA/config/ip_config.dart';
 
 class MuseumService {
-  final String baseUrl = "http://127.0.0.1:5000/museum/api/museums";
-
   Future<List<Museum>> fetchMuseums() async {
     HttpService httpService = HttpService();
-    final response = await httpService.get(baseUrl);
+    final response = await httpService.get(IpConfig.museumEndpoint);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = jsonDecode(response.body)['data'];
