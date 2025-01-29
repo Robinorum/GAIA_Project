@@ -1,4 +1,4 @@
-import 'package:GAIA/pages/detail_page.dart';
+import 'package:GAIA/pages/detail_artwork_page.dart';
 import 'package:flutter/material.dart';
 import '../services/artwork_service.dart';
 import '../model/artwork.dart';
@@ -53,7 +53,7 @@ class _CollectionPageState extends State<CollectionPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          DetailPage(artwork: artworks[index]),
+                          DetailArtworkPage(artwork: artworks[index]),
                     ),
                   );
                 },

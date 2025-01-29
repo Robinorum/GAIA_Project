@@ -5,6 +5,7 @@ import 'package:GAIA/pages/collection_page.dart';
 import 'package:GAIA/pages/map_page.dart';
 import 'package:GAIA/pages/profile_page.dart';
 import 'package:GAIA/pages/quests_page.dart';
+import 'package:GAIA/pages/detail_artwork_page.dart';
 import '../component/custom_bottom_nav.dart';
 import '../scan/camera_screen.dart';
 import '../services/recommendation_service.dart';
@@ -13,6 +14,7 @@ import '../model/artwork.dart';
 import '../model/museum.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import '../pages/detail_museum_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -278,8 +280,28 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  Widget _buildCarouselItem(Image image, String title) {
-    return Column(
+Widget _buildCarouselItem(Image image, String title) {
+  return InkWell(
+    onTap: () {
+      // Find the artwork that matches the title in the artworks list
+      final artworks = _recommendedArtworks as Future<List<Artwork>>;
+      artworks.then((artworksList) {
+        final selectedArtwork = artworksList.firstWhere(
+          (artwork) => artwork.title == title,
+          orElse: () => throw Exception('Artwork not found'),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailArtworkPage(
+              artwork: selectedArtwork,
+            ),
+          ),
+        );
+      });
+    },
+    child: Column(
       children: [
         Container(
           height: 200,
@@ -305,15 +327,36 @@ class _HomeContentState extends State<HomeContent> {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildCarouselItemWithDistance(
-      Image image, String title, double? distance) {
-    return Column(
+Widget _buildCarouselItemWithDistance(Image image, String title, double? distance) {
+  return InkWell(
+    onTap: () {
+      // Find the museum that matches the title in the museums list
+      final museums = _recommendedMuseums as Future<List<Museum>>;
+      museums.then((museumsList) {
+        final selectedMuseum = museumsList.firstWhere(
+          (museum) => museum.title == title,
+          orElse: () => throw Exception('Museum not found'),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailMuseumPage(
+              museum: selectedMuseum,
+              distance: distance ?? 0,
+            ),
+          ),
+        );
+      });
+    },
+    child: Column(
       children: [
         Container(
-          height: 180, // Reduced from 200 to 180 to leave more space for text
+          height: 180,
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
@@ -347,6 +390,7 @@ class _HomeContentState extends State<HomeContent> {
             ),
           ),
       ],
-    );
-  }
+    ),
+  );
+}
 }

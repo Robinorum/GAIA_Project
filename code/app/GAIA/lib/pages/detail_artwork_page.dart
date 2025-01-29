@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:GAIA/model/artwork.dart';
 
-class DetailPage extends StatelessWidget {
+class DetailArtworkPage extends StatelessWidget {
   final Artwork artwork;
 
-  const DetailPage({Key? key, required this.artwork}) : super(key: key);
+  const DetailArtworkPage({Key? key, required this.artwork}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
