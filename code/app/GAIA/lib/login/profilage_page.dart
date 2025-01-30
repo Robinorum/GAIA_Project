@@ -34,9 +34,6 @@ class _ProfilagePageState extends State<ProfilagePage> {
     setState(() {
       if (direction == 'right') {
         ProfilageService().modifyBrands(artworkId, _firebaseUser!.uid);
-        print("Liké (id): $artworkId");
-      } else if (direction == 'left') {
-        print("Pas liké (id): $artworkId");
       }
       currentIndex++;
       offset = 0;
@@ -45,9 +42,8 @@ class _ProfilagePageState extends State<ProfilagePage> {
       if (currentIndex == 5) {
         final user = Provider.of<UserProvider>(context, listen: false).user;
         final uid = user?.id ?? 'Default-uid';
-        print(uid);
         RecommendationService().majRecommendations(uid);
-        _recommendedArtworks.then((artworks) async {
+        _recommendedArtworks.then((_) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const HomePage()),
@@ -72,10 +68,8 @@ class _ProfilagePageState extends State<ProfilagePage> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(
-              child: Text(
-                "Erreur lors du chargement: ${snapshot.error}",
-                style: const TextStyle(color: Colors.red),
-              ),
+              child: Text("Erreur lors du chargement: ${snapshot.error}",
+                  style: const TextStyle(color: Colors.red)),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text("Aucune œuvre trouvée."));
@@ -103,8 +97,7 @@ class _ProfilagePageState extends State<ProfilagePage> {
                         });
                       }
                     },
-                    child:
-                        buildArtworkCard(artworks[currentIndex], offset, angle),
+                    child: buildArtworkCard(artworks[currentIndex], offset, angle),
                   ),
                 )
               : const Center(child: Text("Chargement..."));
@@ -112,49 +105,65 @@ class _ProfilagePageState extends State<ProfilagePage> {
       ),
     );
   }
+Widget buildArtworkCard(Artwork artwork, double offset, double angle) {
+  double opacity = 1 - (offset.abs() / 300).clamp(0.0, 1.0);
 
-  Widget buildArtworkCard(Artwork artwork, double offset, double angle) {
-    return Transform.translate(
+  return Opacity(
+    opacity: opacity,
+    child: Transform.translate(
       offset: Offset(offset, 0),
       child: Transform.rotate(
         angle: angle * 3.14 / 180,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300), // Durée de l'animation
+          key: ValueKey(artwork.id), // Ajout d’une Key unique
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                height: 400,
-                width: 300,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: RepaintBoundary( // Ajout de RepaintBoundary
+                  child: Container(
+                    height: 400,
+                    width: 300,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
-                  image: DecorationImage(
-                    image: artwork.toImage().image,
-                    fit: BoxFit.cover,
+                    child: FadeInImage(
+                      placeholder: AssetImage('assets/placeholder.png'),
+                      image: artwork.toImage().image,
+                      fit: BoxFit.cover,
+                      // Remplacement du placeholder par un CircularProgressIndicator
+                      fadeInCurve: Curves.easeIn,
+                      fadeInDuration: const Duration(milliseconds: 300),
+                      imageErrorBuilder: (context, error, stackTrace) {
+                        return Center(child: Icon(Icons.error, color: Colors.red, size: 50));
+                      },
+                      // Affichage du CircularProgressIndicator pendant le chargement
+                      placeholderErrorBuilder: (context, error, stackTrace) {
+                        return Center(child: CircularProgressIndicator());
+                      },
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
               Text(
                 artwork.title,
-                style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               Text(
                 'Type: ${artwork.movement}',
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey),
+                style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey),
               ),
               const SizedBox(height: 20),
               Row(
@@ -166,15 +175,15 @@ class _ProfilagePageState extends State<ProfilagePage> {
                   ),
                   IconButton(
                     onPressed: () => handleSwipe('right', artwork.id),
-                    icon: const Icon(Icons.favorite,
-                        color: Colors.green, size: 40),
+                    icon: const Icon(Icons.favorite, color: Colors.green, size: 40),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
