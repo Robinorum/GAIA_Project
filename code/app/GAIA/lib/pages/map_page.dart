@@ -112,6 +112,7 @@ class _MapPageState extends State<MapPage> {
                     center: _currentLocation,
                     zoom: 5.0,
                     maxZoom: 17.0,
+                    minZoom: 2.0,
                     interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                   ),
                   children: [

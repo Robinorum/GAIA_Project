@@ -32,11 +32,11 @@ class Museum {
       required this.style,
       required this.title});
 
-  factory Museum.fromJson(Map<String, dynamic> json, String id) {
+  factory Museum.fromJson(Map<String, dynamic> json) {
     // Utilisation de l'id passé en paramètre (clé principale)
 
     return Museum(
-      id: id, // Affectation de l'id
+      id: json['id'],
       city: json['city'],
       country: json['country'],
       location: GeoPoint.fromJson(json['location']),
