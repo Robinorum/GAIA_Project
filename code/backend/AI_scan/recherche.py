@@ -22,7 +22,7 @@ def get_embedding(image, model, device):
 
 
 
-def find_most_similar_image(image, index, titles, artists, model, device, k=1, threshold=0.75):
+def find_most_similar_image(image, index, model, device, k=1, threshold=0.75):
 
     results = []
     
@@ -44,6 +44,6 @@ def find_most_similar_image(image, index, titles, artists, model, device, k=1, t
     print(f"Meilleure distance: {results[0]['distance']} (angle: {results[0]['angle']}°)")
     
     if results[0]['distance'] > threshold:
-        return [(titles[i], artists[i]) for i in results[0]['indices']]
+        return [results[0]['indices']]
     
     return False

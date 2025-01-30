@@ -11,8 +11,11 @@ class DetailArtworkPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(artwork.title),
+        actions: [
+          HeartIcon(), // Utilisation d'un HeartIcon pour gérer l'état du cœur
+        ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,6 +43,35 @@ class DetailArtworkPage extends StatelessWidget {
               style: const TextStyle(fontSize: 16),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class HeartIcon extends StatefulWidget {
+  @override
+  _HeartIconState createState() => _HeartIconState();
+}
+
+class _HeartIconState extends State<HeartIcon> {
+  bool isLiked = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isLiked = !isLiked;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(8.0),
+        child: Icon(
+          isLiked ? Icons.favorite : Icons.favorite_border,
+          color: isLiked ? Colors.pink : Colors.black,
+          size: 35,
         ),
       ),
     );

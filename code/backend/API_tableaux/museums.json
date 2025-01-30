@@ -78,6 +78,79 @@
       "city": "Milan",
       "location": { "latitude": 45.4642, "longitude": 9.1700 },
       "place": "Santa Maria delle Grazie, Milan"
+    },
+
+    "11": {
+    "title": "Uffizi Gallery",
+    "style": "Renaissance",
+    "country": "Italy",
+    "city": "Florence",
+    "location": { "latitude": 43.7687, "longitude": 11.2560 },
+    "place": "Uffizi Gallery, Florence"
+    },
+
+    "12": {
+      "title": "Museo del Prado",
+      "style": "Various (Renaissance, Baroque, Romanticism)",
+      "country": "Spain",
+      "city": "Madrid",
+      "location": { "latitude": 40.4138, "longitude": -3.6921 },
+      "place": "Museo del Prado, Madrid"
+    },
+
+    "13": {
+    "title": "Tula State Museum of Fine Arts",
+    "style": "Various (Russian Realism, Impressionism, Modern Art)",
+    "country": "Russia",
+    "city": "Tula",
+    "location": { "latitude": 54.2048, "longitude": 37.6112 },
+    "place": "Tula State Museum of Fine Arts, Tula"
+    },
+
+    "14": {
+    "title": "Smithsonian American Art Museum",
+    "style": "Various (American Realism, Modernism, Contemporary Art)",
+    "country": "USA",
+    "city": "Washington D.C.",
+    "location": { "latitude": 38.8977, "longitude": -77.0257 },
+    "place": "Smithsonian American Art Museum, Washington D.C."
+    },
+
+    "15": {
+    "title": "Fine Arts Museums of San Francisco",
+    "style": "Various (Renaissance, Baroque, Impressionism, Modern Art)",
+    "country": "USA",
+    "city": "San Francisco",
+    "location": { "latitude": 37.7715, "longitude": -122.4687 },
+    "place": "Fine Arts Museums of San Francisco, San Francisco"
+    },
+
+    "16": {
+    "title": "National Marc Chagall Museum",
+    "style": "Modern Art, Surrealism",
+    "country": "France",
+    "city": "Nice",
+    "location": { "latitude": 43.7150, "longitude": 7.2706 },
+    "place": "National Marc Chagall Museum, Nice"
+    },
+
+    "17": {
+    "title": "The Phillips Collection",
+    "style": "Modern Art, Impressionism, Contemporary Art",
+    "country": "USA",
+    "city": "Washington D.C.",
+    "location": { "latitude": 38.9118, "longitude": -77.0469 },
+    "place": "The Phillips Collection, Washington D.C."
+    },
+
+    "18": {
+    "title": "Wallace Collection",
+    "style": "Baroque, Rococo, Renaissance",
+    "country": "United Kingdom",
+    "city": "London",
+    "location": { "latitude": 51.5163, "longitude": -0.1547 },
+    "place": "Wallace Collection, London"
     }
+
   }
   

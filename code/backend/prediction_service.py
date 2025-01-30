@@ -15,8 +15,6 @@ app = Flask(__name__)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model, preprocess = clip.load("ViT-B/32", device=device)
 index = faiss.read_index("AI_scan/index.faiss")
-with open("AI_scan/titles_artists.pkl", "rb") as f:
-    titles, artists = pickle.load(f)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -28,11 +26,11 @@ def predict():
     image = Image.open(io.BytesIO(file.read())).convert("RGB")
 
     # Recherche des images similaires
-    similar_images = find_most_similar_image(image, index, titles, artists, model, device, k=1)
+    index_similar_images = find_most_similar_image(image, index, model, device, k=1)
 
     # Renvoie la réponse avec les informations de l'image la plus proche
     result = {
-        "prediction": similar_images[0] if similar_images else {"error": "Aucune image similaire trouvee"}
+        "index_prediction": index_similar_images[0] if index_similar_images else {"error": "Aucune image similaire trouvee"}
     }
     return jsonify(result)
 
@@ -55,7 +53,7 @@ def get_embedding(image, model, device):
 
 
 
-def find_most_similar_image(image, index, titles, artists, model, device, k=1, threshold=0.75):
+def find_most_similar_image(image, index, model, device, k=1, threshold=0.75):
 
     results = []
     
@@ -77,7 +75,7 @@ def find_most_similar_image(image, index, titles, artists, model, device, k=1, t
     print(f"Meilleure distance: {results[0]['distance']} (angle: {results[0]['angle']}°)")
     
     if results[0]['distance'] > threshold:
-        return [(titles[i], artists[i]) for i in results[0]['indices']]
+        return [results[0]['indices']]
     
     return False
 

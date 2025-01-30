@@ -36,4 +36,14 @@ class ArtworkService {
       throw Exception("Failed to load recommendations: ${response.statusCode}");
     }
   }
+
+
+
+  Future<Artwork?> getArtworkById(String id) async {
+    final artworks = await fetchArtworks();
+    return artworks.firstWhere(
+      (artwork) => artwork.id == id,
+      
+    );
+  }
 }

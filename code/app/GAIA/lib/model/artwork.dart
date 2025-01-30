@@ -1,19 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-class GeoPoint {
-  final double latitude;
-  final double longitude;
-
-  GeoPoint({required this.latitude, required this.longitude});
-
-  factory GeoPoint.fromJson(Map<String, dynamic> json) {
-    return GeoPoint(
-      latitude: json['latitude'],
-      longitude: json['longitude'],
-    );
-  }
-}
 
 class Artwork {
   final String id; // Ajout de l'id
@@ -22,8 +9,7 @@ class Artwork {
   final String date;
   final String description;
   final String image;
-  final GeoPoint location;
-  final String place;
+  final String idMuseum;
   final String movement;
 
   Artwork({
@@ -33,8 +19,7 @@ class Artwork {
     required this.date,
     required this.description,
     required this.image,
-    required this.location,
-    required this.place,
+    required this.idMuseum,
     required this.movement,
   });
 
@@ -46,10 +31,7 @@ class Artwork {
       date: json['date'] ?? 'Unknown Date',
       description: json['description'] ?? 'No description',
       image: json['image'] ?? '',
-      location: json['location'] != null
-          ? GeoPoint.fromJson(json['location'])
-          : GeoPoint(latitude: 0.0, longitude: 0.0),
-      place: json['place'] ?? 'Unknown Place',
+      idMuseum: json['id_museum'] ?? 'Unknown idMuseum',
       movement: json['movement'] ?? 'Unknown Movement',
     );
   }

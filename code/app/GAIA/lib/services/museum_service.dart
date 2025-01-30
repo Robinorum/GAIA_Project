@@ -6,7 +6,7 @@ import 'package:GAIA/config/ip_config.dart';
 class MuseumService {
   Future<List<Museum>> fetchMuseums() async {
     HttpService httpService = HttpService();
-    final response = await httpService.get("http://127.0.0.1:5000/museum/api/museums");
+    final response = await httpService.get(IpConfig.museumEndpoint);
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);

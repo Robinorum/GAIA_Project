@@ -45,7 +45,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       final XFile photo = await _cameraController.takePicture();
-      var uri = Uri.parse('http://127.0.0.1:5000/predict');
+      var uri = Uri.parse('http://127.0.0.1:5000/scan/predict');
       var request = http.MultipartRequest('POST', uri);
       request.files.add(await http.MultipartFile.fromPath('file', photo.path));
 
@@ -54,13 +54,13 @@ class _CameraScreenState extends State<CameraScreen> {
         final respStr = await response.stream.bytesToString();
         final data = json.decode(respStr);
 
-        if (data['prediction'] != null && data['prediction'] is List) {
+        if (data['index_prediction'] != null && data['index_prediction'] is List) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => PredictionScreen(
                 imagePath: photo.path,
-                prediction: List<String>.from(data['prediction']),
+                index: List<String>.from(data['index_prediction']),
               ),
             ),
           );
