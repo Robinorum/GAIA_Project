@@ -1,7 +1,9 @@
 import 'package:GAIA/pages/detail_artwork_page.dart';
 import 'package:flutter/material.dart';
-import '../services/artwork_service.dart';
+import '../services/user_service.dart';
 import '../model/artwork.dart';
+import 'package:GAIA/provider/userProvider.dart';
+import 'package:provider/provider.dart';
 
 class CollectionPage extends StatefulWidget {
   const CollectionPage({Key? key}) : super(key: key);
@@ -15,8 +17,10 @@ class _CollectionPageState extends State<CollectionPage> {
 
   @override
   void initState() {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final uid = user?.id ?? "default_uid"; // Use a default UID if user is null
     super.initState();
-    _artworks = ArtworkService().fetchArtworks();
+    _artworks = UserService().fetchCollection(uid);
   }
 
   @override
