@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'prediction_screen.dart';
+import '../services/prediction_service.dart';
 
 class CameraScreen extends StatefulWidget {
   @override
@@ -10,6 +11,7 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
+  final PredictionService _predictionService = PredictionService();
   late CameraController _cameraController;
   late List<CameraDescription> _cameras;
   bool _isCameraInitialized = false;
@@ -45,49 +47,37 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       final XFile photo = await _cameraController.takePicture();
-      var uri = Uri.parse('http://127.0.0.1:5000/scan/predict');
-      var request = http.MultipartRequest('POST', uri);
-      request.files.add(await http.MultipartFile.fromPath('file', photo.path));
+      final Map<String, dynamic> artworkData = await _predictionService.predictArtwork(photo.path);
 
-      var response = await request.send();
-      if (response.statusCode == 200) {
-        final respStr = await response.stream.bytesToString();
-        final data = json.decode(respStr);
-
-        if (data['index_prediction'] != null && data['index_prediction'] is List) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PredictionScreen(
-                imagePath: photo.path,
-                index: List<String>.from(data['index_prediction']),
-              ),
+      if (artworkData.isNotEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PredictionScreen(
+              imagePath: photo.path,
+              artworkData: artworkData,
             ),
-          );
-        } else {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text('Aucune correspondance trouvée'),
-                content: Text('Aucune œuvre d\'art reconnue dans l\'image.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        }
+          ),
+        );
       } else {
-        print('Erreur lors de l\'envoi de la photo');
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Aucune correspondance trouvée'),
+            content: Text('Aucune œuvre d\'art reconnue dans l\'image.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
       }
     } catch (e) {
-      print('Erreur lors de la capture de la photo : $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors de la capture: $e')),
+      );
     }
   }
 

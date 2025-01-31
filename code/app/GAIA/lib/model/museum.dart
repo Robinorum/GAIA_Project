@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 
 class GeoPoint {
   final double latitude;
@@ -19,6 +20,7 @@ class Museum {
   final String city;
   final String country;
   final GeoPoint location;
+  final String image;
   final String place;
   final String style;
   final String title;
@@ -28,6 +30,7 @@ class Museum {
       required this.city,
       required this.country,
       required this.location,
+      required this.image,
       required this.place,
       required this.style,
       required this.title});
@@ -40,13 +43,25 @@ class Museum {
       city: json['city'],
       country: json['country'],
       location: GeoPoint.fromJson(json['location']),
+      image: json['image'],
       place: json['place'],
       style: json['style'],
       title: json['title'],
     );
   }
 
-  Image toImage() {
-    return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover);
+    Image toImage() {
+    if (image.isEmpty) {
+      return Image.asset('assets/images/placeholder.png',
+          fit: BoxFit.cover); // Image par défaut si vide
+    }
+
+    try {
+      final decodedBytes = base64Decode(image);
+      return Image.memory(decodedBytes, fit: BoxFit.cover);
+    } catch (e) {
+      return Image.asset('assets/images/placeholder.png',
+          fit: BoxFit.cover); // Image par défaut en cas d'erreur de décodage
+    }
   }
 }
