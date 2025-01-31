@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../config/ip_config.dart';
 import 'http_service.dart';
 
 class PredictionService {

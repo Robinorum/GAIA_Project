@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'prediction_screen.dart';
 import '../services/prediction_service.dart';
 

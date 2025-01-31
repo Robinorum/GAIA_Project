@@ -7,13 +7,11 @@ from torchvision import transforms
 import numpy as np
 from PIL import Image
 import io
-import pickle
 import torch
 import clip
 import faiss
 #from AI_scan.recherche import find_most_similar_image
 import firebase_admin
-import random
 from flask import Flask, jsonify
 from firebase_admin import credentials, firestore
 
