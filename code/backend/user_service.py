@@ -1,5 +1,4 @@
 import firebase_admin
-import random
 from flask import Flask, jsonify
 from firebase_admin import credentials, firestore
 
@@ -9,6 +8,22 @@ cred = credentials.Certificate('logintest-3342f-firebase-adminsdk-ahw4r-a9352805
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
+
+@app.route("/api/state_brand/<userId>/<artworkId>", methods=["GET"])
+def state_brand_byId(userId, artworkId):
+    db = firestore.client()
+    doc_ref = db.collection('accounts').document(userId)
+    doc = doc_ref.get()    
+    if doc.exists:
+        data = doc.to_dict()
+        brands = data.get('brands', [])
+        
+        if artworkId in brands:
+            print("tableau liké")
+            return jsonify({"result": True}), 200
+    print("tableau non liké")
+    return jsonify({"result": False}), 200
+
 
 @app.route("/api/fetch_col/<uid>", methods=["GET"])
 def fetch_collection(uid):
@@ -31,12 +46,12 @@ def get_artworks():
     try:
         db = firestore.client()
         artworks_ref = db.collection('artworks')
-        artworks = artworks_ref.stream()  # Récupère tous les documents de la collection
+        artworks = artworks_ref.stream() 
 
         result = []
         for artwork in artworks:
             artwork_data = artwork.to_dict()
-            artwork_data['id'] = artwork.id  # Inclure l'ID du document si nécessaire
+            artwork_data['id'] = artwork.id  
             result.append(artwork_data)
         print(f"Successfully retrieved {len(result)} artworks.")
         return result
@@ -65,7 +80,6 @@ def get_collection(uid):
             print(f"Document for UID {uid} does not exist.")
             return []
     except Exception as e:
-        print(f"Error retrieving collection for UID {uid}: {e}", file=sys.stderr)
         return []
 
 

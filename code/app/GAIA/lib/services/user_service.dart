@@ -26,4 +26,24 @@ class UserService {
     }
   }
 
+Future <bool> fetchStateBrand(String userId, String artworkId) async {
+  try {
+    final response = await _httpService.get('${IpConfig.stateBrand}$userId/$artworkId');
+
+    if (response.statusCode == 200) {
+      // Parsing the response body to get the 'result' field
+      var jsonResponse = json.decode(response.body);
+      bool result = jsonResponse['result'];
+      
+      return result;
+    } else {
+      print("Erreur lors de la récupération de l'état de la marque: ${response.statusCode}");
+      return false;
+    }
+  } catch (e) {
+    print("Exception lors de la récupération de l'état de la marque: $e");
+    return false;
+  }
+}
+
 }
