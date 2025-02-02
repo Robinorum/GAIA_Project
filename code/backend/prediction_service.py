@@ -34,15 +34,15 @@ def predict():
     file = request.files['file']
     image = Image.open(io.BytesIO(file.read()))
 
-    # Trouver l'image la plus similaire
+    
     index_similar_image = find_most_similar_image(image, index, model, device)
 
     print(f"ID retourné par find_most_similar_image: {index_similar_image}")  # Debug
 
     if index_similar_image:
-        result = get_by_id(str(index_similar_image))  # ID unique au lieu d'une liste
-        print(f"Résultat de get_by_id: {result}")  # Debug
-        return jsonify(result)
+        result = get_by_id(str(index_similar_image))  #on recup le tableau ENTIER
+        print(f"Résultat de get_by_id: {result}")  
+        return jsonify(result) #on l'envoie au fichier prediction_service.dart
     
     return jsonify({"message": "Aucune correspondance trouvée"}), 404
 
@@ -97,19 +97,19 @@ def find_most_similar_image(image, index, model, device, k=1, threshold=0.75):
         
         results.append({
             'distance': distances[0][0],
-            'index': indices[0][0],  # Prendre seulement le premier élément
+            'index': indices[0][0],  
             'angle': angle
         })
 
-    # Trier par distance (meilleure correspondance en premier)
+    
     results.sort(key=lambda x: x['distance'])
 
     print(f"Meilleure distance: {results[0]['distance']} (angle: {results[0]['angle']}°)")
 
-    # Vérifier si la meilleure correspondance est suffisante
+    
     if results[0]['distance'] <= threshold:
         print(f"Index sélectionné: {results[0]['index']}")
-        return str(results[0]['index'])  # Retourne un seul ID sous forme de chaîne
+        return str(results[0]['index'])  #J'envoie l'index du tableau le plus similaire ICI
 
     return None  # Aucun résultat trouvé
 

@@ -47,12 +47,13 @@ class _CameraScreenState extends State<CameraScreen> {
       final XFile photo = await _cameraController.takePicture();
       final Map<String, dynamic> artworkData = await _predictionService.predictArtwork(photo.path);
 
+      //on utilise ICI les données (dans artworkData)
+
       if (artworkData.isNotEmpty) {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PredictionScreen(
-              imagePath: photo.path,
               artworkData: artworkData,
             ),
           ),

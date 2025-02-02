@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:GAIA/model/artwork.dart';
 
 class PredictionScreen extends StatefulWidget {
-  final String imagePath;
   final Map<String, dynamic> artworkData;
 
-  const PredictionScreen({required this.imagePath, required this.artworkData, Key? key}) : super(key: key);
+  const PredictionScreen({required this.artworkData, Key? key}) : super(key: key);
 
   @override
   _PredictionScreenState createState() => _PredictionScreenState();

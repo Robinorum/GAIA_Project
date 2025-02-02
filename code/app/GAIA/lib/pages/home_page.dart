@@ -85,15 +85,19 @@ class _HomeContentState extends State<HomeContent> {
     _getUserLocation();
   }
 
-  // Fonction pour charger les recommandations
-  void _loadRecommendations() {
-    final user = Provider.of<UserProvider>(context, listen: false).user;
-    final uid = user?.id ?? "default_uid"; // Use a default UID if user is null
-    setState(() {
-      _recommendedArtworks = RecommendationService().fetchRecommendations(uid);
-      _recommendedMuseums = MuseumService().fetchMuseums();
+void _loadRecommendations() {
+  final user = Provider.of<UserProvider>(context, listen: false).user;
+  final uid = user?.id ?? "default_uid";
+
+  setState(() {
+    _recommendedArtworks = RecommendationService().fetchRecommendations(uid);
+    _recommendedMuseums = MuseumService().fetchMuseums().then((museums) {
+      return museums;
     });
-  }
+  });
+}
+
+
 
   void _updateRecommendations() {
     final user = Provider.of<UserProvider>(context, listen: false).user;
@@ -104,20 +108,36 @@ class _HomeContentState extends State<HomeContent> {
     });
   }
 
-  Future<void> _getUserLocation() async {
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      setState(() {
-        _currentLocation = LatLng(position.latitude, position.longitude);
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error getting location: $e")),
-      );
-    }
+Future<void> _getUserLocation() async {
+  try {
+    final position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    setState(() {
+      _currentLocation = LatLng(position.latitude, position.longitude);
+    });
+
+    _sortAndUpdateMuseums();
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error getting location: $e")),
+    );
   }
+}
+
+
+void _sortAndUpdateMuseums() {
+  if (_currentLocation == null) return;
+
+  _recommendedMuseums.then((museums) {
+    final sortedMuseums = _sortMuseumsByDistance(museums);
+    setState(() {
+      _recommendedMuseums = Future.value(sortedMuseums);
+    });
+  });
+}
+
 
   double _calculateDistance(LatLng start, LatLng end) {
     return Geolocator.distanceBetween(
@@ -127,6 +147,27 @@ class _HomeContentState extends State<HomeContent> {
       end.longitude,
     );
   }
+
+
+List<Museum> _sortMuseumsByDistance(List<Museum> museums) {
+  if (_currentLocation == null) return museums;
+
+  museums.sort((a, b) {
+    double distanceA = _calculateDistance(
+      _currentLocation!,
+      LatLng(a.location.latitude, a.location.longitude),
+    );
+    double distanceB = _calculateDistance(
+      _currentLocation!,
+      LatLng(b.location.latitude, b.location.longitude),
+    );
+    return distanceA.compareTo(distanceB);
+  });
+
+  return museums;
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -238,6 +279,10 @@ class _HomeContentState extends State<HomeContent> {
             child: FutureBuilder<List<Museum>>(
               future: _recommendedMuseums,
               builder: (context, snapshot) {
+                if (_currentLocation == null) {
+                  return const Center(child: CircularProgressIndicator()); 
+                }
+
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
@@ -274,6 +319,8 @@ class _HomeContentState extends State<HomeContent> {
                 );
               },
             ),
+
+
           ),
         ],
       ),
