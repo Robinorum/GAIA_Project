@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:GAIA/provider/themeProvider.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:GAIA/login/login_page.dart';
+import 'package:GAIA/provider/userProvider.dart';
 
 class SettingsPage extends StatefulWidget {
   final Function(bool isDarkMode) onToggleTheme;
@@ -37,7 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 value: themeProvider.isDarkMode,
                 onChanged: (value) {
                   themeProvider.toggleTheme(value);
-                  widget.onToggleTheme(value);  // Passer le changement de thème
+                  widget.onToggleTheme(value); // Passer le changement de thème
                 },
               ),
             ),
@@ -80,6 +83,12 @@ class _SettingsPageState extends State<SettingsPage> {
               },
             ),
             _buildListTile(
+              title: "Change Username",
+              onTap: () {
+                // Navigation vers une page de modification du mot de passe
+              },
+            ),
+            _buildListTile(
               title: "Change Password",
               onTap: () {
                 // Navigation vers une page de modification du mot de passe
@@ -87,18 +96,17 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const Divider(),
 
-            // Bouton de réinitialisation des paramètres
+            // Bouton Log Out
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _isNotificationsEnabled = true;
-                  _selectedLanguage = 'English';
-                });
-                themeProvider.toggleTheme(false); // Réinitialiser le thème à clair
-                widget.onToggleTheme(false); // Passer le changement de thème à `false`
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Settings reset to default")),
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Provider.of<UserProvider>(context, listen: false).clearUser();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          const LoginPage(title: 'Login Page')),
+                  (Route<dynamic> route) => false,
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -108,8 +116,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text("Reset to Default",
-                  style: TextStyle(fontSize: 16)),
+              child: const Text("Log Out", style: TextStyle(fontSize: 16)),
             ),
           ],
         ),
