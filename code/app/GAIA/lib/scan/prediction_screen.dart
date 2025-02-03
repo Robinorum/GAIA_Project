@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:GAIA/model/artwork.dart';
 import 'package:GAIA/pages/home_page.dart';
+import 'package:GAIA/services/user_service.dart';
+import 'package:GAIA/provider/userProvider.dart';
+import 'package:provider/provider.dart';
+import 'package:GAIA/services/user_service.dart';
+
 
 class PredictionScreen extends StatefulWidget {
   final Map<String, dynamic> artworkData;
@@ -27,6 +32,8 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserProvider>(context).user;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Prédiction')),
       body: SingleChildScrollView(
@@ -81,13 +88,22 @@ class _PredictionScreenState extends State<PredictionScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // 🔄 Rediriger vers la page d'accueil après le clic
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-            (route) => false, // Supprime toutes les pages précédentes
+        onPressed: () async {
+          print(user!.id);
+          bool success = await UserService().addArtworks(user!.id, _artwork.id);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(success ? "Oeuvre ajoutée à la collection !" : "Erreur lors de l'ajout."),
+              backgroundColor: success ? Colors.green : Colors.red,
+            ),
           );
+          if (success) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+              (route) => false,
+            );
+          }
         },
         label: const Text("Ajouter à la collection"),
         icon: const Icon(Icons.add),

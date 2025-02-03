@@ -9,6 +9,27 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
+
+@app.route("/api/add_artwork/<userId>/<artworkId>", methods=["GET"])
+def add_brand_byId(userId, artworkId):
+    db = firestore.client()
+    doc_ref = db.collection('accounts').document(userId)
+    doc = doc_ref.get()
+    
+    if doc.exists:
+        data = doc.to_dict()
+        if 'collection' in data:
+            collection = data['collection']
+            if artworkId in collection:
+                return "Already in collection", 200
+            else:
+                collection.append(artworkId)
+            doc_ref.update({'collection': collection})
+        else:
+            doc_ref.update({'collection': [collection]})
+        return "Artwork liked successfully", 200
+    return f"Document for user {userId} does not exist.", 404
+
 @app.route("/api/state_brand/<userId>/<artworkId>", methods=["GET"])
 def state_brand_byId(userId, artworkId):
     db = firestore.client()

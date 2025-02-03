@@ -47,4 +47,21 @@ Future <bool> fetchStateBrand(String userId, String artworkId) async {
   }
 }
 
+Future <bool> addArtworks(String userId, String artworkId) async {
+  try {
+    final response = await _httpService.get('${IpConfig.addArtwork}$userId/$artworkId');
+
+    if (response.statusCode == 200) {
+      print("Ajout de l'oeuvre à la collection: ${response.statusCode}");
+      return true;
+    } else {
+      print("Erreur lors de l'ajout de l'oeuvre à la collection: ${response.statusCode}");
+      return false;
+    }
+  } catch (e) {
+    print("Exception lors de l'ajout de l'oeuvre à la collection: $e");
+    return false;
+  }
+
+}
 }
