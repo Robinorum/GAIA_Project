@@ -99,6 +99,7 @@ class _HeartIconState extends State<HeartIcon> {
     setState(() {
       isLiked = !isLiked;
     });
+    print(widget.idArtwork);
     ProfilageService().modifyBrands(widget.idArtwork, widget.uid);
   }
 

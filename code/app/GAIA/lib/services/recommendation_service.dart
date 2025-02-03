@@ -13,13 +13,17 @@ class RecommendationService {
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        
 
-        List<dynamic> recommendations = jsonResponse['data'];
+        List<dynamic> recommendations = jsonDecode(response.body)['data'];
 
-        return recommendations
-            .map((artworkJson) => Artwork.fromJson(artworkJson))
-            .toList();
+        print('Fetched recommendations IDs: ${recommendations.map((r) => r['id']).toList()}');
+        
+
+        return recommendations.map((artworkJson) {
+            return Artwork.fromJson(artworkJson);
+        }).toList();
+
       } else if (response.statusCode == 400) {
         throw Exception("Missing UID");
       } else {

@@ -109,9 +109,9 @@ def profilage(uid):
 
             # Récupérer les mouvements des tableaux aimés
             for brand in brands:
-                artwork = get_artwork_by_id(brand).get_json()
-                if 'data' in artwork and 'movement' in artwork['data']:
-                    movements.append(artwork['data']['movement'])
+                artwork = get_artwork_by_id(brand)
+                if artwork and "movement" in artwork:
+                    movements.append(artwork["movement"])
 
             # Calculer les ratios pour les mouvements aimés
             movement_counts = Counter(movements)
@@ -143,9 +143,7 @@ def get_artwork_by_id(artwork_id):
     if artwork.exists:
         artwork_data = artwork.to_dict()
         artwork_data['id'] = artwork.id
-        return jsonify({"success": True, "data": artwork_data})
-    else:
-        return jsonify({"success": False, "message": "Artwork not found"}), 404
+        return artwork_data
     
 @app.route("/api/artworks/", methods=["GET"])
 def get_all_artworks():

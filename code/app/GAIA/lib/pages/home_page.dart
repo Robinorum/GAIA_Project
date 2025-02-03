@@ -338,6 +338,8 @@ Widget _buildCarouselItem(Image image, String title) {
           orElse: () => throw Exception('Artwork not found'),
         );
 
+        print(selectedArtwork.id);
+
         Navigator.push(
           context,
           MaterialPageRoute(

@@ -34,6 +34,7 @@ Future <bool> fetchStateBrand(String userId, String artworkId) async {
       // Parsing the response body to get the 'result' field
       var jsonResponse = json.decode(response.body);
       bool result = jsonResponse['result'];
+      print("Récupération de l'état de la marque: $result");
       
       return result;
     } else {

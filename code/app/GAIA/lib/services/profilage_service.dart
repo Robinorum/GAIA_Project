@@ -14,6 +14,8 @@ class ProfilageService {
       'uid': uid,
     });
 
+    print("Id TRANSMIS: $artworkId");
+    print(response.statusCode);
     if (response.statusCode == 200) {
       return "Brands updated successfully";
     } else if (response.statusCode == 400) {

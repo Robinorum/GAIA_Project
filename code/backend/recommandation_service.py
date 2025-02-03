@@ -190,6 +190,7 @@ def get_recommendations(uid):
 
                 if artwork_doc.exists:
                     artwork_data = artwork_doc.to_dict()
+                    artwork_data["id"] = artwork_id  
                     recommendations.append(artwork_data)
 
             # Répondre avec les recommandations
