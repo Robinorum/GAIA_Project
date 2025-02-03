@@ -381,9 +381,11 @@ Widget _buildCarouselItem(Image image, String title) {
 }
 
 Widget _buildCarouselItemWithDistance(Image image, String title, double? distance) {
+  // Vérifie si la distance est supérieure à 5 km
+  bool isFar = distance != null && distance > 5000;
+
   return InkWell(
     onTap: () {
-      // Find the museum that matches the title in the museums list
       final museums = _recommendedMuseums as Future<List<Museum>>;
       museums.then((museumsList) {
         final selectedMuseum = museumsList.firstWhere(
@@ -419,7 +421,17 @@ Widget _buildCarouselItemWithDistance(Image image, String title, double? distanc
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: image,
+            child: isFar
+                ? ColorFiltered(
+                    colorFilter: const ColorFilter.matrix([
+                      0.3, 0.3, 0.3, 0, 0,  // Rouge
+                      0.3, 0.3, 0.3, 0, 0,  // Vert
+                      0.3, 0.3, 0.3, 0, 0,  // Bleu
+                      0,   0,   0,   1, 0,  // Alpha
+                    ]),
+                    child: image,
+                  )
+                : image, // Image normale si distance ≤ 5 km
           ),
         ),
         const SizedBox(height: 8),
@@ -434,7 +446,7 @@ Widget _buildCarouselItemWithDistance(Image image, String title, double? distanc
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              "${(distance / 1000).toStringAsFixed(2)} kilometers away",
+              "${(distance / 1000).toStringAsFixed(2)} km away",
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ),
@@ -442,4 +454,5 @@ Widget _buildCarouselItemWithDistance(Image image, String title, double? distanc
     ),
   );
 }
+
 }
