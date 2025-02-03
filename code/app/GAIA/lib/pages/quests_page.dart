@@ -46,7 +46,6 @@ class QuestsPage extends StatelessWidget {
   }
 }
 
-// 🟢 Carte pour les quêtes générales
 class QuestCard extends StatelessWidget {
   final String title;
   final String description;
@@ -73,7 +72,7 @@ class QuestCard extends StatelessWidget {
   }
 }
 
-// 🔒 Carte pour la quête verrouillée du musée
+
 class LockedQuestCard extends StatelessWidget {
   final String title;
 

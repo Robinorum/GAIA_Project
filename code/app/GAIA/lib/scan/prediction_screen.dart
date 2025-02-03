@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:GAIA/model/artwork.dart';
+import 'package:GAIA/pages/home_page.dart';
 
 class PredictionScreen extends StatefulWidget {
   final Map<String, dynamic> artworkData;
@@ -21,40 +22,41 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
   void _initializeArtwork() {
     _artwork = Artwork.fromJson(widget.artworkData);
+    print("Artwork ID : ${_artwork.id}");
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(title: const Text('Prédiction')),
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image scannée
-          Center(
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: _artwork.toImage(), // Utilisation de la méthode toImage()
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Prédiction')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image scannée
+            Center(
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: _artwork.toImage(),
+                ),
               ),
             ),
-          ),
-            
+            const SizedBox(height: 16),
             // Affichage des informations de l'œuvre
             Text(
               'Titre: ${_artwork.title}',
@@ -78,6 +80,19 @@ Widget build(BuildContext context) {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // 🔄 Rediriger vers la page d'accueil après le clic
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+            (route) => false, // Supprime toutes les pages précédentes
+          );
+        },
+        label: const Text("Ajouter à la collection"),
+        icon: const Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

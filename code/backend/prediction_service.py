@@ -39,12 +39,11 @@ def predict():
 
     print(f"ID retourné par find_most_similar_image: {index_similar_image}")  # Debug
 
-    if index_similar_image:
-        result = get_by_id(str(index_similar_image))  #on recup le tableau ENTIER
-        print(f"Résultat de get_by_id: {result}")  
-        return jsonify(result) #on l'envoie au fichier prediction_service.dart
     
-    return jsonify({"message": "Aucune correspondance trouvée"}), 404
+    result = get_by_id(str(index_similar_image))  #on recup le tableau ENTIER
+    return jsonify(result) #on l'envoie au fichier prediction_service.dart
+    
+   
 
 
 
@@ -79,6 +78,7 @@ def get_by_id(id):
 
         if doc.exists:
             data = doc.to_dict()
+            data['id'] = doc.id
             print(f"Artwork found: {data.get('title')}")
             return data
     except Exception as e:
@@ -87,7 +87,7 @@ def get_by_id(id):
 
 
 
-def find_most_similar_image(image, index, model, device, k=1, threshold=0.75):
+def find_most_similar_image(image, index, model, device, k=1, threshold=0.6):
     results = []
     
     for angle in [0, 90, 180, 270]:
@@ -107,7 +107,7 @@ def find_most_similar_image(image, index, model, device, k=1, threshold=0.75):
     print(f"Meilleure distance: {results[0]['distance']} (angle: {results[0]['angle']}°)")
 
     
-    if results[0]['distance'] <= threshold:
+    if results[0]['distance'] >= threshold:
         print(f"Index sélectionné: {results[0]['index']}")
         return str(results[0]['index'])  #J'envoie l'index du tableau le plus similaire ICI
 
