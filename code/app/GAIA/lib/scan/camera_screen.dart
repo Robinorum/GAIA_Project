@@ -49,7 +49,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
       //on utilise ICI les données (dans artworkData)
 
-      if (artworkData.isNotEmpty) {
+      if (artworkData['id'] != null) {
         Navigator.push(
           context,
           MaterialPageRoute(

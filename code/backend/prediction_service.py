@@ -7,7 +7,7 @@ from torchvision import transforms
 import numpy as np
 from PIL import Image
 import io
-import torch
+from torch import device, no_grad
 import clip
 import faiss
 #from AI_scan.recherche import find_most_similar_image
@@ -22,27 +22,36 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Initialisation du modèle
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = device("cpu")
 model, preprocess = clip.load("ViT-B/32", device=device)
+model.eval()
 index = faiss.read_index("AI_scan/index_artwork.faiss")
+faiss.omp_set_num_threads(1)
 
-@app.route('/predict', methods=['POST'])
+@app.route('/api/predict', methods=['POST'])
 def predict():
+
     if 'file' not in request.files:
         return jsonify({"error": "Aucune image envoyée"}), 400
 
-    file = request.files['file']
-    image = Image.open(io.BytesIO(file.read()))
+    try:
+        # Optimiser le chargement d'image
+        file = request.files['file']
+        with Image.open(io.BytesIO(file.read())) as image:
+            image.thumbnail((224, 224))  # Redimensionner avant traitement
+            result = find_most_similar_image(image, index, model, device)
 
-    
-    index_similar_image = find_most_similar_image(image, index, model, device)
-
-    print(f"ID retourné par find_most_similar_image: {index_similar_image}")  # Debug
-
-    
-    result = get_by_id(str(index_similar_image))  #on recup le tableau ENTIER
-    return jsonify(result) #on l'envoie au fichier prediction_service.dart
-    
+        
+        
+        
+        if result:
+            artwork_data = get_by_id(str(result))
+            return jsonify(artwork_data)
+            
+        return jsonify({"message": "Aucune correspondance trouvée"})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
    
 
 
@@ -56,10 +65,11 @@ preprocess = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
+
 def get_embedding(image, model, device):
     
     input_tensor = preprocess(image).unsqueeze(0).to(device)
-    with torch.no_grad():
+    with no_grad():
         embedding = model.encode_image(input_tensor)
         embedding = embedding / embedding.norm(dim=-1, keepdim=True)
     return embedding.squeeze().cpu().numpy()
@@ -84,8 +94,7 @@ def get_by_id(id):
     except Exception as e:
         print(f"Error retrieving artwork: {e}")
         return None
-
-
+    
 
 def find_most_similar_image(image, index, model, device, k=1, threshold=0.6):
     results = []
@@ -93,6 +102,7 @@ def find_most_similar_image(image, index, model, device, k=1, threshold=0.6):
     for angle in [0, 90, 180, 270]:
         rotated_image = image.rotate(angle, expand=True)
         input_embedding = get_embedding(rotated_image, model, device).astype("float32")
+        del rotated_image
         distances, indices = index.search(np.array([input_embedding]), k)
         
         results.append({
