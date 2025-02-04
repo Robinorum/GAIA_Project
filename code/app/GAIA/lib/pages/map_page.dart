@@ -20,12 +20,23 @@ class _MapPageState extends State<MapPage> {
   List<Museum> _museums = [];
   final MuseumService _museumService = MuseumService();
   StreamSubscription<Position>? _positionStreamSubscription;
+  final MapController _mapController = MapController();
+  double _markerSize = 40; // Default size for markers
 
   @override
   void initState() {
     super.initState();
     _getUserLocation();
     _loadMuseums();
+
+    // Listen for map zoom events to update icon sizes
+    _mapController.mapEventStream.listen((event) {
+  if (event is MapEventMove) {
+    setState(() {
+      _updateMarkerSize(_mapController.zoom);
+    });
+  }
+});
   }
 
   @override
@@ -83,6 +94,11 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  void _updateMarkerSize(double zoom) {
+    // Adjust size dynamically based on zoom level
+    _markerSize = (zoom * 3).clamp(20, 50); // Min 20px, Max 50px
+  }
+
   double _calculateDistance(LatLng start, LatLng end) {
     return Geolocator.distanceBetween(
       start.latitude,
@@ -104,58 +120,72 @@ class _MapPageState extends State<MapPage> {
           : _currentLocation == null
               ? const Center(child: Text("Could not determine location."))
               : FlutterMap(
+                  mapController: _mapController,
                   options: MapOptions(
                     center: _currentLocation,
                     zoom: 5.0,
                     maxZoom: 17.0,
                     minZoom: 2.0,
-                    interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+                    interactiveFlags:
+                        InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                   ),
                   children: [
                     TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'com.example.app',
                     ),
                     MarkerLayer(
                       markers: [
-                        // Marqueur pour l'utilisateur
+                        // Marqueur pour l'utilisateur (ajout d'un offset)
                         Marker(
                           point: _currentLocation!,
-                          builder: (ctx) => const Icon(
-                            Icons.my_location,
-                            color: Colors.blue,
-                            size: 40,
+                          width: _markerSize,
+                          height: _markerSize,
+                          builder: (ctx) => Transform.translate(
+                            offset: Offset(0, -_markerSize / 2), // Adjust to center
+                            child: Icon(
+                              Icons.man_rounded,
+                              color: Colors.blue,
+                              size: _markerSize,
+                            ),
                           ),
                         ),
-                        // Marqueurs pour les musées avec padding: EdgeInsets.zero
+                        // Marqueurs pour les musées avec réduction dynamique
                         ..._museums.map((museum) {
                           final distance = _calculateDistance(
                             _currentLocation!,
-                            LatLng(museum.location.latitude, museum.location.longitude),
+                            LatLng(museum.location.latitude,
+                                museum.location.longitude),
                           );
                           return Marker(
-                            point: LatLng(museum.location.latitude, museum.location.longitude),
-                            width: 40, // Taille exacte du pin pour éviter le padding
-                            height: 40, // Taille exacte du pin pour éviter le padding
-                            builder: (ctx) => GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailMuseumPage(
-                                      museum: museum,
-                                      distance: distance,
+                            point: LatLng(museum.location.latitude,
+                                museum.location.longitude),
+                            width: _markerSize,
+                            height: _markerSize,
+                            builder: (ctx) => Transform.translate(
+                              offset: Offset(0, -_markerSize / 2), // Adjust for centering
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DetailMuseumPage(
+                                        museum: museum,
+                                        distance: distance,
+                                      ),
                                     ),
+                                  );
+                                },
+                                child: Tooltip(
+                                  padding: EdgeInsets.zero,
+                                  message:
+                                      "${museum.title}\nDistance: ${(distance / 1000).toStringAsFixed(2)} km",
+                                  child: Icon(
+                                    Icons.location_on,
+                                    color: Colors.red,
+                                    size: _markerSize,
                                   ),
-                                );
-                              },
-                              child: Tooltip(
-                                padding: EdgeInsets.zero, // Supprime le padding du Tooltip
-                                message: "${museum.title}\nDistance: ${(distance / 1000).toStringAsFixed(2)} km",
-                                child: const Icon(
-                                  Icons.location_on,
-                                  color: Colors.red,
-                                  size: 40,
                                 ),
                               ),
                             ),
