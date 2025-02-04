@@ -68,11 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     },
                   ),
 
-                  // Titre "Profile" centré
-                  const Text(
-                    "Profile",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
+                  
 
                   // Icône réglages (settings)
                   IconButton(
