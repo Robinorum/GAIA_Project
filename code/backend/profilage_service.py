@@ -160,5 +160,28 @@ def get_all_artworks():
 
     return jsonify({"success": True, "data": all_artworks})
 
+
+@app.route("/api/top_brands/<uid>", methods=["GET"])
+def top_brands(uid):
+    db = firestore.client()
+    doc_ref = db.collection('accounts').document(uid)
+    doc = doc_ref.get()
+    
+    if doc.exists:
+        data = doc.to_dict()
+        if 'preferences' in data and 'movements' in data['preferences']:
+            movements = data['preferences']['movements']                
+            filtered_movements = {movement: score for movement, score in movements.items() if isinstance(score, (int, float)) and score > 0}
+            sorted_movements = sorted(filtered_movements.items(), key=lambda x: x[1], reverse=True)
+            top_3_movements = [movement for movement, score in sorted_movements[:3]]
+            
+            return jsonify({"top_movements": top_3_movements}), 200
+        
+        else:
+            return jsonify({"message": "No movements data available."}), 404
+    else:
+        return jsonify({"error": "User document not found."}), 404
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5002)

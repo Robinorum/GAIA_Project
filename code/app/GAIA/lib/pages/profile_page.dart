@@ -4,6 +4,7 @@ import 'package:GAIA/provider/userProvider.dart';
 import 'package:GAIA/pages/settings_page.dart';
 import 'package:GAIA/pages/museum_completion_page.dart';
 import 'package:GAIA/pages/profile_picture_page.dart';
+import 'package:GAIA/services/profilage_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -18,38 +19,16 @@ class _ProfilePageState extends State<ProfilePage> {
     final user = Provider.of<UserProvider>(context).user;
 
     // Données fictives pour tester
-    List<Map<String, dynamic>> favoriteMovements = [
-      {"name": "Renaissance", "color": Colors.amber},
-      {"name": "Modernism", "color": Colors.grey},
-      {"name": "Baroque", "color": Colors.brown},
-    ];
-
     List<Map<String, dynamic>> visitedMuseums = [
-      {
-        "name": "Museum of Modern Art",
-        "city": "New York",
-        "collected": 34,
-        "total": 34
-      },
+      {"name": "Museum of Modern Art", "city": "New York", "collected": 34, "total": 34},
       {"name": "Louvre Museum", "city": "Paris", "collected": 26, "total": 60},
       {"name": "The Met", "city": "New York", "collected": 7, "total": 28},
       {"name": "National Gallery", "city": "Oslo", "collected": 5, "total": 31},
-      {
-        "name": "Belvedere Museum",
-        "city": "Vienna",
-        "collected": 3,
-        "total": 29
-      },
-      {
-        "name": "Museo Reina Sofia",
-        "city": "Madrid",
-        "collected": 8,
-        "total": 112
-      },
+      {"name": "Belvedere Museum", "city": "Vienna", "collected": 3, "total": 29},
+      {"name": "Museo Reina Sofia", "city": "Madrid", "collected": 8, "total": 112},
     ];
 
-    visitedMuseums.sort((a, b) =>
-        (b["collected"] / b["total"]).compareTo(a["collected"] / a["total"]));
+    visitedMuseums.sort((a, b) => (b["collected"] / b["total"]).compareTo(a["collected"] / a["total"]));
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -67,9 +46,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.pop(context);
                     },
                   ),
-
-                  
-
                   // Icône réglages (settings)
                   IconButton(
                     icon: const Icon(Icons.settings, size: 28),
@@ -77,9 +53,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SettingsPage(
-                            onToggleTheme: (isDarkMode) {},
-                          ),
+                          builder: (context) => SettingsPage(onToggleTheme: (isDarkMode) {}),
                         ),
                       );
                     },
@@ -89,38 +63,36 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             // Header: Couverture + Photo de profil
             Stack(
-            children: [
-              const CircleAvatar(
-                radius: 50,
-                backgroundImage: NetworkImage(
-                    "https://i.pravatar.cc/150?img=12"), // Replace with real image
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ProfilePicturePage(),
+              children: [
+                const CircleAvatar(
+                  radius: 50,
+                  backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=12"), // Replace with real image
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfilePicturePage(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.blue,
+                        border: Border.all(color: Colors.white, width: 2),
                       ),
-                    );
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.blue,
-                      border: Border.all(color: Colors.white, width: 2),
+                      padding: const EdgeInsets.all(6),
+                      child: const Icon(Icons.edit, color: Colors.white, size: 20),
                     ),
-                    padding: const EdgeInsets.all(6),
-                    child: const Icon(Icons.edit, color: Colors.white, size: 20),
                   ),
                 ),
-              ),
-            ],
-          ),
-
+              ],
+            ),
             const SizedBox(height: 50),
             Text(
               user?.username ?? "Guest",
@@ -130,32 +102,56 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             const SizedBox(height: 10),
-
             // Stats
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildStatItem("5", "Museum Visited"),
+                _buildStatItem("6", "Museum Visited"),
                 _buildDivider(),
                 _buildStatItem("27", "Artwork Collected"),
               ],
             ),
-
             const SizedBox(height: 20),
-
             _buildSectionTitle("Favourite Movement"),
-            Column(
-              children: favoriteMovements
-                  .asMap()
-                  .entries
-                  .map((entry) => _buildMovementTile(
-                      entry.key + 1, entry.value["name"], entry.value["color"]))
-                  .toList(),
+            // Utilisation de FutureBuilder pour les mouvements favoris
+            FutureBuilder<List<String>>(
+              future: ProfilageService().fetchTopMovements(user!.id),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator(); // Chargement
+                } else if (snapshot.hasError) {
+                  return const Text("Failed to load movements"); // Erreur
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Text("No movements found"); // Aucune donnée
+                }
+
+                final movements = snapshot.data!;
+                final favoriteMovements = List.generate(movements.length, (index) {
+                  Color color;
+                  switch (index) {
+                    case 0:
+                      color = Colors.amber; // Gold
+                      break;
+                    case 1:
+                      color = Colors.grey; // Silver
+                      break;
+                    default:
+                      color = Colors.brown; // Bronze
+                  }
+                  return {"name": movements[index], "color": color};
+                });
+
+                return Column(
+                  children: favoriteMovements
+                      .asMap()
+                      .entries
+                      .map((entry) => _buildMovementTile(
+                          entry.key + 1, entry.value["name"] as String, entry.value["color"] as Color))
+                      .toList(),
+                );
+              },
             ),
-
             const SizedBox(height: 20),
-
-            
             _buildSectionTitle("Visited Museum"),
             Column(
               children: visitedMuseums
@@ -163,9 +159,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   .map((museum) => _buildMuseumProgress(museum))
                   .toList(),
             ),
-
             const SizedBox(height: 10),
-
             // "See All" Button
             TextButton(
               onPressed: () {
@@ -179,7 +173,6 @@ class _ProfilePageState extends State<ProfilePage> {
               child: const Text("See All",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
-
             const SizedBox(height: 20),
           ],
         ),

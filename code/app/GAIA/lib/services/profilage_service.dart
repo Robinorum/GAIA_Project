@@ -40,5 +40,28 @@ class ProfilageService {
     }
   }
 
+
+Future<List<String>> fetchTopMovements(String uid) async {
+    try {
+      final response = await _httpService.get('${IpConfig.topBrands}$uid');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        // Assurer que 'top_movements' est bien une liste de strings
+        if (data['top_movements'] != null && data['top_movements'] is List) {
+          return List<String>.from(data['top_movements']);
+        } else {
+          throw Exception("Invalid data format: top_movements is not a list");
+        }
+      } else if (response.statusCode == 404) {
+        throw Exception("User document not found or no movements data available.");
+      } else {
+        throw Exception("Failed to fetch top movements: ${response.statusCode}");
+      }
+    } catch (e) {
+      throw Exception("Error fetching top movements: $e");
+    }
+  }
+
   // Ajouter d'autres méthodes si nécessaire
 }
