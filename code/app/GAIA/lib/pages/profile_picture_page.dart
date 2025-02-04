@@ -57,18 +57,7 @@ class _ProfilePicturePageState extends State<ProfilePicturePage> {
                       const Icon(Icons.person, size: 80, color: Colors.grey),
                 ),
               ),
-              Positioned(
-                bottom: 5,
-                right: 5,
-                child: GestureDetector(
-                  onTap: () {},
-                  child: const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.blue,
-                    child: Icon(Icons.edit, color: Colors.white, size: 18),
-                  ),
-                ),
-              ),
+
             ],
           ),
           const SizedBox(height: 20),
