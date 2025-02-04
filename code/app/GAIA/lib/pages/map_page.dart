@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:GAIA/model/museum.dart';
 import 'package:GAIA/services/museum_service.dart';
+import 'package:GAIA/pages/detail_museum_page.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -16,15 +17,15 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   LatLng? _currentLocation;
   bool _loading = true;
-  List<Museum> _museums = []; // Liste pour stocker les musées
-  final MuseumService _museumService = MuseumService(); // Instance du service
+  List<Museum> _museums = [];
+  final MuseumService _museumService = MuseumService();
   StreamSubscription<Position>? _positionStreamSubscription;
 
   @override
   void initState() {
     super.initState();
-    _getUserLocation(); // Obtenir la position de l'utilisateur
-    _loadMuseums(); // Charger les musées dynamiquement
+    _getUserLocation();
+    _loadMuseums();
   }
 
   @override
@@ -36,7 +37,6 @@ class _MapPageState extends State<MapPage> {
   Future<void> _loadMuseums() async {
     try {
       final museums = await _museumService.fetchMuseums();
-
       setState(() {
         _museums = museums;
       });
@@ -53,7 +53,6 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _getUserLocation() async {
     try {
-      // Vérification et demande des permissions de localisation
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -62,14 +61,11 @@ class _MapPageState extends State<MapPage> {
         throw Exception("Location permissions are permanently denied.");
       }
 
-      // Obtention de la position actuelle
       final Position position = await Geolocator.getCurrentPosition();
-
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
       });
 
-      // Écouter les changements de position en temps réel
       _positionStreamSubscription =
           Geolocator.getPositionStream().listen((Position position) {
         setState(() {
@@ -117,8 +113,7 @@ class _MapPageState extends State<MapPage> {
                   ),
                   children: [
                     TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'com.example.app',
                     ),
                     MarkerLayer(
@@ -132,27 +127,36 @@ class _MapPageState extends State<MapPage> {
                             size: 40,
                           ),
                         ),
-                        // Marqueurs pour les musées
+                        // Marqueurs pour les musées avec padding: EdgeInsets.zero
                         ..._museums.map((museum) {
                           final distance = _calculateDistance(
                             _currentLocation!,
-                            LatLng(
-                              museum.location.latitude,
-                              museum.location.longitude,
-                            ),
+                            LatLng(museum.location.latitude, museum.location.longitude),
                           );
                           return Marker(
-                            point: LatLng(
-                              museum.location.latitude,
-                              museum.location.longitude,
-                            ),
-                            builder: (ctx) => Tooltip(
-                              message:
-                                  "${museum.title}\nDistance: ${(distance/1000).toStringAsFixed(2)} kilometers",
-                              child: const Icon(
-                                Icons.location_on,
-                                color: Colors.red,
-                                size: 40,
+                            point: LatLng(museum.location.latitude, museum.location.longitude),
+                            width: 40, // Taille exacte du pin pour éviter le padding
+                            height: 40, // Taille exacte du pin pour éviter le padding
+                            builder: (ctx) => GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DetailMuseumPage(
+                                      museum: museum,
+                                      distance: distance,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Tooltip(
+                                padding: EdgeInsets.zero, // Supprime le padding du Tooltip
+                                message: "${museum.title}\nDistance: ${(distance / 1000).toStringAsFixed(2)} km",
+                                child: const Icon(
+                                  Icons.location_on,
+                                  color: Colors.red,
+                                  size: 40,
+                                ),
                               ),
                             ),
                           );
