@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:GAIA/provider/userProvider.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:GAIA/pages/collection_page.dart';
 import 'package:GAIA/pages/map_page.dart';
@@ -48,19 +49,15 @@ class _HomePageState extends State<HomePage> {
           children: _pages,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
+      bottomNavigationBar: CustomBottomNav(
+        currentIndex: _currentIndex,
+        onTap: _onNavTap,
+        onScan: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => CameraScreen()),
           );
         },
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: _currentIndex,
-        onTap: _onNavTap,
       ),
     );
   }
@@ -85,19 +82,17 @@ class _HomeContentState extends State<HomeContent> {
     _getUserLocation();
   }
 
-void _loadRecommendations() {
-  final user = Provider.of<UserProvider>(context, listen: false).user;
-  final uid = user?.id ?? "default_uid";
+  void _loadRecommendations() {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final uid = user?.id ?? "default_uid";
 
-  setState(() {
-    _recommendedArtworks = RecommendationService().fetchRecommendations(uid);
-    _recommendedMuseums = MuseumService().fetchMuseums().then((museums) {
-      return museums;
+    setState(() {
+      _recommendedArtworks = RecommendationService().fetchRecommendations(uid);
+      _recommendedMuseums = MuseumService().fetchMuseums().then((museums) {
+        return museums;
+      });
     });
-  });
-}
-
-
+  }
 
   void _updateRecommendations() {
     final user = Provider.of<UserProvider>(context, listen: false).user;
@@ -108,36 +103,34 @@ void _loadRecommendations() {
     });
   }
 
-Future<void> _getUserLocation() async {
-  try {
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+  Future<void> _getUserLocation() async {
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
-    setState(() {
-      _currentLocation = LatLng(position.latitude, position.longitude);
-    });
+      setState(() {
+        _currentLocation = LatLng(position.latitude, position.longitude);
+      });
 
-    _sortAndUpdateMuseums();
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Error getting location: $e")),
-    );
+      _sortAndUpdateMuseums();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error getting location: $e")),
+      );
+    }
   }
-}
 
+  void _sortAndUpdateMuseums() {
+    if (_currentLocation == null) return;
 
-void _sortAndUpdateMuseums() {
-  if (_currentLocation == null) return;
-
-  _recommendedMuseums.then((museums) {
-    final sortedMuseums = _sortMuseumsByDistance(museums);
-    setState(() {
-      _recommendedMuseums = Future.value(sortedMuseums);
+    _recommendedMuseums.then((museums) {
+      final sortedMuseums = _sortMuseumsByDistance(museums);
+      setState(() {
+        _recommendedMuseums = Future.value(sortedMuseums);
+      });
     });
-  });
-}
-
+  }
 
   double _calculateDistance(LatLng start, LatLng end) {
     return Geolocator.distanceBetween(
@@ -148,26 +141,23 @@ void _sortAndUpdateMuseums() {
     );
   }
 
+  List<Museum> _sortMuseumsByDistance(List<Museum> museums) {
+    if (_currentLocation == null) return museums;
 
-List<Museum> _sortMuseumsByDistance(List<Museum> museums) {
-  if (_currentLocation == null) return museums;
+    museums.sort((a, b) {
+      double distanceA = _calculateDistance(
+        _currentLocation!,
+        LatLng(a.location.latitude, a.location.longitude),
+      );
+      double distanceB = _calculateDistance(
+        _currentLocation!,
+        LatLng(b.location.latitude, b.location.longitude),
+      );
+      return distanceA.compareTo(distanceB);
+    });
 
-  museums.sort((a, b) {
-    double distanceA = _calculateDistance(
-      _currentLocation!,
-      LatLng(a.location.latitude, a.location.longitude),
-    );
-    double distanceB = _calculateDistance(
-      _currentLocation!,
-      LatLng(b.location.latitude, b.location.longitude),
-    );
-    return distanceA.compareTo(distanceB);
-  });
-
-  return museums;
-}
-
-
+    return museums;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -280,7 +270,7 @@ List<Museum> _sortMuseumsByDistance(List<Museum> museums) {
               future: _recommendedMuseums,
               builder: (context, snapshot) {
                 if (_currentLocation == null) {
-                  return const Center(child: CircularProgressIndicator()); 
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -319,140 +309,138 @@ List<Museum> _sortMuseumsByDistance(List<Museum> museums) {
                 );
               },
             ),
-
-
           ),
         ],
       ),
     );
   }
 
-Widget _buildCarouselItem(Image image, String title) {
-  return InkWell(
-    onTap: () {
-      // Find the artwork that matches the title in the artworks list
-      final artworks = _recommendedArtworks as Future<List<Artwork>>;
-      artworks.then((artworksList) {
-        final selectedArtwork = artworksList.firstWhere(
-          (artwork) => artwork.title == title,
-          orElse: () => throw Exception('Artwork not found'),
-        );
+  Widget _buildCarouselItem(Image image, String title) {
+    return InkWell(
+      onTap: () {
+        // Find the artwork that matches the title in the artworks list
+        final artworks = _recommendedArtworks as Future<List<Artwork>>;
+        artworks.then((artworksList) {
+          final selectedArtwork = artworksList.firstWhere(
+            (artwork) => artwork.title == title,
+            orElse: () => throw Exception('Artwork not found'),
+          );
 
-        print(selectedArtwork.id);
+          print(selectedArtwork.id);
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailArtworkPage(
-              artwork: selectedArtwork,
-            ),
-          ),
-        );
-      });
-    },
-    child: Column(
-      children: [
-        Container(
-          height: 200,
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                blurRadius: 6,
-                offset: const Offset(0, 4),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailArtworkPage(
+                artwork: selectedArtwork,
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: image,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ],
-    ),
-  );
-}
-
-Widget _buildCarouselItemWithDistance(Image image, String title, double? distance) {
-  // Vérifie si la distance est supérieure à 5 km
-  bool isFar = distance != null && distance > 5000;
-
-  return InkWell(
-    onTap: () {
-      final museums = _recommendedMuseums as Future<List<Museum>>;
-      museums.then((museumsList) {
-        final selectedMuseum = museumsList.firstWhere(
-          (museum) => museum.title == title,
-          orElse: () => throw Exception('Museum not found'),
-        );
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailMuseumPage(
-              museum: selectedMuseum,
-              distance: distance ?? 0,
+            ),
+          );
+        });
+      },
+      child: Column(
+        children: [
+          Container(
+            height: 200,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: image,
             ),
           ),
-        );
-      });
-    },
-    child: Column(
-      children: [
-        Container(
-          height: 180,
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                blurRadius: 6,
-                offset: const Offset(0, 4),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCarouselItemWithDistance(
+      Image image, String title, double? distance) {
+    // Vérifie si la distance est supérieure à 5 km
+    bool isFar = distance != null && distance > 5000;
+
+    return InkWell(
+      onTap: () {
+        final museums = _recommendedMuseums as Future<List<Museum>>;
+        museums.then((museumsList) {
+          final selectedMuseum = museumsList.firstWhere(
+            (museum) => museum.title == title,
+            orElse: () => throw Exception('Museum not found'),
+          );
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailMuseumPage(
+                museum: selectedMuseum,
+                distance: distance ?? 0,
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: isFar
-                ? ColorFiltered(
-                    colorFilter: const ColorFilter.matrix([
-                      0.3, 0.3, 0.3, 0, 0,  // Rouge
-                      0.3, 0.3, 0.3, 0, 0,  // Vert
-                      0.3, 0.3, 0.3, 0, 0,  // Bleu
-                      0,   0,   0,   1, 0,  // Alpha
-                    ]),
-                    child: image,
-                  )
-                : image, // Image normale si distance ≤ 5 km
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        if (distance != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              "${(distance / 1000).toStringAsFixed(2)} km away",
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          );
+        });
+      },
+      child: Column(
+        children: [
+          Container(
+            height: 180,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: isFar
+                  ? ColorFiltered(
+                      colorFilter: const ColorFilter.matrix([
+                        0.3, 0.3, 0.3, 0, 0, // Rouge
+                        0.3, 0.3, 0.3, 0, 0, // Vert
+                        0.3, 0.3, 0.3, 0, 0, // Bleu
+                        0, 0, 0, 1, 0, // Alpha
+                      ]),
+                      child: image,
+                    )
+                  : image, // Image normale si distance ≤ 5 km
             ),
           ),
-      ],
-    ),
-  );
-}
-
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (distance != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                "${(distance / 1000).toStringAsFixed(2)} km away",
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
