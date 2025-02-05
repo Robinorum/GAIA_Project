@@ -104,19 +104,23 @@ class _SettingsPageState extends State<SettingsPage> {
                 Provider.of<UserProvider>(context, listen: false).clearUser();
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(
-                      builder: (context) =>
-                          const LoginPage(title: 'Login Page')),
+                    builder: (context) => const LoginPage(title: 'Login Page'),
+                  ),
                   (Route<dynamic> route) => false,
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).secondaryHeaderColor,
+                backgroundColor: Colors.red, // Red background
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text("Log Out", style: TextStyle(fontSize: 16)),
+              child: const Text(
+                "Log Out",
+                style:
+                    TextStyle(fontSize: 16, color: Colors.white), // White text
+              ),
             ),
           ],
         ),
