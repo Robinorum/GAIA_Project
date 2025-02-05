@@ -31,12 +31,12 @@ class _MapPageState extends State<MapPage> {
 
     // Listen for map zoom events to update icon sizes
     _mapController.mapEventStream.listen((event) {
-  if (event is MapEventMove) {
-    setState(() {
-      _updateMarkerSize(_mapController.zoom);
+      if (event is MapEventMove) {
+        setState(() {
+          _updateMarkerSize(_mapController.zoom);
+        });
+      }
     });
-  }
-});
   }
 
   @override
@@ -137,20 +137,6 @@ class _MapPageState extends State<MapPage> {
                     ),
                     MarkerLayer(
                       markers: [
-                        // Marqueur pour l'utilisateur (ajout d'un offset)
-                        Marker(
-                          point: _currentLocation!,
-                          width: _markerSize,
-                          height: _markerSize,
-                          builder: (ctx) => Transform.translate(
-                            offset: Offset(0, -_markerSize / 2), // Adjust to center
-                            child: Icon(
-                              Icons.man_rounded,
-                              color: Colors.blue,
-                              size: _markerSize,
-                            ),
-                          ),
-                        ),
                         // Marqueurs pour les musées avec réduction dynamique
                         ..._museums.map((museum) {
                           final distance = _calculateDistance(
@@ -164,7 +150,8 @@ class _MapPageState extends State<MapPage> {
                             width: _markerSize,
                             height: _markerSize,
                             builder: (ctx) => Transform.translate(
-                              offset: Offset(0, -_markerSize / 2), // Adjust for centering
+                              offset: Offset(
+                                  0, -_markerSize / 2), // Ajustement centré
                               child: GestureDetector(
                                 onTap: () {
                                   Navigator.push(
@@ -191,6 +178,22 @@ class _MapPageState extends State<MapPage> {
                             ),
                           );
                         }).toList(),
+
+                        // Marqueur pour l'utilisateur (placé après pour être au-dessus)
+                        Marker(
+                          point: _currentLocation!,
+                          width: _markerSize,
+                          height: _markerSize,
+                          builder: (ctx) => Transform.translate(
+                            offset: Offset(
+                                0, -_markerSize / 2), // Ajustement centré
+                            child: Icon(
+                              Icons.man_rounded,
+                              color: Colors.blue,
+                              size: _markerSize,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
