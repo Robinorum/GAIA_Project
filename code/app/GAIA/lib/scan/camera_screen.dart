@@ -14,6 +14,7 @@ class _CameraScreenState extends State<CameraScreen> {
   late List<CameraDescription> _cameras;
   bool _isCameraInitialized = false;
   bool _isFlashOn = false;
+  bool _isLoading = false; // État du chargement
 
   @override
   void initState() {
@@ -44,10 +45,36 @@ class _CameraScreenState extends State<CameraScreen> {
     if (!_cameraController.value.isInitialized) return;
 
     try {
-      final XFile photo = await _cameraController.takePicture();
-      final Map<String, dynamic> artworkData = await _predictionService.predictArtwork(photo.path);
+      setState(() {
+        _isLoading = true;
+      });
 
-      //on utilise ICI les données (dans artworkData)
+      // Affiche une boîte de dialogue avec un indicateur de chargement
+      showDialog(
+        context: context,
+        barrierDismissible: false, // Empêche la fermeture en cliquant à côté
+        builder: (context) => const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 12),
+              Text("Scanning ..."),
+            ],
+          ),
+        ),
+      );
+
+      final XFile photo = await _cameraController.takePicture();
+      final Map<String, dynamic> artworkData =
+          await _predictionService.predictArtwork(photo.path);
+
+      // Ferme la boîte de dialogue de chargement
+      Navigator.pop(context);
+
+      setState(() {
+        _isLoading = false;
+      });
 
       if (artworkData['id'] != null) {
         Navigator.push(
@@ -62,8 +89,8 @@ class _CameraScreenState extends State<CameraScreen> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('Aucune correspondance trouvée'),
-            content: Text('Aucune œuvre d\'art reconnue dans l\'image.'),
+            title: Text('No matches found'),
+            content: Text('No recognized artwork in the image.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -74,6 +101,13 @@ class _CameraScreenState extends State<CameraScreen> {
         );
       }
     } catch (e) {
+      // Ferme la boîte de dialogue en cas d'erreur
+      Navigator.pop(context);
+
+      setState(() {
+        _isLoading = false;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de la capture: $e')),
       );
@@ -138,7 +172,7 @@ class _CameraScreenState extends State<CameraScreen> {
                     padding: EdgeInsets.all(20),
                     backgroundColor: Colors.white,
                   ),
-                  onPressed: capturePhoto,
+                  onPressed: _isLoading ? null : capturePhoto, // Désactive le bouton si en chargement
                   child: Icon(Icons.camera_alt, size: 36, color: Colors.black),
                 ),
               ],
