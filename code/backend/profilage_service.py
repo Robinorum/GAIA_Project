@@ -51,41 +51,6 @@ def get_all_movements():
             movements.append(artwork_data['movement'])
     
     return movements
-
-def profilage(uid):
-    db = firestore.client()
-
-    # Partie ajoutée : Récupérer tous les mouvements et les initialiser à 0
-    all_movements = get_all_movements()
-    initial_movements = {movements: 0.0 for movements in all_movements}
-    print(initial_movements)
-    # Mettre à jour Firestore avec tous les mouvements initialisés à 0
-    doc_ref = db.collection('accounts').document(uid)
-    doc_ref.update({'preferences.movements': initial_movements})
-    
-    # Reste de la méthode
-    doc = doc_ref.get()
-
-    if doc.exists:
-        data = doc.to_dict()
-        if 'brands' in data:
-            brands = data['brands']
-            movements = []
-
-            for brand in brands:
-                artwork = get_artwork_by_id(brand).get_json()
-                if 'data' in artwork and 'movement' in artwork['data']:
-                    movements.append(artwork['data']['movement'])
-
-            movement_counts = Counter(movements)
-            total_movements = len(movements)
-            ratios = {movement: count / total_movements for movement, count in movement_counts.items()}
-            doc_ref.update({'preferences.movements': ratios})
-            print(f"Ratios {ratios} updated for user {uid}")
-        else:
-            print(f"No brands found for user {uid}")
-    else:
-        print(f"Document for user {uid} does not exist")
         
 def profilage(uid):
     db = firestore.client()

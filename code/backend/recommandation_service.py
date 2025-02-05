@@ -103,7 +103,7 @@ def update(uid, previous_recommendations, new_recommendations):
         new_recommendations (list): Liste des nouvelles recommandations.
     """
     # Ajouter les nouvelles recommandations aux anciennes
-    updated_reco = previous_recommendations[-2:] + [art['id'] for art in new_recommendations]
+    updated_reco = previous_recommendations[-5:] + [art['id'] for art in new_recommendations]
     
     new_recommendationsid= [art['id'] for art in new_recommendations]
     # Limiter à un nombre raisonnable de recommandations (par exemple 20)
