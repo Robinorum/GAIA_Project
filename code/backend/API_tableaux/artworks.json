@@ -155,7 +155,7 @@
         },
         "id_museum": "13"
     },
-    "14": {
+    "13": {
         "title": "Cornelia Street",
         "artist": "John French Sloan",
         "date": "1920",
@@ -168,7 +168,7 @@
         },
         "id_museum": "1"
     },
-    "15": {
+    "14": {
         "title": "Milking the Cow",
         "artist": "Yasuo Kuniyoshi",
         "date": "1927",
@@ -181,7 +181,7 @@
         },
         "id_museum": "14"
     },
-    "16": {
+    "15": {
         "title": "Arctic Seascape",
         "artist": "William Bradford",
         "date": "Around 1869",
@@ -194,7 +194,7 @@
         },
         "id_museum": "15"
     },
-    "17": {
+    "16": {
         "title": "Las Meninas",
         "artist": "Diego Velazquez",
         "date": "1656",
@@ -207,7 +207,7 @@
         },
         "id_museum": "12"
     },
-    "18": {
+    "17": {
         "title": "Creation of the World",
         "artist": "Marc Chagall",
         "date": "1972",
@@ -220,7 +220,7 @@
         },
         "id_museum": "16"
     },
-    "19": {
+    "18": {
         "title": "The Luncheon of the Boating Party",
         "artist": "Pierre-Auguste Renoir",
         "date": "1881",
@@ -233,7 +233,7 @@
         },
         "id_museum": "17"
     },
-    "20": {
+    "19": {
         "title": "The Swing",
         "artist": "Jean-Honore Fragonard",
         "date": "1767",
