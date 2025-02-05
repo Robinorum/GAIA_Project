@@ -201,9 +201,7 @@ class _HomeContentState extends State<HomeContent> {
                     },
                     child: CircleAvatar(
                       radius: 24,
-                      backgroundImage: NetworkImage(
-                        user?.id ?? 'https://example.com/photo.jpg',
-                      ),
+                      backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=12"),
                     ),
                   ),
                 ],
