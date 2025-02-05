@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:GAIA/model/museum.dart';
 import 'package:GAIA/model/artwork.dart';
 import 'package:GAIA/services/museum_service.dart';
-import 'package:GAIA/pages/detail_artwork_page.dart'; // Import de la page détail œuvre
+import 'package:GAIA/pages/detail_artwork_page.dart';
 
 class DetailMuseumPage extends StatefulWidget {
   final Museum museum;
@@ -27,36 +27,36 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.museum.title)),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: widget.museum.toImage()),
-            const SizedBox(height: 16),
-            Text(widget.museum.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text("${widget.museum.city}, ${widget.museum.country}", style: const TextStyle(fontSize: 18, color: Colors.grey)),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.location_on),
-                const SizedBox(width: 8),
-                Text("${(widget.distance / 1000).toStringAsFixed(2)} km away", style: const TextStyle(fontSize: 16, color: Colors.grey)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text("Style: ${widget.museum.style}", style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 16),
-            Text("Place: ${widget.museum.place}", style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 24),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(child: widget.museum.toImage()),
+              const SizedBox(height: 16),
+              Text(widget.museum.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text("${widget.museum.city}, ${widget.museum.country}", style: const TextStyle(fontSize: 18, color: Colors.grey)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.location_on),
+                  const SizedBox(width: 8),
+                  Text("${(widget.distance / 1000).toStringAsFixed(2)} km away", style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text("Style: ${widget.museum.style}", style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 16),
+              Text("Place: ${widget.museum.place}", style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 24),
 
-            // Section des tableaux du musée
-            const Text("Artworks in this Museum", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
+              // Section des tableaux du musée
+              const Text("Artworks in this Museum", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
 
-            Expanded(
-              child: FutureBuilder<List<Artwork>>(
+              FutureBuilder<List<Artwork>>(
                 future: _artworksFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -69,8 +69,8 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
 
                   final artworks = snapshot.data!;
                   return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true, // ✅ Permet à GridView de s'adapter au contenu
+                    physics: const NeverScrollableScrollPhysics(), // ✅ Désactive le scroll interne
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 0.75,
@@ -83,7 +83,6 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
 
                       return InkWell(
                         onTap: () {
-                          // ✅ Redirection vers la page de détails de l'œuvre sélectionnée
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -108,8 +107,8 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
                   );
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
