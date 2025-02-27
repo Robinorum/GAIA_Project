@@ -30,7 +30,7 @@ def get_embedding(image):
     return embedding / np.linalg.norm(embedding)  # Normalisation
 
 # Charger les données JSON
-with open('../API_tableaux/artworks.json', 'r', encoding='utf-8') as f:
+with open('../API_tableaux/artworksV2.json', 'r', encoding='utf-8') as f:
     artwork_data = json.load(f)
 
 embeddings = []
@@ -53,4 +53,4 @@ index = faiss.IndexFlatL2(dimension)
 index.add(embeddings_np)
 
 # Sauvegarde de l'index
-faiss.write_index(index, "index_artwork2.faiss")
+faiss.write_index(index, "index_artwork_big.faiss")

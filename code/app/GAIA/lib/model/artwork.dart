@@ -8,9 +8,11 @@ class Artwork {
   final String artist;
   final String date;
   final String description;
+  final String dimensions;
   final String image;
   final String idMuseum;
   final String movement;
+  final String techniquesUsed;
 
   Artwork({
     required this.id, // Initialisation de l'id
@@ -18,9 +20,11 @@ class Artwork {
     required this.artist,
     required this.date,
     required this.description,
+    required this.dimensions,
     required this.image,
     required this.idMuseum,
     required this.movement,
+    required this.techniquesUsed,
   });
 
   factory Artwork.fromJson(Map<String, dynamic> json) {
@@ -30,9 +34,11 @@ class Artwork {
       artist: json['artist'] ?? 'Unknown Artist',
       date: json['date'] ?? 'Unknown Date',
       description: json['description'] ?? 'No description',
+      dimensions: json['dimensions'] ?? 'No dimensions',
       image: json['image'] ?? '',
       idMuseum: json['id_museum'] ?? 'Unknown idMuseum',
       movement: json['movement'] ?? 'Unknown Movement',
+      techniquesUsed: json['techniques used'] ?? 'Unknown techniques', 
     );
   }
 

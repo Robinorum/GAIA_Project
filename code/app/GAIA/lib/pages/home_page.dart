@@ -121,16 +121,29 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-  void _sortAndUpdateMuseums() {
-    if (_currentLocation == null) return;
+void _sortAndUpdateMuseums() {
+  if (_currentLocation == null) return;
 
-    _recommendedMuseums.then((museums) {
-      final sortedMuseums = _sortMuseumsByDistance(museums);
-      setState(() {
-        _recommendedMuseums = Future.value(sortedMuseums);
-      });
+  _recommendedMuseums.then((museums) {
+    // Filtrer les musées à une distance maximale de 50 km
+    final nearbyMuseums = museums.where((museum) {
+      final museumLocation = LatLng(museum.location.latitude, museum.location.longitude);
+      final distance = _calculateDistance(_currentLocation!, museumLocation);
+      return distance <= 50000; // Distance maximale de 50 km
+    }).toList();
+
+    // Trier les musées restants par distance
+    final sortedMuseums = _sortMuseumsByDistance(nearbyMuseums);
+
+    // Limiter à 10 musées
+    final topMuseums = sortedMuseums.take(10).toList();
+
+    setState(() {
+      _recommendedMuseums = Future.value(topMuseums);
     });
-  }
+  });
+}
+
 
   double _calculateDistance(LatLng start, LatLng end) {
     return Geolocator.distanceBetween(

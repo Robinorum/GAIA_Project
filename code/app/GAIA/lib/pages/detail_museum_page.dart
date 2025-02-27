@@ -20,7 +20,7 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
   @override
   void initState() {
     super.initState();
-    _artworksFuture = MuseumService().fetchArtworksByMuseum(widget.museum.id);
+    _artworksFuture = MuseumService().fetchArtworksByMuseum(widget.museum.officialId);
   }
 
   @override
@@ -37,7 +37,7 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
               const SizedBox(height: 16),
               Text(widget.museum.title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text("${widget.museum.city}, ${widget.museum.country}", style: const TextStyle(fontSize: 18, color: Colors.grey)),
+              Text("${widget.museum.city}, ${widget.museum.departement}", style: const TextStyle(fontSize: 18, color: Colors.grey)),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -47,7 +47,7 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              Text("Style: ${widget.museum.style}", style: const TextStyle(fontSize: 16)),
+              Text("Histoire: ${widget.museum.histoire}", style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 16),
               Text("Place: ${widget.museum.place}", style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 24),

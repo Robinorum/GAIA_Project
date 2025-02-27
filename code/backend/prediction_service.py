@@ -26,7 +26,7 @@ model.eval()
 model.to(device)
 
 # 🔹 Chargement de l’index FAISS
-index = faiss.read_index("AI_scan/index_artwork2.faiss")
+index = faiss.read_index("AI_scan/index_artwork_big.faiss")
 faiss.omp_set_num_threads(1)
 
 # 🔹 Prétraitement de l'image

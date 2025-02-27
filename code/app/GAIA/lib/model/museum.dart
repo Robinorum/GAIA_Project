@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 
 class GeoPoint {
   final double latitude;
@@ -17,51 +16,68 @@ class GeoPoint {
 
 class Museum {
   final String id; // Ajout de l'id
+  final String officialId;
+  final String themes;
   final String city;
-  final String country;
+  final String region;
+  final String departement;
+  final String codePostal;
   final GeoPoint location;
   final String image;
   final String place;
-  final String style;
   final String title;
+  final String officialLink;
+  final String telephone;
+  final String histoire;
+  final String atout;
+  final String interet;
 
   Museum(
       {required this.id, // Initialisation de l'id
+      required this.officialId,
+      required this.themes,
       required this.city,
-      required this.country,
+      required this.region,
+      required this.departement,
+      required this.codePostal,
       required this.location,
       required this.image,
       required this.place,
-      required this.style,
-      required this.title});
+      required this.title,
+      required this.officialLink,
+      required this.telephone,
+      required this.histoire,
+      required this.atout,
+      required this.interet});
 
   factory Museum.fromJson(Map<String, dynamic> json) {
-    // Utilisation de l'id passé en paramètre (clé principale)
-
     return Museum(
-      id: json['id'],
-      city: json['city'],
-      country: json['country'],
+      id: json['id'] ?? 'Unknown',
+      officialId: json['official_id'] ?? 'Unknown',
+      themes: json['themes'] ?? 'Unknown',
+      city: json['city'] ?? 'Unknown',
+      region: json['region'],
+      departement: json['departement'] ?? 'Unknown',
+      codePostal: json['code_postal'] ?? 'Unknown',
       location: GeoPoint.fromJson(json['location']),
-      image: json['image'],
-      place: json['place'],
-      style: json['style'],
-      title: json['title'],
+      image: json['image'] ?? '',
+      place: json['place'] ?? 'Unknown',
+      title: json['title'] ?? 'Unknown',
+      officialLink: json['official_link'] ?? 'Unknown',
+      telephone: json['telephone'] ?? 'Unknown',
+      histoire: json['histoire'] ?? 'Unknown',
+      atout: json['atout'] ?? 'Unknown',
+      interet: json['interet'] ?? 'Unknown',
     );
   }
 
-    Image toImage() {
+  // Récupère l'image via un lien URL
+  Image toImage() {
     if (image.isEmpty) {
-      return Image.asset('assets/images/placeholder.png',
-          fit: BoxFit.cover); // Image par défaut si vide
+      return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover); // Image par défaut si vide
     }
 
-    try {
-      final decodedBytes = base64Decode(image);
-      return Image.memory(decodedBytes, fit: BoxFit.cover);
-    } catch (e) {
-      return Image.asset('assets/images/placeholder.png',
-          fit: BoxFit.cover); // Image par défaut en cas d'erreur de décodage
-    }
+    // Image depuis une URL
+    return Image.network(image, fit: BoxFit.cover);
   }
 }
