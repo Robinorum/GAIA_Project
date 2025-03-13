@@ -241,7 +241,7 @@ void _sortAndUpdateMuseums() {
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 250,
+            height: 260,
             child: FutureBuilder<List<Artwork>>(
               future: _recommendedArtworks,
               builder: (context, snapshot) {
