@@ -15,6 +15,7 @@ class _CameraScreenState extends State<CameraScreen> {
   bool _isCameraInitialized = false;
   bool _isFlashOn = false;
   bool _isLoading = false; // État du chargement
+  double _cameraAspectRatio = 1.0;
 
   @override
   void initState() {
@@ -24,19 +25,29 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> initializeCamera() async {
     _cameras = await availableCameras();
-    _cameraController = CameraController(_cameras[0], ResolutionPreset.medium,
-        enableAudio: false, imageFormatGroup: ImageFormatGroup.jpeg);
+    _cameraController = CameraController(
+      _cameras[0],
+      ResolutionPreset.medium,
+      enableAudio: false,
+      imageFormatGroup: ImageFormatGroup.jpeg,
+    );
+
     await _cameraController.initialize();
-    setState(() {
-      _isCameraInitialized = true;
-    });
+
+     if (mounted) {
+      setState(() {
+        _isCameraInitialized = true;
+        _cameraAspectRatio = 1 / _cameraController.value.aspectRatio;
+      });
+    }
   }
+
 
   Future<void> toggleFlash() async {
     if (_cameraController.value.isInitialized) {
       _isFlashOn = !_isFlashOn;
-      await _cameraController.setFlashMode(
-          _isFlashOn ? FlashMode.torch : FlashMode.off);
+      await _cameraController
+          .setFlashMode(_isFlashOn ? FlashMode.torch : FlashMode.off);
       setState(() {});
     }
   }
@@ -127,8 +138,15 @@ class _CameraScreenState extends State<CameraScreen> {
       body: Stack(
         children: [
           if (_isCameraInitialized)
-            Positioned.fill(
-              child: CameraPreview(_cameraController),
+            Center(
+              child: ClipRect(
+                child: AspectRatio(
+                  aspectRatio: _cameraAspectRatio, // Garde un carré
+                  child: CameraPreview(_cameraController),
+                ),
+                
+              ),
+              
             ),
           Positioned(
             top: 40,
@@ -172,7 +190,9 @@ class _CameraScreenState extends State<CameraScreen> {
                     padding: EdgeInsets.all(20),
                     backgroundColor: Colors.white,
                   ),
-                  onPressed: _isLoading ? null : capturePhoto, // Désactive le bouton si en chargement
+                  onPressed: _isLoading
+                      ? null
+                      : capturePhoto, // Désactive le bouton si en chargement
                   child: Icon(Icons.camera_alt, size: 36, color: Colors.black),
                 ),
               ],

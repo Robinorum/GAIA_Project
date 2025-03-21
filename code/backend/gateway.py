@@ -1,8 +1,18 @@
+import subprocess
 from flask import Flask, request, jsonify
 import requests
 from config import MICROSERVICES
 import firebase_admin
 from firebase_admin import credentials, auth
+
+
+# UPDATE : auto adb reverse
+def setup_adb_reverse():
+    try:
+        subprocess.run(["adb", "reverse", "tcp:5000", "tcp:5000"], check=True)
+        print("ADB reverse set up successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to set up ADB reverse: {e}")
 
 # Initialize Firebase Admin with the service account
 cred = credentials.Certificate("logintest-3342f-firebase-adminsdk-ahw4r-a935280551.json")
@@ -49,4 +59,5 @@ def proxy(service, endpoint):
 
 
 if __name__ == "__main__":
+    setup_adb_reverse()
     app.run(debug=True, host="0.0.0.0", port=5000)
