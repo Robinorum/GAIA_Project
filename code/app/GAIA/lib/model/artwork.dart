@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 
 
@@ -35,25 +34,20 @@ class Artwork {
       date: json['date'] ?? 'Unknown Date',
       description: json['description'] ?? 'No description',
       dimensions: json['dimensions'] ?? 'No dimensions',
-      image: json['image'] ?? '',
+      image: json['image_url'] ?? '',
       idMuseum: json['id_museum'] ?? 'Unknown idMuseum',
       movement: json['movement'] ?? 'Unknown Movement',
       techniquesUsed: json['techniques used'] ?? 'Unknown techniques', 
     );
   }
 
+
   Image toImage() {
     if (image.isEmpty) {
-      return Image.asset('assets/images/placeholder.png',
-          fit: BoxFit.cover); // Image par défaut si vide
+      return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover); // Image par défaut si vide
     }
 
-    try {
-      final decodedBytes = base64Decode(image);
-      return Image.memory(decodedBytes, fit: BoxFit.cover);
-    } catch (e) {
-      return Image.asset('assets/images/placeholder.png',
-          fit: BoxFit.cover); // Image par défaut en cas d'erreur de décodage
-    }
+    // Image depuis une URL
+    return Image.network(image, fit: BoxFit.cover);
   }
 }

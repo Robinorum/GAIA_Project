@@ -25,7 +25,7 @@ def upload_artworks_to_firestore():
             'dimensions': artwork.get('dimensions'),
             'techniques used': artwork.get('techniques used'),
             'movement': artwork.get('movement'),
-            'image': artwork.get('image', {}).get('bytes'),
+            'image_url': artwork.get('image_url'),
             'id_museum': artwork.get('id_museum')
         }
 
