@@ -263,7 +263,7 @@ void _sortAndUpdateMuseums() {
                   itemCount: artworks.length,
                   itemBuilder: (context, index) {
                     final artwork = artworks[index];
-                    return _buildCarouselItem(artwork.toImage(), artwork.title);
+                    return _buildCarouselItem(artwork.toImage() as Image, artwork.title);
                   },
                 );
               },
@@ -312,7 +312,7 @@ void _sortAndUpdateMuseums() {
                           )
                         : null;
                     return _buildCarouselItemWithDistance(
-                      museum.toImage(),
+                      museum.toImage() as Image,
                       museum.title,
                       distance,
                     );
@@ -326,132 +326,163 @@ void _sortAndUpdateMuseums() {
     );
   }
 
-  Widget _buildCarouselItem(Image image, String title) {
-    return InkWell(
-      onTap: () {
-        // Find the artwork that matches the title in the artworks list
-        final artworks = _recommendedArtworks as Future<List<Artwork>>;
-        artworks.then((artworksList) {
-          final selectedArtwork = artworksList.firstWhere(
-            (artwork) => artwork.title == title,
-            orElse: () => throw Exception('Artwork not found'),
-          );
+Widget _buildCarouselItem(Image image, String title) {
+  return InkWell(
+    onTap: () {
+      final artworks = _recommendedArtworks as Future<List<Artwork>>;
+      artworks.then((artworksList) {
+        final selectedArtwork = artworksList.firstWhere(
+          (artwork) => artwork.title == title,
+          orElse: () => throw Exception('Artwork not found'),
+        );
 
-          print(selectedArtwork.id);
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DetailArtworkPage(
-                artwork: selectedArtwork,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailArtworkPage(
+              artwork: selectedArtwork,
+            ),
+          ),
+        );
+      });
+    },
+    child: Column(
+      children: [
+        Container(
+          height: 200,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.transparent, // Ombre invisible
+                blurRadius: 6,
+                offset: const Offset(0, 4),
               ),
-            ),
-          );
-        });
-      },
-      child: Column(
-        children: [
-          Container(
-            height: 200,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  blurRadius: 6,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: image,
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image(
+              image: image.image, // Récupère le provider d'image
+              fit: BoxFit.contain, // Préserve le ratio d'aspect
+              width: double.infinity,
+              height: 200,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child; // Image chargée
+                }
+                return const Center(
+                  child: CircularProgressIndicator(), // Rond de chargement
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return const Center(
+                  child: Icon(Icons.error, color: Colors.red), // En cas d'erreur
+                );
+              },
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildCarouselItemWithDistance(Image image, String title, double? distance) {
+  bool isFar = distance != null && distance > 5000;
+
+  return InkWell(
+    onTap: () {
+      final museums = _recommendedMuseums as Future<List<Museum>>;
+      museums.then((museumsList) {
+        final selectedMuseum = museumsList.firstWhere(
+          (museum) => museum.title == title,
+          orElse: () => throw Exception('Museum not found'),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailMuseumPage(
+              museum: selectedMuseum,
+              distance: distance ?? 0,
+            ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCarouselItemWithDistance(
-      Image image, String title, double? distance) {
-    // Vérifie si la distance est supérieure à 5 km
-    bool isFar = distance != null && distance > 5000;
-
-    return InkWell(
-      onTap: () {
-        final museums = _recommendedMuseums as Future<List<Museum>>;
-        museums.then((museumsList) {
-          final selectedMuseum = museumsList.firstWhere(
-            (museum) => museum.title == title,
-            orElse: () => throw Exception('Museum not found'),
-          );
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DetailMuseumPage(
-                museum: selectedMuseum,
-                distance: distance ?? 0,
+        );
+      });
+    },
+    child: Column(
+      children: [
+        Container(
+          height: 180,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.transparent, // Ombre invisible
+                blurRadius: 6,
+                offset: const Offset(0, 4),
               ),
-            ),
-          );
-        });
-      },
-      child: Column(
-        children: [
-          Container(
-            height: 180,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  blurRadius: 6,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: isFar
-                  ? ColorFiltered(
-                      colorFilter: const ColorFilter.matrix([
-                        0.3, 0.3, 0.3, 0, 0, // Rouge
-                        0.3, 0.3, 0.3, 0, 0, // Vert
-                        0.3, 0.3, 0.3, 0, 0, // Bleu
-                        0, 0, 0, 1, 0, // Alpha
-                      ]),
-                      child: image,
-                    )
-                  : image, // Image normale si distance ≤ 5 km
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image(
+              image: image.image, // Récupère le provider d'image
+              fit: BoxFit.contain, // Préserve le ratio d'aspect
+              width: double.infinity,
+              height: 180,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return isFar
+                      ? ColorFiltered(
+                          colorFilter: const ColorFilter.matrix([
+                            0.3, 0.3, 0.3, 0, 0, // Rouge
+                            0.3, 0.3, 0.3, 0, 0, // Vert
+                            0.3, 0.3, 0.3, 0, 0, // Bleu
+                            0, 0, 0, 1, 0, // Alpha
+                          ]),
+                          child: child,
+                        )
+                      : child; // Image chargée, avec ou sans filtre
+                }
+                return const Center(
+                  child: CircularProgressIndicator(), // Rond de chargement
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return const Center(
+                  child: Icon(Icons.error, color: Colors.red), // En cas d'erreur
+                );
+              },
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (distance != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                "${(distance / 1000).toStringAsFixed(2)} km away",
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
-              ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (distance != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              "${(distance / 1000).toStringAsFixed(2)} km away",
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
-        ],
-      ),
-    );
-  }
+          ),
+      ],
+    ),
+  );
+}
 }
