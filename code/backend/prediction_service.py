@@ -14,7 +14,7 @@ from torchvision import models
 app = Flask(__name__)
 
 # 🔹 Initialisation Firebase
-cred = credentials.Certificate('logintest-3342f-firebase-adminsdk-ahw4r-a935280551.json')
+cred = credentials.Certificate('testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -26,7 +26,7 @@ model.eval()
 model.to(device)
 
 # 🔹 Chargement de l’index FAISS
-index = faiss.read_index("AI_scan/index_artwork_big.faiss")
+index = faiss.read_index("AI_scan/index_joconde.faiss")
 faiss.omp_set_num_threads(1)
 
 # 🔹 Prétraitement de l'image
@@ -44,22 +44,40 @@ def get_embedding(image, model, device):
         embedding = embedding / embedding.norm(dim=-1, keepdim=True)
     return embedding.squeeze().cpu().numpy().astype("float32")
 
-def get_by_id(id):
-    """ Récupère un document Firestore par ID """
-    try:
-        id_en_plus = int(id) + 1
-        doc_ref = db.collection('artworks').document(str(id_en_plus))
-        doc = doc_ref.get()
 
-        if doc.exists:
+
+def get_link_with_id(id):
+    """Récupère le lien de la photo situé à la ligne `id` dans link_id.txt (ligne 0 = id 0)"""
+    try:
+        with open("AI_scan/link_id.txt", "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            index = int(id)  # FAISS renvoie un index entier
+            if 0 <= index < len(lines):
+                line = lines[index].strip()
+                parts = line.split(",")
+                if len(parts) == 2:
+                    print(parts[1])
+                    return parts[1]  # URL
+    except Exception as e:
+        print(f"Erreur lors de la lecture du fichier link_id.txt : {e}")
+    return None
+
+
+
+def get_by_url(url):
+    """ Récupère un tableau dans Firestore par son image_url """
+    try:
+        query = db.collection('artworks').where("image_url", "==", url).limit(1).stream()
+        for doc in query:
             data = doc.to_dict()
             data['id'] = doc.id
             return data
     except Exception as e:
-        print(f"Error retrieving artwork: {e}")
+        print(f"Erreur lors de la récupération dans Firestore : {e}")
     return None
 
-def find_most_similar_image(image, index, model, device, k=1, threshold=0.55):
+
+def find_most_similar_image(image, index, model, device, k=1, threshold=0.3):
     results = []
     
     for angle in [0, 90, 180, 270]:
@@ -98,7 +116,8 @@ def predict():
             result = find_most_similar_image(image, index, model, device)
 
         if result:
-            artwork_data = get_by_id(result)
+            artwork_link = get_link_with_id(result)
+            artwork_data = get_by_url(artwork_link)
             return jsonify(artwork_data)
             
         return jsonify({"message": "Aucune correspondance trouvée"})

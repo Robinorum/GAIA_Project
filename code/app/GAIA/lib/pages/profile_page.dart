@@ -64,9 +64,9 @@ class _ProfilePageState extends State<ProfilePage> {
             // Header: Couverture + Photo de profil
             Stack(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 50,
-                  backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=12"), // Replace with real image
+                  backgroundImage: AssetImage(user!.profilePhoto), // Replace with real image
                 ),
                 Positioned(
                   bottom: 0,
@@ -76,7 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ProfilePicturePage(),
+                          builder: (context) => ProfilePicturePage(),
                         ),
                       );
                     },

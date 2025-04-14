@@ -214,7 +214,7 @@ void _sortAndUpdateMuseums() {
                     },
                     child: CircleAvatar(
                       radius: 24,
-                      backgroundImage: NetworkImage("https://i.pravatar.cc/150?img=12"),
+                      backgroundImage: AssetImage(user!.profilePhoto),
                     ),
                   ),
                 ],

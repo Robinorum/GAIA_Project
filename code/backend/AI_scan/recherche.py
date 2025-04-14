@@ -22,7 +22,7 @@ def get_embedding(image, model, device):
 
 
 
-def find_most_similar_image(image, index, model, device, k=1, threshold=0.75):
+def find_most_similar_image(image, index, model, device, k=1, threshold=0.1):
 
     results = []
     

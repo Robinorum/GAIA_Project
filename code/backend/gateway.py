@@ -15,7 +15,7 @@ def setup_adb_reverse():
         print(f"Failed to set up ADB reverse: {e}")
 
 # Initialize Firebase Admin with the service account
-cred = credentials.Certificate("logintest-3342f-firebase-adminsdk-ahw4r-a935280551.json")
+cred = credentials.Certificate("testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json")
 firebase_admin.initialize_app(cred)
 
 app = Flask(__name__)

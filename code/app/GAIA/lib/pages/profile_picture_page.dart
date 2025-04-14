@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 
 class ProfilePicturePage extends StatefulWidget {
   const ProfilePicturePage({Key? key}) : super(key: key);
@@ -18,11 +18,24 @@ class _ProfilePicturePageState extends State<ProfilePicturePage> {
     _galleryImages = fetchGalleryImages();
   }
 
-  Future<List<String>> fetchGalleryImages() async {
+  /*Future<List<String>> fetchGalleryImages() async {
     await Future.delayed(const Duration(seconds: 2));
 
     return List.generate(24, (index) => "https://i.pravatar.cc/150?img=$index");
+  }*/
+
+  Future<List<String<void> fetchGalleryImages() async {
+    try {
+      String jsonString = await rootBundle.loadString('assets/image_museums/images.json');
+      Map<String, dynamic> jsonData = json.decode(jsonString);
+      setState(() {
+        imagePaths = List<String>.from(jsonData['images']);
+      });
+    } catch (e) {
+      print("Erreur lors du chargement des images: $e");
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +116,81 @@ class _ProfilePicturePageState extends State<ProfilePicturePage> {
           ),
         ],
       ),
+    );
+  }
+}*/
+
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:GAIA/provider/userProvider.dart'; // Assure-toi d'importer ton userProvider
+import 'package:GAIA/model/appUser.dart'; // Assure-toi d'importer ton modèle AppUser
+
+class ProfilePicturePage extends StatefulWidget {
+  @override
+  _ProfilePicturePageState createState() => _ProfilePicturePageState();
+}
+
+class _ProfilePicturePageState extends State<ProfilePicturePage> {
+  List<String> imagePaths = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadImagesFromJson();
+  }
+
+  Future<void> loadImagesFromJson() async {
+    try {
+      String jsonString = await rootBundle.loadString('assets/image_profiles/images.json');
+      Map<String, dynamic> jsonData = json.decode(jsonString);
+      
+      List<String> paths = List<String>.from(jsonData['images']);
+      setState(() {
+        imagePaths = paths;
+      });
+    } catch (e) {
+      print("Error loading images: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Select a Profile Picture")),
+      body: imagePaths.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : GridView.builder(
+              padding: EdgeInsets.all(10),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              ),
+              itemCount: imagePaths.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () async {
+              // Récupère l'utilisateur actuel
+              final user = Provider.of<UserProvider>(context, listen: false).user;
+
+              // Mets à jour la photo de profil dans Firestore
+              try {
+                await user?.updateProfilePhoto(imagePaths[index]);
+                // Une fois l'image mise à jour, notifie les autres widgets
+                Provider.of<UserProvider>(context, listen: false).updateProfileImage(imagePaths[index]);
+                Navigator.pop(context); // Retour à la page précédente
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+              }
+            },
+            child: Image.asset(imagePaths[index], fit: BoxFit.cover),
+          );
+              },
+            ),
     );
   }
 }
