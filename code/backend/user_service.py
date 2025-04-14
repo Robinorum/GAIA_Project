@@ -62,6 +62,73 @@ def fetch_collection(uid):
             print("No matching artworks found in Firestore.")
 
 
+@app.route("/api/maj_quest/<userId>/<artworkMovement>", methods=["GET"])
+def maj_quest_byId(userId, artworkMovement):
+    db = firestore.client()
+    doc_ref = db.collection('accounts').document(userId)
+    doc = doc_ref.get()
+    
+    if not doc.exists:
+        return {"error": "Utilisateur non trouvé"}, 404
+    
+    user_data = doc.to_dict()
+    
+    user_quests = user_data.get('quests', {})  
+    if not isinstance(user_quests, dict):  
+        user_quests = {}  # Correction si c'est mal initialisé
+    
+    quests_data = db.collection('quests').get()
+    
+    for quest in quests_data:
+        quest_data = quest.to_dict()
+        quest_id = quest.id  
+
+        if quest_data.get('movement') == artworkMovement or quest_data.get('movement') == "All":
+            if quest_id in user_quests:
+                user_quests[quest_id]['progression'] += 1  
+            else:
+                user_quests[quest_id] = {
+                    'progression': 1,
+                    'movement': quest_data.get('movement')
+                }
+
+    doc_ref.update({'quests': user_quests}) 
+    return  200    
+    
+@app.route("/api/get_quest/<userId>", methods=["GET"])
+def get_quests(userId):
+    db = firestore.client()
+    doc_ref = db.collection('accounts').document(userId)
+    doc = doc_ref.get()
+    
+    if not doc.exists:
+        return {"error": "Utilisateur non trouvé"}, 404
+    
+    user_data = doc.to_dict()
+    user_quests = user_data.get('quests', {})  
+    
+    if not isinstance(user_quests, dict):  
+        user_quests = {}  # Correction si c'est mal initialisé
+    
+    # Extraire uniquement quest_id et progression
+    filtered_quests = [{"id": quest_id, "progression": data.get("progression", 0)} for quest_id, data in user_quests.items()]
+    print(filtered_quests)
+    return {"quests": filtered_quests}, 200
+
+
+  # if doc.exists:
+    #     data = doc.to_dict()
+    #     if 'quests' in data:
+    #         quests = data['quests']
+    #         if artworkMovement in quests:
+    #             quests[artworkMovement] += 1
+    #         else:
+    #             quests[artworkMovement] = 1
+    #     else:
+    #         quests = {artworkMovement: 1}
+        
+    #     doc_ref.update({'quests': quests})
+    #     return "Quest updated successfully", 200
 
 def get_artworks():
     try:

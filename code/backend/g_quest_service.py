@@ -24,34 +24,23 @@ def get_general_quests():
         print(quest)
     return jsonify({"success": True, "data": all_quests})
 
-@app.route("/api/general_quests/<quest_id>", methods=["GET"])
-def get_quest_by_id(quest_id):
-    quest_ref = db.collection('quests').document(quest_id)
-    quest = quest_ref.get()
+@app.route("/api/get_quests/<userId>", methods=["GET"])
+def get_quests(userId):
+    db = firestore.client()
+    doc_ref = db.collection('accounts').document(userId)
+    doc = doc_ref.get()
+    
+    if not doc.exists:
+        return {"error": "Utilisateur non trouvé"}, 404
+    
+    user_data = doc.to_dict()
+    user_quests = user_data.get('quests', {})  
+    
+    if not isinstance(user_quests, dict):  
+        user_quests = {}  # Correction si c'est mal initialisé
+    
+    return {"quests": user_quests}, 200
 
-    if quest.exists:
-        quest_data = quest.to_dict()
-        quest_data['id'] = quest.id
-        return jsonify(quest_data), 200
-    else:
-        return jsonify({"error": "Quest not found"}), 404
-
-# @app.route("/api/general_quests/<quest_id>/progress", methods=["POST"])
-# def update_quest_progress(quest_id):
-#     data = request.get_json()
-#     new_progress = data.get("progress")
-
-#     if new_progress is None or not isinstance(new_progress, int):
-#         return jsonify({"error": "Invalid progress value"}), 400
-
-#     quest_ref = db.collection('quests').document(quest_id)
-#     quest = quest_ref.get()
-
-#     if quest.exists:
-#         quest_ref.update({"progress": new_progress})
-#         return jsonify({"message": "Progress updated successfully"}), 200
-#     else:
-#         return jsonify({"error": "Quest not found"}), 404
 
 if __name__ == "__main__":
     app.run(debug=True, port=5006)
