@@ -1,5 +1,5 @@
 import 'package:GAIA/model/GeneralQuest.dart';
-import 'package:GAIA/services/GeneralQuestService.dart';
+import 'package:GAIA/services/general_quest_service.dart';
 import 'package:flutter/material.dart';
 
 

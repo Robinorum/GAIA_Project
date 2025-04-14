@@ -91,6 +91,8 @@ class _PredictionScreenState extends State<PredictionScreen> {
         onPressed: () async {
           print(user!.id);
           bool success = await UserService().addArtworks(user!.id, _artwork.id);
+          bool majQuest= await  UserService().majQuest(user!.id, _artwork.movement);// pour mettre à jour les quêtes
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(success ? "Oeuvre ajoutée à la collection !" : "Erreur lors de l'ajout."),
