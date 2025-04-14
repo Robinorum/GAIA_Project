@@ -44,16 +44,17 @@ class _QuestsPageState extends State<QuestsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Quêtes"), automaticallyImplyLeading: false),
+      appBar:
+          AppBar(title: const Text("Quêtes"), automaticallyImplyLeading: false),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Quêtes Générales", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
+            const Text("Quêtes Générales",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
 
-            // Chargement des quêtes
             Expanded(
               child: FutureBuilder<void>(
                 future: _combinedFuture,
@@ -63,11 +64,10 @@ class _QuestsPageState extends State<QuestsPage> {
                   }
 
                   return ListView.builder(
-                    itemCount: _quests.length,
+                    itemCount: _quests.length < 3 ? _quests.length : 3,
                     itemBuilder: (context, index) {
                       final quest = _quests[index];
 
-                      // Cherche la progression correspondante
                       final progressData = _questProgressData.firstWhere(
                         (element) => element['id'] == quest.id,
                         orElse: () => {'progression': 0, 'goal': quest.goal[0]},
@@ -76,7 +76,6 @@ class _QuestsPageState extends State<QuestsPage> {
                       final int progression = progressData['progression'];
                       final int goal = progressData['goal'];
 
-                      // Détermine le niveau d'étoiles
                       int level = 0;
                       if (progression >= quest.goal[2]) {
                         level = 3;
@@ -105,14 +104,15 @@ class _QuestsPageState extends State<QuestsPage> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Partie gauche : infos + étoiles
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       quest.title,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(quest.description),
@@ -121,19 +121,20 @@ class _QuestsPageState extends State<QuestsPage> {
                                   ],
                                 ),
                               ),
-
-                              // Partie droite : progression actuelle
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
                                     "$progression / $goal",
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14),
                                   ),
                                   const SizedBox(height: 4),
                                   const Text(
                                     "Progression",
-                                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                                    style: TextStyle(
+                                        fontSize: 12, color: Colors.grey),
                                   ),
                                 ],
                               ),
@@ -147,25 +148,25 @@ class _QuestsPageState extends State<QuestsPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 12), 
 
-            // Bouton "Tout voir"
             Center(
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AllQuestsPage()),
+                    MaterialPageRoute(
+                        builder: (context) => const AllQuestsPage()),
                   );
                 },
                 child: const Text("Tout voir"),
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 24), 
 
-            // 🔒 Quête verrouillée
-            const Text("Quête du musée", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text("Quête du musée",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Stack(
               children: [
@@ -214,11 +215,7 @@ class _QuestsPageState extends State<QuestsPage> {
   }
 }
 
-// 🔁 Nouvelle fonction utilisée uniquement
-List<Map<String, dynamic>> getProgressionAndGoal(
-  List<GeneralQuest> questList,
-  List<Map<String, dynamic>> progressList,
-) {
+List<Map<String, dynamic>> getProgressionAndGoal(List<GeneralQuest> questList,List<Map<String, dynamic>> progressList,) {
   List<Map<String, dynamic>> result = [];
 
   for (var progress in progressList) {

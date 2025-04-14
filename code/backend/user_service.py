@@ -108,27 +108,12 @@ def get_quests(userId):
     user_quests = user_data.get('quests', {})  
     
     if not isinstance(user_quests, dict):  
-        user_quests = {}  # Correction si c'est mal initialisé
+        user_quests = {}  
     
-    # Extraire uniquement quest_id et progression
     filtered_quests = [{"id": quest_id, "progression": data.get("progression", 0)} for quest_id, data in user_quests.items()]
     print(filtered_quests)
     return {"quests": filtered_quests}, 200
 
-
-  # if doc.exists:
-    #     data = doc.to_dict()
-    #     if 'quests' in data:
-    #         quests = data['quests']
-    #         if artworkMovement in quests:
-    #             quests[artworkMovement] += 1
-    #         else:
-    #             quests[artworkMovement] = 1
-    #     else:
-    #         quests = {artworkMovement: 1}
-        
-    #     doc_ref.update({'quests': quests})
-    #     return "Quest updated successfully", 200
 
 def get_artworks():
     try:

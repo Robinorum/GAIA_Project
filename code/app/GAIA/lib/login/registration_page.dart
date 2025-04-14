@@ -129,6 +129,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         'visitedMuseum': '',
         'profilePhoto': '',
         'preferences': {'movements': {}},
+        'quests': [],
       });
 
       // Fetch the created user's data

@@ -95,7 +95,6 @@ Future<List<Map<String, dynamic>>> getQuests(String userId) async {
         print("ID: ${item['id']}, Progression: ${item['progression']}");
         print("\n");
       }
-      // Récupérer uniquement l'id et la progression
       return data.map<Map<String, dynamic>>((item) {
         return {
           'id': item['id'],
