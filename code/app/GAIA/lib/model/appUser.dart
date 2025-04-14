@@ -9,7 +9,7 @@ class AppUser {
   final List<String> liked;
   final List<String> collection;
   final String visitedMuseum;
-  final String profilePhoto; // Ajout de la photo de profil
+  String profilePhoto; // Ajout de la photo de profil
   final Map<String, dynamic> preferences; // Ajout des préférences complètes
   final Map<String, double> movements; // Ajout des préférences liées aux mouvements artistiques
 
@@ -26,6 +26,20 @@ class AppUser {
     required this.movements,
   });
 
+  // Méthode pour mettre à jour la photo de profil dans Firestore
+  Future<void> updateProfilePhoto(String newProfilePhoto) async {
+    final firestore = FirebaseFirestore.instance;
+    
+    try {
+      // Mettre à jour la photo de profil dans Firestore
+      await firestore.collection('accounts').doc(id).update({
+        'profilePhoto': newProfilePhoto, // Mise à jour de la photo de profil
+      });
+    } catch (e) {
+      print('Erreur lors de la mise à jour de la photo de profil: $e');
+      throw Exception('Erreur lors de la mise à jour de la photo de profil');
+    }
+  }
 
   static AppUser empty() {
     return AppUser(
