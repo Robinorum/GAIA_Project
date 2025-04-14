@@ -44,13 +44,13 @@ for artwork_id, artwork_info in artwork_data.items():
     embedding = get_embedding(image)
     embeddings.append(embedding)
 
-# Convertir en numpy array
+
 embeddings_np = np.array(embeddings).astype("float32")
 dimension = embeddings_np.shape[1]
 
-# Créer un index FAISS (distance euclidienne)
+
 index = faiss.IndexFlatL2(dimension)
 index.add(embeddings_np)
 
-# Sauvegarde de l'index
+
 faiss.write_index(index, "index_artwork_big.faiss")
