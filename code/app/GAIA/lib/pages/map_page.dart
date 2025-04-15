@@ -143,10 +143,6 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("User Location Map"),
-        automaticallyImplyLeading: false,
-      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _currentLocation == null

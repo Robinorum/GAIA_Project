@@ -16,18 +16,30 @@ class _CollectionPageState extends State<CollectionPage> {
   late Future<List<Artwork>> _artworks;
   List<Artwork> _allArtworks = [];
   List<Artwork> _filteredArtworks = [];
+  List<String> _selectedMovements = [];
   final TextEditingController _searchController = TextEditingController();
-  String _selectedMovement = "All";
 
-  // To modify after
   final List<String> _movements = [
-    "All",
-    "Impressionism",
     "Renaissance",
     "Baroque",
-    "Cubism",
-    "Surrealism",
-    "Modern Art",
+    "Rococo",
+    "Néoclassicisme",
+    "Romantisme",
+    "Réalisme",
+    "Impressionnisme",
+    "Post-impressionnisme",
+    "Symbolisme",
+    "Art nouveau",
+    "Fauvisme",
+    "Cubisme",
+    "Byzantin",
+    "Expressionnisme",
+    "Surréalisme",
+    "Dadaïsme",
+    "Abstraction",
+    "Art déco",
+    "Pop art",
+    "Hyperréalisme"
   ];
 
   @override
@@ -45,22 +57,105 @@ class _CollectionPageState extends State<CollectionPage> {
 
     setState(() {
       _filteredArtworks = _allArtworks.where((artwork) {
-        bool matchesSearch = artwork.title.toLowerCase().contains(query) ||
+        final matchesSearch = artwork.title.toLowerCase().contains(query) ||
             artwork.artist.toLowerCase().contains(query);
 
-        bool matchesMovement =
-            _selectedMovement == "All" || artwork.movement == _selectedMovement;
+        final matchesMovement = _selectedMovements.isEmpty ||
+            _selectedMovements.contains(artwork.movement);
 
         return matchesSearch && matchesMovement;
       }).toList();
     });
   }
 
-  void _filterByMovement(String? movement) {
-    setState(() {
-      _selectedMovement = movement ?? "All";
-      _filterArtworks();
-    });
+  void _showFilterSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        List<String> tempSelection = List.from(_selectedMovements);
+
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.95,
+          builder: (_, controller) {
+            return StatefulBuilder(
+              builder: (context, setModalState) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ListView(
+                    controller: controller,
+                    children: [
+                      const Text(
+                        "Filtrer par mouvements",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _movements.map((movement) {
+                          final isSelected = tempSelection.contains(movement);
+                          return FilterChip(
+                            label: Text(movement),
+                            selected: isSelected,
+                            onSelected: (bool selected) {
+                              setModalState(() {
+                                if (selected) {
+                                  tempSelection.add(movement);
+                                } else {
+                                  tempSelection.remove(movement);
+                                }
+                              });
+                            },
+                            selectedColor: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.2),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedMovements.clear();
+                                _filterArtworks();
+                              });
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Réinitialiser"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedMovements = tempSelection;
+                                _filterArtworks();
+                              });
+                              Navigator.pop(context);
+                            },
+                            child: const Text("Appliquer"),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -72,37 +167,47 @@ class _CollectionPageState extends State<CollectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Collection"),
-        automaticallyImplyLeading: false,
-      ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: "Search an artwork...",
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+            padding:
+                const EdgeInsets.only(top: 20, left: 16, right: 16, bottom: 24),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: "Search artworks...",
+                      prefixIcon: const Icon(Icons.search),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: DropdownButton<String>(
-              value: _selectedMovement,
-              isExpanded: true,
-              items: _movements.map((movement) {
-                return DropdownMenuItem<String>(
-                  value: movement,
-                  child: Text(movement),
-                );
-              }).toList(),
-              onChanged: _filterByMovement,
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  onPressed: () => _showFilterSheet(context),
+                  icon: const Icon(Icons.tune, size: 20),
+                  label: Text(
+                    _selectedMovements.isEmpty
+                        ? "Filtres"
+                        : "Filtres (${_selectedMovements.length})",
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
