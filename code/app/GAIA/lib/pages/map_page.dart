@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:GAIA/model/museum.dart';
 import 'package:GAIA/services/museum_service.dart';
-import 'package:GAIA/pages/detail_museum_page.dart';
+import '../widgets/museum_list_view.dart';
+import '../widgets/museum_map_view.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -16,82 +16,32 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  LatLng? _currentLocation;
   bool _loading = true;
-  List<Museum> _allMuseums = [];
+  LatLng? _currentLocation;
   List<Museum> _museums = [];
+  List<Museum> _visibleMuseumsOnMap = [];
+
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _showMap = false;
 
   final MuseumService _museumService = MuseumService();
-  StreamSubscription<Position>? _positionStreamSubscription;
   final MapController _mapController = MapController();
-  double _markerSize = 40; // Default size for markers
+  StreamSubscription<Position>? _positionStreamSubscription;
+  final double _markerSize = 40;
 
   @override
   void initState() {
     super.initState();
     _getUserLocation();
-    _loadAllMuseums(); // Renommé
-    _mapController.mapEventStream.listen(_onMapMove);
+    _loadMuseums();
   }
 
   @override
   void dispose() {
     _positionStreamSubscription?.cancel();
+    _searchController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadAllMuseums() async {
-    try {
-      final museums =
-          await _museumService.fetchMuseums(); // 1 seul appel Firebase ici
-      setState(() {
-        _allMuseums = museums;
-      });
-
-      final bounds = _mapController.bounds;
-      if (bounds != null) {
-        _loadMuseumsInBounds(bounds);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur chargement musées initiaux : $e")),
-      );
-    } finally {
-      setState(() {
-        _loading = false;
-      });
-    }
-  }
-
-  Future<void> _loadMuseumsInBounds(LatLngBounds bounds) async {
-    try {
-      final visibleMuseums = _allMuseums.where((museum) {
-        final point =
-            LatLng(museum.location.latitude, museum.location.longitude);
-        return bounds.contains(point);
-      }).toList();
-
-      setState(() {
-        _museums = visibleMuseums;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur filtrage musées dans la zone : $e")),
-      );
-    }
-  }
-
-  Timer? _debounce;
-
-  void _onMapMove(MapEvent event) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 200), () {
-      final bounds = _mapController.bounds;
-      if (bounds != null) {
-        _updateMarkerSize(_mapController.zoom);
-        _loadMuseumsInBounds(bounds);
-      }
-    });
   }
 
   Future<void> _getUserLocation() async {
@@ -104,141 +54,171 @@ class _MapPageState extends State<MapPage> {
         throw Exception("Location permissions are permanently denied.");
       }
 
-      final Position position = await Geolocator.getCurrentPosition();
+      final position = await Geolocator.getCurrentPosition();
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
       });
 
       _positionStreamSubscription =
-          Geolocator.getPositionStream().listen((Position position) {
+          Geolocator.getPositionStream().listen((position) {
         setState(() {
           _currentLocation = LatLng(position.latitude, position.longitude);
         });
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error getting location: $e")),
+        SnackBar(content: Text("Erreur localisation : $e")),
       );
-    } finally {
-      setState(() {
-        _loading = false;
-      });
     }
   }
 
-  void _updateMarkerSize(double zoom) {
-    // Adjust size dynamically based on zoom level
-    _markerSize = (zoom * 3).clamp(20, 50); // Min 20px, Max 50px
+  Future<void> _loadMuseums() async {
+    try {
+      final museums = await _museumService.fetchMuseums();
+      setState(() {
+        _museums = museums;
+      });
+      _filterMapMuseums();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur chargement musées : $e")),
+      );
+    } finally {
+      setState(() => _loading = false);
+    }
   }
 
-  double _calculateDistance(LatLng start, LatLng end) {
-    return Geolocator.distanceBetween(
-      start.latitude,
-      start.longitude,
-      end.latitude,
-      end.longitude,
-    );
+  void _filterMapMuseums() {
+    final bounds = _mapController.bounds;
+    final query = _searchQuery.toLowerCase();
+
+    if (bounds == null) return;
+
+    setState(() {
+      _visibleMuseumsOnMap = _museums.where((museum) {
+        final point =
+            LatLng(museum.location.latitude, museum.location.longitude);
+        final inBounds = bounds.contains(point);
+        final match = museum.title.toLowerCase().contains(query) ||
+            museum.city.toLowerCase().contains(query);
+        return inBounds && match;
+      }).toList();
+    });
+  }
+
+  List<Museum> _filteredMuseumsForList(List<Museum> sortedMuseums) {
+    if (_searchQuery.isEmpty) return sortedMuseums;
+
+    return sortedMuseums.where((museum) {
+      return museum.title.toLowerCase().contains(_searchQuery) ||
+          museum.city.toLowerCase().contains(_searchQuery);
+    }).toList();
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query.toLowerCase();
+    });
+    _filterMapMuseums();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _currentLocation == null
-              ? const Center(child: Text("Could not determine location."))
-              : FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    center: _currentLocation,
-                    zoom: 5.0,
-                    maxZoom: 17.0,
-                    minZoom: 2.0,
-                    interactiveFlags:
-                        InteractiveFlag.pinchZoom | InteractiveFlag.drag,
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.example.app',
-                    ),
-                    MarkerClusterLayerWidget(
-                      options: MarkerClusterLayerOptions(
-                        maxClusterRadius: 45,
-                        size: const Size(50, 50),
-                        fitBoundsOptions:
-                            const FitBoundsOptions(padding: EdgeInsets.all(50)),
-                        markers: _museums.map((museum) {
-                          final distance = _calculateDistance(
-                            _currentLocation!,
-                            LatLng(museum.location.latitude,
-                                museum.location.longitude),
-                          );
-                          return Marker(
-                            point: LatLng(museum.location.latitude,
-                                museum.location.longitude),
-                            width: _markerSize,
-                            height: _markerSize,
-                            builder: (ctx) => GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailMuseumPage(
-                                      museum: museum,
-                                      distance: distance,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Tooltip(
-                                message:
-                                    "${museum.title}\nDistance: ${(distance / 1000).toStringAsFixed(2)} km",
-                                child: Icon(
-                                  Icons.location_on,
-                                  color: Colors.red,
-                                  size: _markerSize,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        builder: (context, markers) {
-                          return Container(
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.5),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.red,
-                                width: 3.0,
-                              ),
-                            ),
-                            child: Text('${markers.length}'),
-                          );
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _onSearchChanged,
+              textAlignVertical: TextAlignVertical.center,
+              decoration: InputDecoration(
+                hintText: 'Rechercher un musée...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          _onSearchChanged('');
                         },
-                      ),
-                    ),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: _currentLocation!,
-                          width: _markerSize,
-                          height: _markerSize,
-                          builder: (ctx) => Transform.translate(
-                            offset: Offset(0, -_markerSize / 2),
-                            child: Icon(
-                              Icons.man_rounded,
-                              color: Colors.blue,
-                              size: _markerSize,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      )
+                    : null,
+                filled: true,
+                fillColor: Colors.grey[200],
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12.0, horizontal: 16.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24.0),
+                  borderSide: BorderSide.none,
                 ),
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildToggleButton(
+                label: 'Liste',
+                selected: !_showMap,
+                onPressed: () => setState(() => _showMap = false),
+              ),
+              const SizedBox(width: 12),
+              _buildToggleButton(
+                label: 'Carte',
+                selected: _showMap,
+                onPressed: () => setState(() => _showMap = true),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _showMap
+                    ? MuseumMapView(
+                        museums: _visibleMuseumsOnMap,
+                        allMuseums: _museums,
+                        mapController: _mapController,
+                        currentLocation: _currentLocation,
+                        markerSize: _markerSize,
+                        onMapMove: _filterMapMuseums,
+                      )
+                    : MuseumListView(
+                        museums: _filteredMuseumsForList(_museums),
+                        currentLocation: _currentLocation,
+                      ),
+          ),
+        ],
+      ),
     );
   }
+}
+
+Widget _buildToggleButton({
+  required String label,
+  required bool selected,
+  required VoidCallback onPressed,
+}) {
+  return ElevatedButton(
+    onPressed: onPressed,
+    style: ElevatedButton.styleFrom(
+      backgroundColor: selected ? Colors.blue : Colors.transparent,
+      side: const BorderSide(color: Colors.blue),
+      elevation: selected ? 4 : 0,
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+    ),
+    child: Text(
+      label,
+      style: TextStyle(
+        fontSize: 16,
+        color: selected ? Colors.white : Colors.blue,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
 }
