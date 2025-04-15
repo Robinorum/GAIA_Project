@@ -34,7 +34,7 @@ def add_brand_byId(userId, artworkId):
 def state_brand_byId(userId, artworkId):
     db = firestore.client()
     doc_ref = db.collection('accounts').document(userId)
-    doc = doc_ref.get()    
+    doc = doc_ref.get()
     if doc.exists:
         data = doc.to_dict()
         brands = data.get('brands', [])
@@ -48,18 +48,20 @@ def state_brand_byId(userId, artworkId):
 
 @app.route("/api/fetch_col/<uid>", methods=["GET"])
 def fetch_collection(uid):
+    collection_ids = get_collection(uid)
     
-    collection_id = get_collection(uid)
-    
-    if collection_id:
-        print(f"Collection for UID {uid} already exists.")
-        artworks = get_artworks()
-        collection_user = []
+    if collection_ids:
+        print(f"Collection for UID {uid} contains {len(collection_ids)} artworks.")
+        artworks = get_artworks_by_ids(collection_ids)
+        
         if artworks:
-            collection_user = [art for art in artworks if art["id"] in collection_id]
-            return jsonify({"success": True, "data": collection_user})
+            return jsonify({"success": True, "data": artworks}), 200
         else:
             print("No matching artworks found in Firestore.")
+            return jsonify({"success": False, "data": []}), 404
+    
+    print(f"No collection found for UID {uid}.")
+    return jsonify({"success": False, "data": []}), 404
 
 
 @app.route("/api/maj_quest/<userId>/<artworkMovement>", methods=["GET"])
@@ -108,12 +110,27 @@ def get_quests(userId):
     user_quests = user_data.get('quests', {})  
     
     if not isinstance(user_quests, dict):  
-        user_quests = {}  
+        user_quests = {}  # Correction si c'est mal initialisé
     
+    # Extraire uniquement quest_id et progression
     filtered_quests = [{"id": quest_id, "progression": data.get("progression", 0)} for quest_id, data in user_quests.items()]
     print(filtered_quests)
     return {"quests": filtered_quests}, 200
 
+
+  # if doc.exists:
+    #     data = doc.to_dict()
+    #     if 'quests' in data:
+    #         quests = data['quests']
+    #         if artworkMovement in quests:
+    #             quests[artworkMovement] += 1
+    #         else:
+    #             quests[artworkMovement] = 1
+    #     else:
+    #         quests = {artworkMovement: 1}
+        
+    #     doc_ref.update({'quests': quests})
+    #     return "Quest updated successfully", 200
 
 def get_artworks():
     try:
@@ -154,6 +171,38 @@ def get_collection(uid):
             return []
     except Exception as e:
         return []
+
+
+
+
+def get_artworks_by_ids(artwork_ids):
+    try:
+        db = firestore.client()
+        artworks_ref = db.collection('artworks')
+        
+        # Firestore permet de faire une requête avec "in" pour jusqu'à 10 IDs à la fois
+        # Si plus de 10 IDs, on doit diviser en plusieurs requêtes
+        result = []
+        batch_size = 10 
+        
+        for i in range(0, len(artwork_ids), batch_size):
+            batch_ids = artwork_ids[i:i + batch_size]
+            query = artworks_ref.where(field_path='__name__', op_string='in', value=[artworks_ref.document(art_id) for art_id in batch_ids])
+            artworks = query.stream()
+            
+            for artwork in artworks:
+                artwork_data = artwork.to_dict()
+                artwork_data['id'] = artwork.id
+                result.append(artwork_data)
+        
+        print(f"Successfully retrieved {len(result)} artworks for IDs.")
+        return result
+    except Exception as e:
+        print(f"Error retrieving artworks: {e}")
+        return []
+    
+
+
 
 
 
