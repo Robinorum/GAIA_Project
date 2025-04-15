@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:GAIA/model/museum.dart';
 import 'package:GAIA/services/museum_service.dart';
@@ -17,7 +18,9 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   LatLng? _currentLocation;
   bool _loading = true;
+  List<Museum> _allMuseums = [];
   List<Museum> _museums = [];
+
   final MuseumService _museumService = MuseumService();
   StreamSubscription<Position>? _positionStreamSubscription;
   final MapController _mapController = MapController();
@@ -27,16 +30,8 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
     _getUserLocation();
-    _loadMuseums();
-
-    // Listen for map zoom events to update icon sizes
-    _mapController.mapEventStream.listen((event) {
-      if (event is MapEventMove) {
-        setState(() {
-          _updateMarkerSize(_mapController.zoom);
-        });
-      }
-    });
+    _loadAllMuseums(); // Renommé
+    _mapController.mapEventStream.listen(_onMapMove);
   }
 
   @override
@@ -45,21 +40,58 @@ class _MapPageState extends State<MapPage> {
     super.dispose();
   }
 
-  Future<void> _loadMuseums() async {
+  Future<void> _loadAllMuseums() async {
     try {
-      final museums = await _museumService.fetchMuseums();
+      final museums =
+          await _museumService.fetchMuseums(); // 1 seul appel Firebase ici
       setState(() {
-        _museums = museums;
+        _allMuseums = museums;
       });
+
+      final bounds = _mapController.bounds;
+      if (bounds != null) {
+        _loadMuseumsInBounds(bounds);
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to load museums: $e")),
+        SnackBar(content: Text("Erreur chargement musées initiaux : $e")),
       );
     } finally {
       setState(() {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _loadMuseumsInBounds(LatLngBounds bounds) async {
+    try {
+      final visibleMuseums = _allMuseums.where((museum) {
+        final point =
+            LatLng(museum.location.latitude, museum.location.longitude);
+        return bounds.contains(point);
+      }).toList();
+
+      setState(() {
+        _museums = visibleMuseums;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur filtrage musées dans la zone : $e")),
+      );
+    }
+  }
+
+  Timer? _debounce;
+
+  void _onMapMove(MapEvent event) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 200), () {
+      final bounds = _mapController.bounds;
+      if (bounds != null) {
+        _updateMarkerSize(_mapController.zoom);
+        _loadMuseumsInBounds(bounds);
+      }
+    });
   }
 
   Future<void> _getUserLocation() async {
@@ -111,10 +143,6 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("User Location Map"),
-        automaticallyImplyLeading: false,
-      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _currentLocation == null
@@ -135,10 +163,13 @@ class _MapPageState extends State<MapPage> {
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'com.example.app',
                     ),
-                    MarkerLayer(
-                      markers: [
-                        // Marqueurs pour les musées avec réduction dynamique
-                        ..._museums.map((museum) {
+                    MarkerClusterLayerWidget(
+                      options: MarkerClusterLayerOptions(
+                        maxClusterRadius: 45,
+                        size: Size(50, 50),
+                        fitBoundsOptions:
+                            FitBoundsOptions(padding: EdgeInsets.all(50)),
+                        markers: _museums.map((museum) {
                           final distance = _calculateDistance(
                             _currentLocation!,
                             LatLng(museum.location.latitude,
@@ -149,44 +180,54 @@ class _MapPageState extends State<MapPage> {
                                 museum.location.longitude),
                             width: _markerSize,
                             height: _markerSize,
-                            builder: (ctx) => Transform.translate(
-                              offset: Offset(
-                                  0, -_markerSize / 2), // Ajustement centré
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => DetailMuseumPage(
-                                        museum: museum,
-                                        distance: distance,
-                                      ),
+                            builder: (ctx) => GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DetailMuseumPage(
+                                      museum: museum,
+                                      distance: distance,
                                     ),
-                                  );
-                                },
-                                child: Tooltip(
-                                  padding: EdgeInsets.zero,
-                                  message:
-                                      "${museum.title}\nDistance: ${(distance / 1000).toStringAsFixed(2)} km",
-                                  child: Icon(
-                                    Icons.location_on,
-                                    color: Colors.red,
-                                    size: _markerSize,
                                   ),
+                                );
+                              },
+                              child: Tooltip(
+                                message:
+                                    "${museum.title}\nDistance: ${(distance / 1000).toStringAsFixed(2)} km",
+                                child: Icon(
+                                  Icons.location_on,
+                                  color: Colors.red,
+                                  size: _markerSize,
                                 ),
                               ),
                             ),
                           );
                         }).toList(),
-
-                        // Marqueur pour l'utilisateur (placé après pour être au-dessus)
+                        builder: (context, markers) {
+                          return Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.red,
+                                width: 3.0,
+                              ),
+                            ),
+                            child: Text('${markers.length}'),
+                          );
+                        },
+                      ),
+                    ),
+                    MarkerLayer(
+                      markers: [
                         Marker(
                           point: _currentLocation!,
                           width: _markerSize,
                           height: _markerSize,
                           builder: (ctx) => Transform.translate(
-                            offset: Offset(
-                                0, -_markerSize / 2), // Ajustement centré
+                            offset: Offset(0, -_markerSize / 2),
                             child: Icon(
                               Icons.man_rounded,
                               color: Colors.blue,
