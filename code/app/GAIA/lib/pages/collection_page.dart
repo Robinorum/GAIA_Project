@@ -6,7 +6,7 @@ import 'package:GAIA/provider/userProvider.dart';
 import 'package:provider/provider.dart';
 
 class CollectionPage extends StatefulWidget {
-  const CollectionPage({Key? key}) : super(key: key);
+  const CollectionPage({super.key});
 
   @override
   _CollectionPageState createState() => _CollectionPageState();

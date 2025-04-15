@@ -8,7 +8,7 @@ import 'package:GAIA/provider/userProvider.dart';
 class SettingsPage extends StatefulWidget {
   final Function(bool isDarkMode) onToggleTheme;
 
-  const SettingsPage({Key? key, required this.onToggleTheme}) : super(key: key);
+  const SettingsPage({super.key, required this.onToggleTheme});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();

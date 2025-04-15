@@ -123,13 +123,12 @@ class _ProfilePicturePageState extends State<ProfilePicturePage> {
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:GAIA/provider/userProvider.dart'; // Assure-toi d'importer ton userProvider
-import 'package:GAIA/model/appUser.dart'; // Assure-toi d'importer ton modèle AppUser
+import 'package:GAIA/provider/userProvider.dart';
 
 class ProfilePicturePage extends StatefulWidget {
+  const ProfilePicturePage({super.key});
+
   @override
   _ProfilePicturePageState createState() => _ProfilePicturePageState();
 }
@@ -145,9 +144,10 @@ class _ProfilePicturePageState extends State<ProfilePicturePage> {
 
   Future<void> loadImagesFromJson() async {
     try {
-      String jsonString = await rootBundle.loadString('assets/image_profiles/images.json');
+      String jsonString =
+          await rootBundle.loadString('assets/image_profiles/images.json');
       Map<String, dynamic> jsonData = json.decode(jsonString);
-      
+
       List<String> paths = List<String>.from(jsonData['images']);
       setState(() {
         imagePaths = paths;
@@ -160,12 +160,12 @@ class _ProfilePicturePageState extends State<ProfilePicturePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Select a Profile Picture")),
+      appBar: AppBar(title: const Text("Select a Profile Picture")),
       body: imagePaths.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : GridView.builder(
-              padding: EdgeInsets.all(10),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              padding: const EdgeInsets.all(10),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
@@ -174,21 +174,24 @@ class _ProfilePicturePageState extends State<ProfilePicturePage> {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () async {
-              // Récupère l'utilisateur actuel
-              final user = Provider.of<UserProvider>(context, listen: false).user;
+                    // Récupère l'utilisateur actuel
+                    final user =
+                        Provider.of<UserProvider>(context, listen: false).user;
 
-              // Mets à jour la photo de profil dans Firestore
-              try {
-                await user?.updateProfilePhoto(imagePaths[index]);
-                // Une fois l'image mise à jour, notifie les autres widgets
-                Provider.of<UserProvider>(context, listen: false).updateProfileImage(imagePaths[index]);
-                Navigator.pop(context); // Retour à la page précédente
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
-              }
-            },
-            child: Image.asset(imagePaths[index], fit: BoxFit.cover),
-          );
+                    // Mets à jour la photo de profil dans Firestore
+                    try {
+                      await user?.updateProfilePhoto(imagePaths[index]);
+                      // Une fois l'image mise à jour, notifie les autres widgets
+                      Provider.of<UserProvider>(context, listen: false)
+                          .updateProfileImage(imagePaths[index]);
+                      Navigator.pop(context); // Retour à la page précédente
+                    } catch (e) {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                    }
+                  },
+                  child: Image.asset(imagePaths[index], fit: BoxFit.cover),
+                );
               },
             ),
     );

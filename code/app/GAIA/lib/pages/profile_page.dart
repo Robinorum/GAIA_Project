@@ -7,7 +7,7 @@ import 'package:GAIA/pages/profile_picture_page.dart';
 import 'package:GAIA/services/profilage_service.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -20,15 +20,31 @@ class _ProfilePageState extends State<ProfilePage> {
 
     // Données fictives pour tester
     List<Map<String, dynamic>> visitedMuseums = [
-      {"name": "Museum of Modern Art", "city": "New York", "collected": 34, "total": 34},
+      {
+        "name": "Museum of Modern Art",
+        "city": "New York",
+        "collected": 34,
+        "total": 34
+      },
       {"name": "Louvre Museum", "city": "Paris", "collected": 26, "total": 60},
       {"name": "The Met", "city": "New York", "collected": 7, "total": 28},
       {"name": "National Gallery", "city": "Oslo", "collected": 5, "total": 31},
-      {"name": "Belvedere Museum", "city": "Vienna", "collected": 3, "total": 29},
-      {"name": "Museo Reina Sofia", "city": "Madrid", "collected": 8, "total": 112},
+      {
+        "name": "Belvedere Museum",
+        "city": "Vienna",
+        "collected": 3,
+        "total": 29
+      },
+      {
+        "name": "Museo Reina Sofia",
+        "city": "Madrid",
+        "collected": 8,
+        "total": 112
+      },
     ];
 
-    visitedMuseums.sort((a, b) => (b["collected"] / b["total"]).compareTo(a["collected"] / a["total"]));
+    visitedMuseums.sort((a, b) =>
+        (b["collected"] / b["total"]).compareTo(a["collected"] / a["total"]));
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -53,7 +69,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SettingsPage(onToggleTheme: (isDarkMode) {}),
+                          builder: (context) =>
+                              SettingsPage(onToggleTheme: (isDarkMode) {}),
                         ),
                       );
                     },
@@ -66,7 +83,8 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 CircleAvatar(
                   radius: 50,
-                  backgroundImage: AssetImage(user!.profilePhoto), // Replace with real image
+                  backgroundImage:
+                      AssetImage(user!.profilePhoto), // Replace with real image
                 ),
                 Positioned(
                   bottom: 0,
@@ -76,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ProfilePicturePage(),
+                          builder: (context) => const ProfilePicturePage(),
                         ),
                       );
                     },
@@ -87,7 +105,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         border: Border.all(color: Colors.white, width: 2),
                       ),
                       padding: const EdgeInsets.all(6),
-                      child: const Icon(Icons.edit, color: Colors.white, size: 20),
+                      child:
+                          const Icon(Icons.edit, color: Colors.white, size: 20),
                     ),
                   ),
                 ),
@@ -95,7 +114,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 50),
             Text(
-              user?.username ?? "Guest",
+              user.username,
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -115,7 +134,7 @@ class _ProfilePageState extends State<ProfilePage> {
             _buildSectionTitle("Favourite Movement"),
             // Utilisation de FutureBuilder pour les mouvements favoris
             FutureBuilder<List<String>>(
-              future: ProfilageService().fetchTopMovements(user!.id),
+              future: ProfilageService().fetchTopMovements(user.id),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator(); // Chargement
@@ -126,7 +145,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 }
 
                 final movements = snapshot.data!;
-                final favoriteMovements = List.generate(movements.length, (index) {
+                final favoriteMovements =
+                    List.generate(movements.length, (index) {
                   Color color;
                   switch (index) {
                     case 0:
@@ -146,7 +166,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       .asMap()
                       .entries
                       .map((entry) => _buildMovementTile(
-                          entry.key + 1, entry.value["name"] as String, entry.value["color"] as Color))
+                          entry.key + 1,
+                          entry.value["name"] as String,
+                          entry.value["color"] as Color))
                       .toList(),
                 );
               },

@@ -5,15 +5,15 @@ import 'package:GAIA/services/user_service.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:provider/provider.dart';
 
-
 class PredictionScreen extends StatefulWidget {
   final Map<String, dynamic> artworkData;
 
-  const PredictionScreen({required this.artworkData, Key? key}) : super(key: key);
+  const PredictionScreen({required this.artworkData, super.key});
 
   @override
   _PredictionScreenState createState() => _PredictionScreenState();
 }
+
 class _PredictionScreenState extends State<PredictionScreen> {
   late Artwork _artwork;
   late Future<List<Artwork>> _collectionFuture;
@@ -24,7 +24,8 @@ class _PredictionScreenState extends State<PredictionScreen> {
     _initializeArtwork();
 
     final user = Provider.of<UserProvider>(context, listen: false).user;
-    _collectionFuture = UserService().fetchCollection(user!.id); // Chargé une seule fois
+    _collectionFuture =
+        UserService().fetchCollection(user!.id); // Chargé une seule fois
   }
 
   void _initializeArtwork() {
@@ -84,7 +85,8 @@ class _PredictionScreenState extends State<PredictionScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'Titre: ${_artwork.title}',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -94,14 +96,16 @@ class _PredictionScreenState extends State<PredictionScreen> {
                       const SizedBox(height: 8),
                       Text(
                         'Année: ${_artwork.date}',
-                        style: const TextStyle(fontSize: 16, color: Colors.grey),
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         _artwork.description,
                         style: const TextStyle(fontSize: 16),
                       ),
-                      const SizedBox(height: 100), // Pour laisser de l'espace au bouton
+                      const SizedBox(
+                          height: 100), // Pour laisser de l'espace au bouton
                     ],
                   ),
                 ),
@@ -118,28 +122,33 @@ class _PredictionScreenState extends State<PredictionScreen> {
                               backgroundColor: Colors.grey,
                               foregroundColor: Colors.white,
                               disabledBackgroundColor: Colors.grey.shade400,
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
                             ),
                           )
                         : FloatingActionButton.extended(
                             onPressed: () async {
-                              print(user!.id);
-                              bool success = await UserService().addArtworks(user.id, _artwork.id);
-                              bool majQuest = await UserService().majQuest(user.id, _artwork.movement);
+                              //print(user!.id);
+                              bool success = await UserService()
+                                  .addArtworks(user!.id, _artwork.id);
+                              bool majQuest = await UserService()
+                                  .majQuest(user.id, _artwork.movement);
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(success
                                       ? "Oeuvre ajoutée à la collection !"
                                       : "Erreur lors de l'ajout."),
-                                  backgroundColor: success ? Colors.green : Colors.red,
+                                  backgroundColor:
+                                      success ? Colors.green : Colors.red,
                                 ),
                               );
 
                               if (success) {
                                 Navigator.pushAndRemoveUntil(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const HomePage()),
+                                  MaterialPageRoute(
+                                      builder: (context) => const HomePage()),
                                   (route) => false,
                                 );
                               }

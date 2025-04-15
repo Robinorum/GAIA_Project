@@ -9,7 +9,7 @@ import 'package:GAIA/services/museum_service.dart';
 import 'package:GAIA/pages/detail_museum_page.dart';
 
 class MapPage extends StatefulWidget {
-  const MapPage({Key? key}) : super(key: key);
+  const MapPage({super.key});
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -166,9 +166,9 @@ class _MapPageState extends State<MapPage> {
                     MarkerClusterLayerWidget(
                       options: MarkerClusterLayerOptions(
                         maxClusterRadius: 45,
-                        size: Size(50, 50),
+                        size: const Size(50, 50),
                         fitBoundsOptions:
-                            FitBoundsOptions(padding: EdgeInsets.all(50)),
+                            const FitBoundsOptions(padding: EdgeInsets.all(50)),
                         markers: _museums.map((museum) {
                           final distance = _calculateDistance(
                             _currentLocation!,

@@ -4,6 +4,8 @@ import 'prediction_screen.dart';
 import '../services/prediction_service.dart';
 
 class CameraScreen extends StatefulWidget {
+  const CameraScreen({super.key});
+
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
@@ -34,14 +36,13 @@ class _CameraScreenState extends State<CameraScreen> {
 
     await _cameraController.initialize();
 
-     if (mounted) {
+    if (mounted) {
       setState(() {
         _isCameraInitialized = true;
         _cameraAspectRatio = 1 / _cameraController.value.aspectRatio;
       });
     }
   }
-
 
   Future<void> toggleFlash() async {
     if (_cameraController.value.isInitialized) {
@@ -100,12 +101,12 @@ class _CameraScreenState extends State<CameraScreen> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('No matches found'),
-            content: Text('No recognized artwork in the image.'),
+            title: const Text('No matches found'),
+            content: const Text('No recognized artwork in the image.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('OK'),
+                child: const Text('OK'),
               ),
             ],
           ),
@@ -144,15 +145,14 @@ class _CameraScreenState extends State<CameraScreen> {
                   aspectRatio: _cameraAspectRatio, // Garde un carré
                   child: CameraPreview(_cameraController),
                 ),
-                
               ),
-              
             ),
           Positioned(
             top: 40,
             left: 20,
             child: IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 28),
+              icon: const Icon(Icons.arrow_back_ios,
+                  color: Colors.white, size: 28),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -175,7 +175,7 @@ class _CameraScreenState extends State<CameraScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                const Text(
                   'Tap to capture a photo',
                   style: TextStyle(
                     color: Colors.white,
@@ -183,17 +183,18 @@ class _CameraScreenState extends State<CameraScreen> {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(20),
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(20),
                     backgroundColor: Colors.white,
                   ),
                   onPressed: _isLoading
                       ? null
                       : capturePhoto, // Désactive le bouton si en chargement
-                  child: Icon(Icons.camera_alt, size: 36, color: Colors.black),
+                  child: const Icon(Icons.camera_alt,
+                      size: 36, color: Colors.black),
                 ),
               ],
             ),

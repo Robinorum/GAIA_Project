@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:GAIA/provider/userProvider.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:GAIA/pages/collection_page.dart';
 import 'package:GAIA/pages/map_page.dart';
@@ -18,7 +17,7 @@ import 'package:latlong2/latlong.dart';
 import '../pages/detail_museum_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -28,10 +27,10 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    HomeContent(),
-    MapPage(),
-    QuestsPage(),
-    CollectionPage(),
+    const HomeContent(),
+    const MapPage(),
+    const QuestsPage(),
+    const CollectionPage(),
   ];
 
   void _onNavTap(int index) {
@@ -55,7 +54,7 @@ class _HomePageState extends State<HomePage> {
         onScan: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CameraScreen()),
+            MaterialPageRoute(builder: (context) => const CameraScreen()),
           );
         },
       ),
@@ -64,7 +63,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class HomeContent extends StatefulWidget {
-  HomeContent({Key? key}) : super(key: key);
+  const HomeContent({super.key});
 
   @override
   State<HomeContent> createState() => _HomeContentState();
@@ -121,29 +120,29 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-void _sortAndUpdateMuseums() {
-  if (_currentLocation == null) return;
+  void _sortAndUpdateMuseums() {
+    if (_currentLocation == null) return;
 
-  _recommendedMuseums.then((museums) {
-    // Filtrer les musées à une distance maximale de 50 km
-    final nearbyMuseums = museums.where((museum) {
-      final museumLocation = LatLng(museum.location.latitude, museum.location.longitude);
-      final distance = _calculateDistance(_currentLocation!, museumLocation);
-      return distance <= 50000; // Distance maximale de 50 km
-    }).toList();
+    _recommendedMuseums.then((museums) {
+      // Filtrer les musées à une distance maximale de 50 km
+      final nearbyMuseums = museums.where((museum) {
+        final museumLocation =
+            LatLng(museum.location.latitude, museum.location.longitude);
+        final distance = _calculateDistance(_currentLocation!, museumLocation);
+        return distance <= 50000; // Distance maximale de 50 km
+      }).toList();
 
-    // Trier les musées restants par distance
-    final sortedMuseums = _sortMuseumsByDistance(nearbyMuseums);
+      // Trier les musées restants par distance
+      final sortedMuseums = _sortMuseumsByDistance(nearbyMuseums);
 
-    // Limiter à 10 musées
-    final topMuseums = sortedMuseums.take(10).toList();
+      // Limiter à 10 musées
+      final topMuseums = sortedMuseums.take(10).toList();
 
-    setState(() {
-      _recommendedMuseums = Future.value(topMuseums);
+      setState(() {
+        _recommendedMuseums = Future.value(topMuseums);
+      });
     });
-  });
-}
-
+  }
 
   double _calculateDistance(LatLng start, LatLng end) {
     return Geolocator.distanceBetween(
@@ -209,7 +208,8 @@ void _sortAndUpdateMuseums() {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ProfilePage()),
+                        MaterialPageRoute(
+                            builder: (context) => const ProfilePage()),
                       );
                     },
                     child: CircleAvatar(
@@ -263,7 +263,7 @@ void _sortAndUpdateMuseums() {
                   itemCount: artworks.length,
                   itemBuilder: (context, index) {
                     final artwork = artworks[index];
-                    return _buildCarouselItem(artwork.toImage() as Image, artwork.title);
+                    return _buildCarouselItem(artwork.toImage(), artwork.title);
                   },
                 );
               },
@@ -312,7 +312,7 @@ void _sortAndUpdateMuseums() {
                           )
                         : null;
                     return _buildCarouselItemWithDistance(
-                      museum.toImage() as Image,
+                      museum.toImage(),
                       museum.title,
                       distance,
                     );
@@ -326,163 +326,166 @@ void _sortAndUpdateMuseums() {
     );
   }
 
-Widget _buildCarouselItem(Image image, String title) {
-  return InkWell(
-    onTap: () {
-      final artworks = _recommendedArtworks as Future<List<Artwork>>;
-      artworks.then((artworksList) {
-        final selectedArtwork = artworksList.firstWhere(
-          (artwork) => artwork.title == title,
-          orElse: () => throw Exception('Artwork not found'),
-        );
+  Widget _buildCarouselItem(Image image, String title) {
+    return InkWell(
+      onTap: () {
+        final artworks = _recommendedArtworks;
+        artworks.then((artworksList) {
+          final selectedArtwork = artworksList.firstWhere(
+            (artwork) => artwork.title == title,
+            orElse: () => throw Exception('Artwork not found'),
+          );
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailArtworkPage(
-              artwork: selectedArtwork,
-            ),
-          ),
-        );
-      });
-    },
-    child: Column(
-      children: [
-        Container(
-          height: 200,
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.transparent, // Ombre invisible
-                blurRadius: 6,
-                offset: const Offset(0, 4),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailArtworkPage(
+                artwork: selectedArtwork,
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image(
-              image: image.image, // Récupère le provider d'image
-              fit: BoxFit.contain, // Préserve le ratio d'aspect
-              width: double.infinity,
-              height: 200,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
-                  return child; // Image chargée
-                }
-                return const Center(
-                  child: CircularProgressIndicator(), // Rond de chargement
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.error, color: Colors.red), // En cas d'erreur
-                );
-              },
             ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ],
-    ),
-  );
-}
-
-Widget _buildCarouselItemWithDistance(Image image, String title, double? distance) {
-  bool isFar = distance != null && distance > 5000;
-
-  return InkWell(
-    onTap: () {
-      final museums = _recommendedMuseums as Future<List<Museum>>;
-      museums.then((museumsList) {
-        final selectedMuseum = museumsList.firstWhere(
-          (museum) => museum.title == title,
-          orElse: () => throw Exception('Museum not found'),
-        );
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailMuseumPage(
-              museum: selectedMuseum,
-              distance: distance ?? 0,
+          );
+        });
+      },
+      child: Column(
+        children: [
+          Container(
+            height: 200,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.transparent, // Ombre invisible
+                  blurRadius: 6,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-          ),
-        );
-      });
-    },
-    child: Column(
-      children: [
-        Container(
-          height: 180,
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.transparent, // Ombre invisible
-                blurRadius: 6,
-                offset: const Offset(0, 4),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image(
+                image: image.image, // Récupère le provider d'image
+                fit: BoxFit.contain, // Préserve le ratio d'aspect
+                width: double.infinity,
+                height: 200,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child; // Image chargée
+                  }
+                  return const Center(
+                    child: CircularProgressIndicator(), // Rond de chargement
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child:
+                        Icon(Icons.error, color: Colors.red), // En cas d'erreur
+                  );
+                },
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image(
-              image: image.image, // Récupère le provider d'image
-              fit: BoxFit.contain, // Préserve le ratio d'aspect
-              width: double.infinity,
-              height: 180,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
-                  return isFar
-                      ? ColorFiltered(
-                          colorFilter: const ColorFilter.matrix([
-                            0.3, 0.3, 0.3, 0, 0, // Rouge
-                            0.3, 0.3, 0.3, 0, 0, // Vert
-                            0.3, 0.3, 0.3, 0, 0, // Bleu
-                            0, 0, 0, 1, 0, // Alpha
-                          ]),
-                          child: child,
-                        )
-                      : child; // Image chargée, avec ou sans filtre
-                }
-                return const Center(
-                  child: CircularProgressIndicator(), // Rond de chargement
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.error, color: Colors.red), // En cas d'erreur
-                );
-              },
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        if (distance != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              "${(distance / 1000).toStringAsFixed(2)} km away",
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCarouselItemWithDistance(
+      Image image, String title, double? distance) {
+    bool isFar = distance != null && distance > 5000;
+
+    return InkWell(
+      onTap: () {
+        final museums = _recommendedMuseums;
+        museums.then((museumsList) {
+          final selectedMuseum = museumsList.firstWhere(
+            (museum) => museum.title == title,
+            orElse: () => throw Exception('Museum not found'),
+          );
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailMuseumPage(
+                museum: selectedMuseum,
+                distance: distance ?? 0,
+              ),
+            ),
+          );
+        });
+      },
+      child: Column(
+        children: [
+          Container(
+            height: 180,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.transparent, // Ombre invisible
+                  blurRadius: 6,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image(
+                image: image.image, // Récupère le provider d'image
+                fit: BoxFit.contain, // Préserve le ratio d'aspect
+                width: double.infinity,
+                height: 180,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return isFar
+                        ? ColorFiltered(
+                            colorFilter: const ColorFilter.matrix([
+                              0.3, 0.3, 0.3, 0, 0, // Rouge
+                              0.3, 0.3, 0.3, 0, 0, // Vert
+                              0.3, 0.3, 0.3, 0, 0, // Bleu
+                              0, 0, 0, 1, 0, // Alpha
+                            ]),
+                            child: child,
+                          )
+                        : child; // Image chargée, avec ou sans filtre
+                  }
+                  return const Center(
+                    child: CircularProgressIndicator(), // Rond de chargement
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child:
+                        Icon(Icons.error, color: Colors.red), // En cas d'erreur
+                  );
+                },
+              ),
             ),
           ),
-      ],
-    ),
-  );
-}
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (distance != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                "${(distance / 1000).toStringAsFixed(2)} km away",
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }

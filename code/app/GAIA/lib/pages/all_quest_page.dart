@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:GAIA/model/GeneralQuest.dart';
 import 'package:GAIA/services/general_quest_service.dart';
 import 'package:GAIA/services/user_service.dart';
@@ -8,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:GAIA/provider/userProvider.dart';
 
 class AllQuestsPage extends StatefulWidget {
-  const AllQuestsPage({Key? key}) : super(key: key);
+  const AllQuestsPage({super.key});
 
   @override
   State<AllQuestsPage> createState() => _AllQuestsPageState();
@@ -52,7 +50,8 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Quêtes Générales", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text("Quêtes Générales",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
 
             // Chargement des quêtes
@@ -114,7 +113,9 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                                   children: [
                                     Text(
                                       quest.title,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(quest.description),
@@ -130,12 +131,15 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                                 children: [
                                   Text(
                                     "$progression / $goal",
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14),
                                   ),
                                   const SizedBox(height: 4),
                                   const Text(
                                     "Progression",
-                                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                                    style: TextStyle(
+                                        fontSize: 12, color: Colors.grey),
                                   ),
                                 ],
                               ),

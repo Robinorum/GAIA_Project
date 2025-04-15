@@ -8,7 +8,7 @@ import 'package:GAIA/services/user_service.dart';
 class DetailArtworkPage extends StatelessWidget {
   final Artwork artwork;
 
-  const DetailArtworkPage({Key? key, required this.artwork}) : super(key: key);
+  const DetailArtworkPage({super.key, required this.artwork});
 
   @override
   Widget build(BuildContext context) {
@@ -67,11 +67,11 @@ class HeartIcon extends StatefulWidget {
   final String uid;
 
   const HeartIcon({
-    Key? key,
+    super.key,
     required this.artwork,
     required this.idArtwork,
     required this.uid,
-  }) : super(key: key);
+  });
 
   @override
   _HeartIconState createState() => _HeartIconState();
@@ -88,7 +88,8 @@ class _HeartIconState extends State<HeartIcon> {
   }
 
   Future<bool> fetchLikeStatus() async {
-    bool liked = await UserService().fetchStateBrand(widget.uid, widget.idArtwork);
+    bool liked =
+        await UserService().fetchStateBrand(widget.uid, widget.idArtwork);
     setState(() {
       isLiked = liked;
     });
@@ -99,7 +100,6 @@ class _HeartIconState extends State<HeartIcon> {
     setState(() {
       isLiked = !isLiked;
     });
-    print(widget.idArtwork);
     ProfilageService().modifyBrands(widget.idArtwork, widget.uid);
   }
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class MuseumCompletionPage extends StatefulWidget {
   final List<Map<String, dynamic>> visitedMuseums;
 
-  const MuseumCompletionPage({Key? key, required this.visitedMuseums}) : super(key: key);
+  const MuseumCompletionPage({super.key, required this.visitedMuseums});
 
   @override
   _MuseumCompletionPageState createState() => _MuseumCompletionPageState();
@@ -57,7 +57,8 @@ class _MuseumCompletionPageState extends State<MuseumCompletionPage> {
                 double progress = museum["collected"] / museum["total"];
 
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                   child: ListTile(
                     title: Text("${museum['name']} - ${museum['city']}"),
                     subtitle: Column(
@@ -68,7 +69,8 @@ class _MuseumCompletionPageState extends State<MuseumCompletionPage> {
                           backgroundColor: Colors.grey[300],
                           color: Colors.amber,
                         ),
-                        Text("${museum['collected']}/${museum['total']} collected"),
+                        Text(
+                            "${museum['collected']}/${museum['total']} collected"),
                       ],
                     ),
                   ),

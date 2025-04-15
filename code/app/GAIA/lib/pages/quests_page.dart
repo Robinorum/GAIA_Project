@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class QuestsPage extends StatefulWidget {
-  const QuestsPage({Key? key}) : super(key: key);
+  const QuestsPage({super.key});
 
   @override
   State<QuestsPage> createState() => _QuestsPageState();
@@ -54,7 +54,6 @@ class _QuestsPageState extends State<QuestsPage> {
             const Text("Quêtes Générales",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-
             Expanded(
               child: FutureBuilder<void>(
                 future: _combinedFuture,
@@ -147,9 +146,7 @@ class _QuestsPageState extends State<QuestsPage> {
                 },
               ),
             ),
-
-            const SizedBox(height: 12), 
-
+            const SizedBox(height: 12),
             Center(
               child: ElevatedButton(
                 onPressed: () {
@@ -162,9 +159,7 @@ class _QuestsPageState extends State<QuestsPage> {
                 child: const Text("Tout voir"),
               ),
             ),
-
-            const SizedBox(height: 24), 
-
+            const SizedBox(height: 24),
             const Text("Quête du musée",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
@@ -183,13 +178,13 @@ class _QuestsPageState extends State<QuestsPage> {
                     ),
                   ),
                 ),
-                Positioned.fill(
+                const Positioned.fill(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.lock, size: 36, color: Colors.grey),
-                      const SizedBox(height: 8),
-                      const Text(
+                      Icon(Icons.lock, size: 36, color: Colors.grey),
+                      SizedBox(height: 8),
+                      Text(
                         "Quête exclusive",
                         style: TextStyle(
                           fontSize: 16,
@@ -197,8 +192,8 @@ class _QuestsPageState extends State<QuestsPage> {
                           color: Colors.black54,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
+                      SizedBox(height: 8),
+                      Text(
                         "Veuillez vous rapprocher d'un musée\npour débloquer les quêtes",
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 12, color: Colors.grey),
@@ -215,7 +210,10 @@ class _QuestsPageState extends State<QuestsPage> {
   }
 }
 
-List<Map<String, dynamic>> getProgressionAndGoal(List<GeneralQuest> questList,List<Map<String, dynamic>> progressList,) {
+List<Map<String, dynamic>> getProgressionAndGoal(
+  List<GeneralQuest> questList,
+  List<Map<String, dynamic>> progressList,
+) {
   List<Map<String, dynamic>> result = [];
 
   for (var progress in progressList) {
