@@ -7,13 +7,14 @@ import 'package:GAIA/config/ip_config.dart';
 class ProfilageService {
   final HttpService _httpService = HttpService();
 
-  Future<String> modifyBrands(Artwork artwork, AppUser user, String action) async {
+  Future<String> modifyBrands(
+      Artwork artwork, AppUser user, String action) async {
     final body = {
       'uid': user.id,
       'artwork_id': artwork.id,
       'movement': artwork.movement,
       'previous_profile': user.preferences['movements'],
-      'action' : action
+      'action': action
     };
 
     final response = await _httpService.post(
@@ -22,7 +23,9 @@ class ProfilageService {
     );
 
     if (response.statusCode == 200) {
-      return "Profil mis à jour avec succès";
+      final json = jsonDecode(response.body);
+      user.preferences['movements'] = json['updated_profile'];
+      return json['message'];
     } else {
       throw Exception("Échec de mise à jour du profil: ${response.body}");
     }

@@ -12,7 +12,29 @@ ALL_MOVEMENTS = [
 ]
 
 def init_profile():
-    return {movement: 0.0 for movement in ALL_MOVEMENTS}
+    return {m: 1.0 for m in ALL_MOVEMENTS}
+
+def update_profile(profile, movement, action, alpha=0.1):
+    if movement not in profile:
+        print(f"Mouvement inconnu : {movement}. Ajout au profil.")
+        profile[movement] = 0.0
+
+    for m in profile:
+        if m == movement:
+            if action == "like":
+                profile[m] += alpha * (1 - profile[m])
+            elif action == "dislike":
+                profile[m] -= alpha * profile[m]
+        else:
+            profile[m] *= (1 - alpha * 0.2)
+
+    total = sum(profile.values())
+    if total > 0:
+        profile = {k: round(v / total, 4) for k, v in profile.items()}
+
+    return profile
+
+
 
 @app.route("/api/profilage", methods=["POST"])
 def profilage():
@@ -23,7 +45,7 @@ def profilage():
     artwork_id = data.get("artwork_id")
     movement = data.get("movement")
     previous_profile = data.get("previous_profile", {})
-    action = data.get("action")
+    action = data.get("action")  # "like" ou "dislike"
 
     if not previous_profile:
         print("Aucun profil précédent trouvé, initialisation d'un nouveau profil")
@@ -37,17 +59,8 @@ def profilage():
             "message": "Aucun mouvement valide trouvé."
         })
 
-    profile = previous_profile
-
-    if action == "like":
-        profile[movement] += 1
-    else:
-        profile[movement] = abs(profile[movement]-1)
-
-    total = sum(profile.values())
-    if total > 0:
-        profile = {k: round(v / total, 4) for k, v in profile.items()}
-        print(f"Profil après normalisation: {profile}")
+    profile = update_profile(previous_profile, movement, action)
+    print(f"Profil mis à jour pour {uid} après {action} sur {movement} : {profile}")
 
     try:
         print(f"Sending PUT request to update profile for UID: {uid}")
@@ -67,7 +80,7 @@ def profilage():
 
     return jsonify({
         "uid": uid,
-        "profile": profile,
+        "updated_profile": profile,
         "message": "Profil mis à jour avec succès via le monolithe."
     }), 200
 
