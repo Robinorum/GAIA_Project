@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:GAIA/model/appUser.dart';
 import 'package:GAIA/model/artwork.dart';
 import 'package:GAIA/services/http_service.dart';
 import 'package:GAIA/config/ip_config.dart';
@@ -6,22 +7,24 @@ import 'package:GAIA/config/ip_config.dart';
 class ProfilageService {
   final HttpService _httpService = HttpService();
 
-  // Fonction pour modifier les marques d'un utilisateur
-  Future<String> modifyBrands(String artworkId, String uid) async {
-    final response =
-        await _httpService.post(IpConfig.profilingProfilage, body: {
-      'artworkId': artworkId,
-      'uid': uid,
-    });
+  Future<String> modifyBrands(Artwork artwork, AppUser user, String action) async {
+    final body = {
+      'uid': user.id,
+      'artwork_id': artwork.id,
+      'movement': artwork.movement,
+      'previous_profile': user.preferences['movements'],
+      'action' : action
+    };
 
-    print("Id TRANSMIS: $artworkId");
-    print(response.statusCode);
+    final response = await _httpService.post(
+      IpConfig.profilingProfilage,
+      body: body,
+    );
+
     if (response.statusCode == 200) {
-      return "Brands updated successfully";
-    } else if (response.statusCode == 400) {
-      throw Exception("Missing artworkId or uid");
+      return "Profil mis à jour avec succès";
     } else {
-      throw Exception("Failed to update brands");
+      throw Exception("Échec de mise à jour du profil: ${response.body}");
     }
   }
 
@@ -40,8 +43,7 @@ class ProfilageService {
     }
   }
 
-
-Future<List<String>> fetchTopMovements(String uid) async {
+  Future<List<String>> fetchTopMovements(String uid) async {
     try {
       final response = await _httpService.get('${IpConfig.topBrands}$uid');
 
@@ -54,9 +56,11 @@ Future<List<String>> fetchTopMovements(String uid) async {
           throw Exception("Invalid data format: top_movements is not a list");
         }
       } else if (response.statusCode == 404) {
-        throw Exception("User document not found or no movements data available.");
+        throw Exception(
+            "User document not found or no movements data available.");
       } else {
-        throw Exception("Failed to fetch top movements: ${response.statusCode}");
+        throw Exception(
+            "Failed to fetch top movements: ${response.statusCode}");
       }
     } catch (e) {
       throw Exception("Error fetching top movements: $e");

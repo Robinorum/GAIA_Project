@@ -46,7 +46,6 @@ class MuseumListView extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => DetailMuseumPage(
                   museum: museum,
-                  distance: dist,
                 ),
               ),
             );

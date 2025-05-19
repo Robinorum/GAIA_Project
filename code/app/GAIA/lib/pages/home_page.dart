@@ -1,9 +1,9 @@
+import 'package:GAIA/login/profilage_page.dart';
 import 'package:flutter/material.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:GAIA/pages/collection_page.dart';
 import 'package:GAIA/pages/map_page.dart';
-import 'package:GAIA/pages/profile_page.dart';
 import 'package:GAIA/pages/quests_page.dart';
 import 'package:GAIA/pages/detail_artwork_page.dart';
 import '../component/custom_bottom_nav.dart';
@@ -209,7 +209,7 @@ class _HomeContentState extends State<HomeContent> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const ProfilePage()),
+                            builder: (context) => const ProfilagePage()),
                       );
                     },
                     child: CircleAvatar(
@@ -413,7 +413,6 @@ class _HomeContentState extends State<HomeContent> {
             MaterialPageRoute(
               builder: (context) => DetailMuseumPage(
                 museum: selectedMuseum,
-                distance: distance ?? 0,
               ),
             ),
           );

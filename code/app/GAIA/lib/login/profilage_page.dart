@@ -1,7 +1,6 @@
 import 'package:GAIA/services/profilage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../model/artwork.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:GAIA/pages/home_page.dart';
@@ -16,8 +15,6 @@ class ProfilagePage extends StatefulWidget {
 
 class _ProfilagePageState extends State<ProfilagePage> {
   late Future<List<Artwork>> _recommendedArtworks;
-  late FirebaseAuth _auth;
-  late User? _firebaseUser;
   int currentIndex = 0;
   double offset = 0;
   double angle = 0;
@@ -26,14 +23,13 @@ class _ProfilagePageState extends State<ProfilagePage> {
   void initState() {
     super.initState();
     _recommendedArtworks = ProfilageService().fetchArtworks();
-    _auth = FirebaseAuth.instance;
-    _firebaseUser = _auth.currentUser;
   }
 
-  void handleSwipe(String direction, String artworkId) async {
+  void handleSwipe(String direction, Artwork artwork) async {
     setState(() {
       if (direction == 'right') {
-        ProfilageService().modifyBrands(artworkId, _firebaseUser!.uid);
+        final user = Provider.of<UserProvider>(context, listen: false).user;
+        ProfilageService().modifyBrands(artwork, user!, "like");
       }
       currentIndex++;
       offset = 0;
@@ -87,9 +83,9 @@ class _ProfilagePageState extends State<ProfilagePage> {
                     },
                     onPanEnd: (details) {
                       if (offset > 100) {
-                        handleSwipe('right', artworks[currentIndex].id);
+                        handleSwipe('right', artworks[currentIndex]);
                       } else if (offset < -100) {
-                        handleSwipe('left', artworks[currentIndex].id);
+                        handleSwipe('left', artworks[currentIndex]);
                       } else {
                         setState(() {
                           offset = 0;
@@ -180,12 +176,12 @@ class _ProfilagePageState extends State<ProfilagePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
-                      onPressed: () => handleSwipe('left', artwork.id),
+                      onPressed: () => handleSwipe('left', artwork),
                       icon:
                           const Icon(Icons.close, color: Colors.red, size: 40),
                     ),
                     IconButton(
-                      onPressed: () => handleSwipe('right', artwork.id),
+                      onPressed: () => handleSwipe('right', artwork),
                       icon: const Icon(Icons.favorite,
                           color: Colors.green, size: 40),
                     ),

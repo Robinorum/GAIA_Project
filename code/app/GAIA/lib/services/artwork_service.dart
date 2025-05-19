@@ -1,10 +1,13 @@
 import 'dart:convert';
 import '../model/artwork.dart';
+import '../model/museum.dart';
 import 'http_service.dart';
+import 'museum_service.dart';
 
 class ArtworkService {
   final String baseUrl = "http://127.0.0.1:5000/reco/api/recom_get";
   final HttpService _httpService = HttpService();
+  final MuseumService _museumService = MuseumService();
 
   // Fonction pour récupérer toutes les œuvres d'art
   Future<List<Artwork>> fetchArtworks() async {
@@ -46,4 +49,12 @@ class ArtworkService {
       
     );
   }
+
+  Future<Museum?> getMuseumById(String id) async{
+    final museums = await _museumService.fetchMuseums();
+    return museums.firstWhere(
+      (museum) => museum.officialId == id,
+    );
+  }
+  
 }

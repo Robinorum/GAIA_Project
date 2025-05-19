@@ -1,6 +1,4 @@
-import firebase_admin
-from flask import Flask, jsonify
-from firebase_admin import credentials, firestore
+from firebase_admin import firestore
 
 
 def get_artworks():

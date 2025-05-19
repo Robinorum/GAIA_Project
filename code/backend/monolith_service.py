@@ -11,6 +11,7 @@ import torch
 from torchvision.models import efficientnet_b3, EfficientNet_B3_Weights
 
 import random
+#from google import genai
 
 from functions.prediction_functions import crop_image_with_yolo, find_most_similar_image, get_link_with_id, get_by_url
 from functions.recommandation_functions import get_user_preferences, get_artworks, get_previous_recommendations, get_user_collection, update
@@ -36,6 +37,8 @@ model.eval()
 model.to(device)
 
 
+#client = genai.Client(api_key="")
+
 index = faiss.read_index("AI_tools/index_joconde2.faiss")
 faiss.omp_set_num_threads(1)
 
@@ -45,7 +48,7 @@ faiss.omp_set_num_threads(1)
 
 
 
-#MUSEUM_SERVICE
+#MUSEUM_FUNCTIONS
 
 
 @app.route("/api/museums", methods=["GET"])
@@ -109,10 +112,18 @@ def predict():
         return jsonify({"error": str(e)}), 500
     
 
+#QUIZZ_FUNCTIONS
+
+
+# @app.route('/api/quizz/<artworkId>', methods=["GET"])
+# def create_quizz(artworkId):
+#     try:
+#         artwork= get_artworks_by_ids(artworkId)
 
 
 
-    #RECO_SERVICE
+
+#RECO_FUNCTIONS
 
 
 @app.route("/api/recom_maj/<uid>", methods=["GET"])
@@ -200,7 +211,7 @@ def get_recommendations(uid):
     
 
 
-#USER_SERVICE 
+#USER_FUNCTIONS
 
 
 
@@ -310,6 +321,63 @@ def get_quests(userId):
     filtered_quests = [{"id": quest_id, "progression": data.get("progression", 0)} for quest_id, data in user_quests.items()]
     print(filtered_quests)
     return {"quests": filtered_quests}, 200
+
+
+@app.route("/api/put-profile/<uid>", methods=["PUT"])
+def update_profile(uid):
+    try:
+        # Récupérer les données JSON envoyées dans la requête
+        data = request.get_json()
+        movements = data.get("movements", {})
+        artwork_id = data.get("liked_artworks")
+        action = data.get("action")
+        print(f"artwork id : {artwork_id}")
+        
+        if not isinstance(movements, dict):  # On vérifie que 'movements' est un dictionnaire
+            return jsonify({"error": "Invalid profile format. 'movements' should be a dictionary."}), 400
+
+        # Accès à la collection Firestore
+        doc_ref = db.collection('accounts').document(uid)
+        doc = doc_ref.get()
+
+        if not doc.exists:
+            app.logger.error(f"User with UID {uid} not found.")
+            return jsonify({"error": "User not found"}), 404
+
+        current_data = doc.to_dict()
+        current_likes = current_data.get("brands", [])
+
+        if action == "like":
+
+            if artwork_id not in current_likes:
+                current_likes.append(artwork_id)
+        
+        if action == "dislike":
+
+            if artwork_id in current_likes:
+                current_likes.remove(artwork_id)
+                print("TABLEAU SUPPR")
+
+        doc_ref.update({
+            "preferences.movements": movements,
+            "brands": current_likes
+        })
+        
+        updated_doc = doc_ref.get()
+        updated_data = updated_doc.to_dict()
+
+        return jsonify({
+            "uid": uid,
+            "movements": updated_data.get('preferences', {}).get('movements', {}),
+            "message": "Profile updated successfully."
+        }), 200
+    except Exception as e:
+        app.logger.error(f"Error updating profile for {uid}: {str(e)}")
+        return jsonify({
+            "uid": uid,
+            "error": f"An error occurred while updating the profile: {str(e)}"
+        }), 500
+ 
 
 
 

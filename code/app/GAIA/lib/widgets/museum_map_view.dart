@@ -78,7 +78,7 @@ class MuseumMapView extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => DetailMuseumPage(
-                                  museum: museum, distance: distance),
+                                  museum: museum),
                             ),
                           );
                         },

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:GAIA/model/artwork.dart';
-import '../services/profilage_service.dart';
+import 'package:GAIA/model/museum.dart';
+import 'package:GAIA/services/artwork_service.dart';
+import 'package:GAIA/services/profilage_service.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:GAIA/services/user_service.dart';
+import 'package:GAIA/pages/detail_museum_page.dart';
 
 class DetailArtworkPage extends StatelessWidget {
   final Artwork artwork;
@@ -32,9 +35,7 @@ class DetailArtworkPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: artwork.toImage(),
-            ),
+            Center(child: artwork.toImage()),
             const SizedBox(height: 16),
             Text(
               artwork.title,
@@ -53,6 +54,73 @@ class DetailArtworkPage extends StatelessWidget {
             Text(
               artwork.description,
               style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 32),
+
+            /// ----- Section Musée -----
+            FutureBuilder<Museum?>(
+              future: ArtworkService().getMuseumById(artwork.idMuseum),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Text(
+                    "Erreur lors du chargement du musée : ${snapshot.error}",
+                    style: const TextStyle(color: Colors.red),
+                  );
+                } else if (!snapshot.hasData || snapshot.data == null) {
+                  return const Text("Musée inconnu.");
+                }
+
+                final museum = snapshot.data!;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Divider(height: 40),
+                    const Text(
+                      "Exposé à :",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailMuseumPage(
+                              museum: museum,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(child: museum.toImage()),
+                            const SizedBox(height: 12),
+                            Text(
+                              museum.title,
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              "${museum.city}, ${museum.departement}",
+                              style: const TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -100,7 +168,13 @@ class _HeartIconState extends State<HeartIcon> {
     setState(() {
       isLiked = !isLiked;
     });
-    ProfilageService().modifyBrands(widget.idArtwork, widget.uid);
+
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    if (isLiked) {
+      ProfilageService().modifyBrands(widget.artwork, user!, "like");
+    } else {
+      ProfilageService().modifyBrands(widget.artwork, user!, "dislike");
+    }
   }
 
   @override
