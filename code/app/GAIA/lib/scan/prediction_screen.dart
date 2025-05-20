@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:GAIA/model/artwork.dart';
 import 'package:GAIA/pages/home_page.dart';
+import 'package:GAIA/scan/quizz_screen.dart';
 import 'package:GAIA/services/user_service.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:provider/provider.dart';
+import 'package:GAIA/services/quizz_service.dart';
+
 
 class PredictionScreen extends StatefulWidget {
   final Map<String, dynamic> artworkData;
@@ -114,48 +117,78 @@ class _PredictionScreenState extends State<PredictionScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 20),
                     child: alreadyCollected
-                        ? ElevatedButton.icon(
-                            onPressed: null,
-                            icon: const Icon(Icons.check),
-                            label: const Text("Œuvre déjà collectée"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey,
-                              foregroundColor: Colors.white,
-                              disabledBackgroundColor: Colors.grey.shade400,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                            ),
-                          )
-                        : FloatingActionButton.extended(
-                            onPressed: () async {
-                              //print(user!.id);
-                              bool success = await UserService()
-                                  .addArtworks(user!.id, _artwork.id);
-                              await UserService()
-                                  .majQuest(user.id, _artwork.movement);
+                  ? ElevatedButton.icon(
+                      onPressed: null,
+                      icon: const Icon(Icons.check),
+                      label: const Text("Œuvre déjà collectée"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey.shade400,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FloatingActionButton.extended(
+                          onPressed: () async {
+                            bool success = await UserService()
+                                .addArtworks(user!.id, _artwork.id);
+                            await UserService()
+                                .majQuest(user.id, _artwork.movement);
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(success
-                                      ? "Oeuvre ajoutée à la collection !"
-                                      : "Erreur lors de l'ajout."),
-                                  backgroundColor:
-                                      success ? Colors.green : Colors.red,
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(success
+                                    ? "Oeuvre ajoutée à la collection !"
+                                    : "Erreur lors de l'ajout."),
+                                backgroundColor: success ? Colors.green : Colors.red,
+                              ),
+                            );
+
+                            if (success) {
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (context) => const HomePage()),
+                                (route) => false,
+                              );
+                            }
+                          },
+                          label: const Text("Ajouter à la collection"),
+                          icon: const Icon(Icons.add),
+                        ),
+                        const SizedBox(width: 12),
+                        FloatingActionButton.extended(
+                          onPressed: () async {
+                            try {
+                              final quizz = await QuizzService().fetchQuizz(_artwork.id);
+                               
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => QuizzScreen(
+                                    quizz: quizz,
+                                    artwork: _artwork,
+                                  ),
                                 ),
                               );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Erreur : $e"),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                          label: const Text("Créer le quizz"),
+                          icon: const Icon(Icons.quiz),
+                          backgroundColor: Colors.orange,
+                        ),
+                      ],
+                    ),
 
-                              if (success) {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const HomePage()),
-                                  (route) => false,
-                                );
-                              }
-                            },
-                            label: const Text("Ajouter à la collection"),
-                            icon: const Icon(Icons.add),
-                          ),
                   ),
                 )
               ],
