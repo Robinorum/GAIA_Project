@@ -133,6 +133,7 @@ platformdirs==4.2.2
 pluggy==0.13.1
 prompt_toolkit==3.0.44
 proto-plus==1.25.0
+protobuf==4.24.1
 psutil==5.9.8
 pure-eval==0.2.2
 py==1.10.0
