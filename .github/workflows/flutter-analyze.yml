@@ -1,0 +1,25 @@
+name: Flutter Analyze
+
+on: [push]
+
+jobs:
+  analyze:
+    name: Analyze Flutter Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        working-directory: code/app/GAIA
+        run: flutter pub get
+
+      - name: Analyze code
+        working-directory: code/app/GAIA
+        run: flutter analyze
