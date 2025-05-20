@@ -51,7 +51,7 @@ faiss.omp_set_num_threads(1)
 #MUSEUM_FUNCTIONS
 
 
-@app.route("/api/museums", methods=["GET"])
+@app.route("/museums", methods=["GET"])
 def get_museums():
     try:
         museums_ref = db.collection('museums')
@@ -68,7 +68,7 @@ def get_museums():
         print(f"Error retrieving museums: {e}")
         return jsonify([])
 
-@app.route("/api/museums/<museum_id>/artworks", methods=["GET"])
+@app.route("/museums/<museum_id>/artworks", methods=["GET"])
 def get_artworks_by_museum(museum_id):
     try:
         artworks_ref = db.collection('artworks')
@@ -92,7 +92,7 @@ def get_artworks_by_museum(museum_id):
 # PREDICTION_SERVICE
 
 
-@app.route('/api/predict', methods=['POST'])
+@app.route('/prediction', methods=['POST'])
 def predict():
     if 'file' not in request.files:
         return jsonify({"error": "Aucune image envoyée"}), 400
@@ -125,9 +125,8 @@ def predict():
 
 #RECO_FUNCTIONS
 
-
-@app.route("/api/recom_maj/<uid>", methods=["GET"])
-def maj_recommendation(uid):
+@app.route("/users/<uid>/recommendations", methods=["PUT"])
+def update_recommendations(uid):
     try:
         user_preferences = get_user_preferences(uid)
         previous_recommendations = get_previous_recommendations(uid)
@@ -173,11 +172,9 @@ def maj_recommendation(uid):
         }, 500
 
 
-@app.route("/api/recom_get/<uid>", methods=["GET"])
+@app.route("/users/<uid>/recommendations", methods=["GET"])
 def get_recommendations(uid):
     try:
-        # Connexion à Firestore
-        db = firestore.client()
         doc_ref = db.collection('accounts').document(uid)
         doc = doc_ref.get()
 
@@ -215,10 +212,9 @@ def get_recommendations(uid):
 
 
 
-@app.route("/api/add_artwork/<userId>/<artworkId>", methods=["GET"])
-def add_brand_byId(userId, artworkId):
-    db = firestore.client()
-    doc_ref = db.collection('accounts').document(userId)
+@app.route("/users/<uid>/artworks/<artworkId>", methods=["POST"])
+def add_collection(uid, artworkId):
+    doc_ref = db.collection('accounts').document(uid)
     doc = doc_ref.get()
     
     if doc.exists:
@@ -232,13 +228,12 @@ def add_brand_byId(userId, artworkId):
             doc_ref.update({'collection': collection})
         else:
             doc_ref.update({'collection': [collection]})
-        return "Artwork liked successfully", 200
-    return f"Document for user {userId} does not exist.", 404
+        return "Artwork added successfully", 200
+    return f"Document for user {uid} does not exist.", 404
 
-@app.route("/api/state_brand/<userId>/<artworkId>", methods=["GET"])
-def state_brand_byId(userId, artworkId):
-    db = firestore.client()
-    doc_ref = db.collection('accounts').document(userId)
+@app.route("/users/<uid>/like/<artworkId>", methods=["GET"])
+def add_like(uid, artworkId):
+    doc_ref = db.collection('accounts').document(uid)
     doc = doc_ref.get()
     if doc.exists:
         data = doc.to_dict()
@@ -251,28 +246,25 @@ def state_brand_byId(userId, artworkId):
     return jsonify({"result": False}), 200
 
 
-@app.route("/api/fetch_col/<uid>", methods=["GET"])
+@app.route("/users/<uid>/collection", methods=["GET"])
 def fetch_collection(uid):
     collection_ids = get_collection(uid)
     
     if collection_ids:
         print(f"Collection for UID {uid} contains {len(collection_ids)} artworks.")
         artworks = get_artworks_by_ids(collection_ids)
-        
-        if artworks:
-            return jsonify({"success": True, "data": artworks}), 200
-        else:
-            print("No matching artworks found in Firestore.")
-            return jsonify({"success": False, "data": []}), 404
-    
+        return jsonify({"success": True, "data": artworks or []}), 200
+
+    # Même si aucune œuvre ou aucune collection
     print(f"No collection found for UID {uid}.")
-    return jsonify({"success": False, "data": []}), 404
+    return jsonify({"success": True, "data": []}), 200
 
+@app.route("/users/<uid>/quests", methods=["PUT"])
+def update_general_quest_progress(uid):
+    data = request.get_json()
+    movement = data.get("movement")
 
-@app.route("/api/maj_quest/<userId>/<artworkMovement>", methods=["GET"])
-def maj_quest_byId(userId, artworkMovement):
-    db = firestore.client()
-    doc_ref = db.collection('accounts').document(userId)
+    doc_ref = db.collection('accounts').document(uid)
     doc = doc_ref.get()
     
     if not doc.exists:
@@ -290,7 +282,7 @@ def maj_quest_byId(userId, artworkMovement):
         quest_data = quest.to_dict()
         quest_id = quest.id  
 
-        if quest_data.get('movement') == artworkMovement or quest_data.get('movement') == "All":
+        if quest_data.get('movement') == movement or quest_data.get('movement') == "All":
             if quest_id in user_quests:
                 user_quests[quest_id]['progression'] += 1  
             else:
@@ -302,10 +294,10 @@ def maj_quest_byId(userId, artworkMovement):
     doc_ref.update({'quests': user_quests}) 
     return  200    
     
-@app.route("/api/get_quest/<userId>", methods=["GET"])
-def get_quests(userId):
-    db = firestore.client()
-    doc_ref = db.collection('accounts').document(userId)
+@app.route("/users/<uid>/quests", methods=["GET"])
+def get_general_quests(uid):
+    
+    doc_ref = db.collection('accounts').document(uid)
     doc = doc_ref.get()
     
     if not doc.exists:
@@ -323,7 +315,7 @@ def get_quests(userId):
     return {"quests": filtered_quests}, 200
 
 
-@app.route("/api/put-profile/<uid>", methods=["PUT"])
+@app.route("/users/<uid>/profile", methods=["PUT"])
 def update_profile(uid):
     try:
         # Récupérer les données JSON envoyées dans la requête

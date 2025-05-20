@@ -19,7 +19,7 @@ class MuseumService {
 
   Future<List<Artwork>> fetchArtworksByMuseum(String museumId) async {
     HttpService httpService = HttpService();
-    final response = await httpService.get("${IpConfig.museumEndpoint}/$museumId/artworks");
+    final response = await httpService.get(IpConfig.museumArtworks(museumId));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);

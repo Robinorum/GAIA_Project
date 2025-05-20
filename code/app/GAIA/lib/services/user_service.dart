@@ -8,7 +8,7 @@ class UserService {
 
   Future<List<Artwork>> fetchCollection(String uid) async {
     try {
-      final response = await _httpService.get('${IpConfig.fetchCol}$uid');
+      final response = await _httpService.get(IpConfig.fetchCol(uid));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body)['data'];
@@ -29,7 +29,7 @@ class UserService {
   Future<bool> fetchStateBrand(String userId, String artworkId) async {
     try {
       final response =
-          await _httpService.get('${IpConfig.stateBrand}$userId/$artworkId');
+          await _httpService.get(IpConfig.stateBrand(userId, artworkId));
 
       if (response.statusCode == 200) {
         // Parsing the response body to get the 'result' field
@@ -51,8 +51,9 @@ class UserService {
 
   Future<bool> addArtworks(String userId, String artworkId) async {
     try {
-      final response =
-          await _httpService.get('${IpConfig.addArtwork}$userId/$artworkId');
+      final response = await _httpService.post(
+          IpConfig.addArtwork(userId, artworkId),
+          body: {"message": "Added to collection"});
 
       if (response.statusCode == 200) {
         print("Ajout de l'oeuvre à la collection: ${response.statusCode}");
@@ -68,10 +69,13 @@ class UserService {
     }
   }
 
-  Future<bool> majQuest(String userId, String arworkMovement) async {
+  Future<bool> majQuest(String userId, String artworkMovement) async {
     try {
-      final response =
-          await _httpService.get('${IpConfig.majQuest}$userId/$arworkMovement');
+      final url = IpConfig.majQuest(userId);
+      final response = await _httpService.put(
+        url,
+        body: {'movement': artworkMovement},
+      );
 
       if (response.statusCode == 200) {
         print("Mise à jour des quêtes: ${response.statusCode}");
@@ -89,7 +93,7 @@ class UserService {
 
   Future<List<Map<String, dynamic>>> getQuests(String userId) async {
     try {
-      final response = await _httpService.get('${IpConfig.getQuests}$userId');
+      final response = await _httpService.get(IpConfig.getQuests(userId));
 
       if (response.statusCode == 200) {
         print("Réponse reçue: ${response.body}");
