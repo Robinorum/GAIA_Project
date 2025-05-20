@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:GAIA/model/appUser.dart';
 import 'package:GAIA/model/artwork.dart';
 import 'package:GAIA/services/http_service.dart';
 import 'package:GAIA/config/ip_config.dart';
@@ -46,6 +47,29 @@ class UserService {
     } catch (e) {
       print("Exception lors de la récupération de l'état de la marque: $e");
       return false;
+    }
+  }
+
+  Future<String> toggleLike(
+      Artwork artwork, AppUser user, String action) async {
+    try {
+      final body = {
+        'uid': user.id,
+        'artwork_id': artwork.id,
+        'movement': artwork.movement,
+        'previous_profile': user.preferences['movements'],
+        'action': action
+      };
+      final response = await _httpService
+          .post(IpConfig.toggleLike(user.id, artwork.id), body: body);
+
+      if (response.statusCode == 200) {
+        return "Ok";
+      } else {
+        return "Nok";
+      }
+    } catch (e) {
+      return "$e";
     }
   }
 
