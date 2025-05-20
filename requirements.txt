@@ -193,7 +193,6 @@ tensorflow==2.16.1
 termcolor==2.4.0
 thrift==0.16.0
 timm==1.0.14
-toml==0.10.2
 torch==2.5.1
 torchvision==0.20.1
 tornado==6.4
