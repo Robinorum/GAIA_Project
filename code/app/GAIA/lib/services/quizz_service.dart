@@ -8,7 +8,7 @@ class QuizzService {
   
   Future<Quizz> fetchQuizz(String idArtwork) async {
     HttpService httpService = HttpService();
-    final response = await httpService.get("${IpConfig.generateQuizz}/$idArtwork");
+    final response = await httpService.get(IpConfig.genQuizz(idArtwork));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

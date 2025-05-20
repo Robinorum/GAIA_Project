@@ -18,9 +18,16 @@ from functions.recommandation_functions import get_user_preferences, get_artwork
 from functions.user_functions import get_artworks_by_ids, get_collection
 from functions.quizz_functions import parse_quizz_response
 
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 #INITIALISATION DE FLASK
 
-genai.configure(api_key="")
+key = os.getenv("GEMINI_KEY")
+
+genai.configure(api_key=key)
 
 app = Flask(__name__)
 cred = credentials.Certificate('testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json')
@@ -117,7 +124,7 @@ def predict():
 #QUIZZ_FUNCTIONS
 
 
-@app.route('/api/quizz/<artworkId>', methods=["GET"])
+@app.route('/quizz/generate/<artworkId>', methods=["GET"])
 def create_quizz(artworkId):
     try:
         artwork = get_artworks_by_ids([artworkId])[0]

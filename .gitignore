@@ -4,3 +4,4 @@ code/backend/config.py
 code/backend/testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json
 
 **/__pycache__
+code/backend/.env
