@@ -20,7 +20,7 @@ cffi==1.17.1
 charset-normalizer==3.3.2
 click==8.1.7
 clip==0.2.0
-colorama==0.4.4
+colorama==0.4.6
 coloredlogs==15.0.1
 comm==0.2.2
 ConfigArgParse==1.7
