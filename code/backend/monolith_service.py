@@ -11,14 +11,23 @@ import torch
 from torchvision.models import efficientnet_b3, EfficientNet_B3_Weights
 
 import random
-#from google import genai
+import google.generativeai as genai
 
 from functions.prediction_functions import crop_image_with_yolo, find_most_similar_image, get_link_with_id, get_by_url
 from functions.recommandation_functions import get_user_preferences, get_artworks, get_previous_recommendations, get_user_collection, update
 from functions.user_functions import get_artworks_by_ids, get_collection
+from functions.quizz_functions import parse_quizz_response
+
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 #INITIALISATION DE FLASK
 
+key = os.getenv("GEMINI_KEY")
+
+genai.configure(api_key=key)
 
 app = Flask(__name__)
 cred = credentials.Certificate('testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json')
@@ -115,10 +124,48 @@ def predict():
 #QUIZZ_FUNCTIONS
 
 
-# @app.route('/api/quizz/<artworkId>', methods=["GET"])
-# def create_quizz(artworkId):
-#     try:
-#         artwork= get_artworks_by_ids(artworkId)
+@app.route('/quizz/generate/<artworkId>', methods=["GET"])
+def create_quizz(artworkId):
+    try:
+        artwork = get_artworks_by_ids([artworkId])[0]
+
+        prompt = f"""J'aimerai que tu me gènères une question à choix multiples sur un tableau d'art. Je veux 4 choix de réponse, avec une seule bonne réponse à chaque fois Pour t'aider à generer les questions,
+
+        Titre du tableau : {artwork['title']}
+        Description du tableau : {artwork['description']}
+        Peintre : {artwork['artist']}
+        Date : {artwork['date']}
+        Mouvement du tableau : {artwork['movement']}
+        Techniques utilisés : {artwork['techniques used']}
+
+        J'aimerai que tu me gènères ça sous cette forme. Je veux EXACTEMENT cette forme, sans phrase avant comme "voici la question généré...":
+
+        EXEMPLE :
+
+        Question : Question de base 
+
+        A. Reponse A
+        B. Reponse B
+        C. Reponse C
+        D. Reponse D
+
+        Bonne réponse : lettre de la bonne réponse
+
+        """
+
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        response = model.generate_content(prompt)
+        print("Réponse de Gemini :", response.text)
+
+        parsed = parse_quizz_response(response.text)
+        return jsonify(parsed)
+
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }, 500
+
 
 
 
