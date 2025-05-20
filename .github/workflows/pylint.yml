@@ -15,7 +15,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        sudo apt-get update && sudo apt-get install -y swig libssl-dev python3-dev
+        sudo apt-get update
+        sudo apt-get install -y swig libssl-dev=1.1.1f-1ubuntu2 python3-dev
         pip install pylint
         pip install -r requirements.txt
     - name: Analysing the code with pylint
