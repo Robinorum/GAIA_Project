@@ -210,4 +210,4 @@ wheel==0.43.0
 wrapt==1.16.0
 zope.event==5.0
 zope.interface==7.2
-M2Crypto==0.38.0
+M2Crypto==0.26.4
