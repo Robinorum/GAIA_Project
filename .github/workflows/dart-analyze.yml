@@ -14,7 +14,7 @@ jobs:
         uses: dart-lang/setup-dart@v1
 
       - name: Change to project directory
-        working-directory: /code/app/GAIA
+        working-directory: GAIA_Project/code/app/GAIA/
         run: |
           dart pub get
           dart analyze
