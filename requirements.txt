@@ -74,7 +74,6 @@ greenlet==3.2.0
 grep==0.3.2
 grpc-google-iam-v1==0.14.0
 grpcio==1.68.1
-grpcio-status==1.68.1
 h11==0.14.0
 h5py==3.11.0
 halo==0.0.31
