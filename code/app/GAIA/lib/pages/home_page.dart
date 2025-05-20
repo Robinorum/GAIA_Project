@@ -1,4 +1,4 @@
-import 'package:GAIA/login/profilage_page.dart';
+import 'package:GAIA/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:provider/provider.dart';
@@ -209,7 +209,7 @@ class _HomeContentState extends State<HomeContent> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const ProfilagePage()),
+                            builder: (context) => const ProfilePage()),
                       );
                     },
                     child: CircleAvatar(

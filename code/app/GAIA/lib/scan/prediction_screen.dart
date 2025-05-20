@@ -131,7 +131,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                               //print(user!.id);
                               bool success = await UserService()
                                   .addArtworks(user!.id, _artwork.id);
-                              bool majQuest = await UserService()
+                              await UserService()
                                   .majQuest(user.id, _artwork.movement);
 
                               ScaffoldMessenger.of(context).showSnackBar(
