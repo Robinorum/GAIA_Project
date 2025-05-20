@@ -36,7 +36,7 @@ def update_profile(profile, movement, action, alpha=0.1):
 
 
 
-@app.route("/api/profilage", methods=["POST"])
+@app.route("/profilage", methods=["POST"])
 def profilage():
     data = request.get_json()
     print(f"Received data: {data}")
@@ -65,7 +65,7 @@ def profilage():
     try:
         print(f"Sending PUT request to update profile for UID: {uid}")
         response = requests.put(
-            f"http://localhost:5001/api/put-profile/{uid}",
+            f"http://localhost:5001/users/{uid}/profile",
             json={"movements": profile, "liked_artworks": artwork_id, "action": action},
             timeout=10
         )

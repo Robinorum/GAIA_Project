@@ -76,7 +76,7 @@ class _MapPageState extends State<MapPage> {
     try {
       final museums = await _museumService.fetchMuseums();
       setState(() {
-        _museums = museums;
+        _museums = _sortMuseumsForList(museums);
       });
       _filterMapMuseums();
     } catch (e) {
@@ -106,13 +106,32 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-  List<Museum> _filteredMuseumsForList(List<Museum> sortedMuseums) {
-    if (_searchQuery.isEmpty) return sortedMuseums;
-
-    return sortedMuseums.where((museum) {
+  List<Museum> _filteredMuseumsForList(List<Museum> museums) {
+    if (_searchQuery.isEmpty) return museums;
+    museums = _sortMuseumsForList(museums);
+    return museums.where((museum) {
       return museum.title.toLowerCase().contains(_searchQuery) ||
           museum.city.toLowerCase().contains(_searchQuery);
     }).toList();
+  }
+
+  List<Museum> _sortMuseumsForList(List<Museum> museums) {
+    if (_currentLocation == null) return museums;
+
+    museums.sort((a, b) {
+      final distA = Distance().as(
+        LengthUnit.Meter,
+        _currentLocation!,
+        LatLng(a.location.latitude, a.location.longitude),
+      );
+      final distB = Distance().as(
+        LengthUnit.Meter,
+        _currentLocation!,
+        LatLng(b.location.latitude, b.location.longitude),
+      );
+      return distA.compareTo(distB);
+    });
+    return museums;
   }
 
   void _onSearchChanged(String query) {

@@ -9,21 +9,18 @@ class RecommendationService {
   Future<List<Artwork>> fetchRecommendations(String uid) async {
     try {
       final response = await _httpService.get(
-        '${IpConfig.recoGet}$uid',
+        IpConfig.recoGet(uid),
       );
 
       if (response.statusCode == 200) {
-        
-
         List<dynamic> recommendations = jsonDecode(response.body)['data'];
 
-        print('Fetched recommendations IDs: ${recommendations.map((r) => r['id']).toList()}');
-        
+        print(
+            'Fetched recommendations IDs: ${recommendations.map((r) => r['id']).toList()}');
 
         return recommendations.map((artworkJson) {
-            return Artwork.fromJson(artworkJson);
+          return Artwork.fromJson(artworkJson);
         }).toList();
-
       } else if (response.statusCode == 400) {
         throw Exception("Missing UID");
       } else {
@@ -36,7 +33,7 @@ class RecommendationService {
 
   Future<List<Artwork>> majRecommendations(String uid) async {
     try {
-      final response = await _httpService.get('${IpConfig.recoMaj}$uid');
+      final response = await _httpService.get(IpConfig.recoMaj(uid));
 
       if (response.statusCode == 200) {
         throw Exception("Recommendations updated successfully");
