@@ -20,7 +20,7 @@ from functions.quizz_functions import parse_quizz_response
 
 #INITIALISATION DE FLASK
 
-genai.configure(api_key="AIzaSyCuBSC8jDVuXEetWOOrksbKYCAmYCzNEbU")
+genai.configure(api_key="")
 
 app = Flask(__name__)
 cred = credentials.Certificate('testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json')
