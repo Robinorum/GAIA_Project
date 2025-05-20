@@ -13,8 +13,8 @@ jobs:
       - name: Set up Dart SDK
         uses: dart-lang/setup-dart@v1
 
-      - name: Install dependencies
-        run: dart pub get
-
-      - name: Run Dart Analyzer
-        run: dart analyze
+      - name: Change to project directory
+        working-directory: GAIA_Project/code/app/GAIA
+        run: |
+          dart pub get
+          dart analyze
