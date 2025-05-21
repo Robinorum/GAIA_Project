@@ -70,3 +70,19 @@ def get_artworks_by_ids(artwork_ids):
         print(f"Error retrieving artworks: {e}")
         return []
     
+def get_artwork_by_id(artwork_id):
+    try:
+        db = firestore.client()
+        doc = db.collection('artworks').document(artwork_id).get()
+        
+        if doc.exists:
+            artwork_data = doc.to_dict()
+            artwork_data['id'] = doc.id
+            print(f"Successfully retrieved artwork with ID: {artwork_id}")
+            return artwork_data
+        else:
+            print(f"No artwork found with ID: {artwork_id}")
+            return None
+    except Exception as e:
+        print(f"Error retrieving artwork: {e}")
+        return None
