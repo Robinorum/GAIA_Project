@@ -65,6 +65,9 @@ def get_artworks_by_ids(artwork_ids):
                 result.append(artwork_data)
         
         print(f"Successfully retrieved {len(result)} artworks for IDs.")
+        for one_result in result : 
+            print(one_result)
+        
         return result
     except Exception as e:
         print(f"Error retrieving artworks: {e}")

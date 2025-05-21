@@ -3,6 +3,8 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 import os
+
+import requests
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 from PIL import Image
 import io
@@ -11,7 +13,7 @@ import torch
 from torchvision.models import efficientnet_b3, EfficientNet_B3_Weights
 
 import random
-#from google import genai
+import google.generativeai as genai
 
 from functions.prediction_functions import crop_image_with_yolo, find_most_similar_image, get_link_with_id, get_by_url
 from functions.recommandation_functions import get_user_preferences, get_artworks, get_previous_recommendations, get_user_collection, update
@@ -19,6 +21,9 @@ from functions.user_functions import get_artworks_by_ids, get_collection, get_ar
 
 #INITIALISATION DE FLASK
 
+key = os.getenv("GEMINI_KEY")
+
+genai.configure(api_key=key)
 
 app = Flask(__name__)
 cred = credentials.Certificate('testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json')
@@ -37,7 +42,6 @@ model.eval()
 model.to(device)
 
 
-#client = genai.Client(api_key="")
 
 index = faiss.read_index("AI_tools/index_joconde2.faiss")
 faiss.omp_set_num_threads(1)
@@ -112,13 +116,7 @@ def predict():
         return jsonify({"error": str(e)}), 500
     
 
-#QUIZZ_FUNCTIONS
-
-
-# @app.route('/api/quizz/<artworkId>', methods=["GET"])
-# def create_quizz(artworkId):
-#     try:
-#         artwork= get_artworks_by_ids(artworkId)
+#QUIZZ_FUNCTIONS - NOT HERE ANYMORE MOUAHAHAH
 
 
 
@@ -232,7 +230,7 @@ def add_collection(uid, artworkId):
     return f"Document for user {uid} does not exist.", 404
 
 @app.route("/users/<uid>/like/<artworkId>", methods=["GET"])
-def add_like(uid, artworkId):
+def get_like_state(uid, artworkId):
     doc_ref = db.collection('accounts').document(uid)
     doc = doc_ref.get()
     if doc.exists:
@@ -245,6 +243,54 @@ def add_like(uid, artworkId):
     print("tableau non liké")
     return jsonify({"result": False}), 200
 
+@app.route("/users/<uid>/like/<artworkId>", methods=["POST"])
+def toggle_like(uid, artworkId):
+    data = request.get_json()
+    action = data.get("action")
+    movement = data.get("movement")
+    previous_profile = data.get("previous_profile", {})
+
+    if action not in ["like", "dislike"]:
+        return jsonify({"error": "Invalid action"}), 400
+
+    doc_ref = db.collection('accounts').document(uid)
+    doc = doc_ref.get()
+    if not doc.exists:
+        return jsonify({"error": "User not found"}), 404
+
+    user_data = doc.to_dict()
+    current_likes = user_data.get("brands", [])
+
+    updated = False
+    if action == "like" and artworkId not in current_likes:
+        current_likes.append(artworkId)
+        updated = True
+    elif action == "dislike" and artworkId in current_likes:
+        current_likes.remove(artworkId)
+        updated = True
+
+    if updated:
+        try:
+            response = requests.post(
+                "http://localhost:5002/profilage",
+                json={
+                    "uid": uid,
+                    "action": action,
+                    "movement": movement,
+                    "previous_profile": previous_profile
+                }
+            )
+            response.raise_for_status()
+            new_profile = response.json().get("profile")
+            doc_ref.update({
+                "brands": current_likes,
+                "profile": new_profile
+            })
+        except Exception as e:
+            app.logger.error(f"Error calling profiling service: {e}")
+            return jsonify({"error": "Profiling failed"}), 500
+
+    return jsonify({"likes": current_likes}), 200
 
 @app.route("/users/<uid>/collection", methods=["GET"])
 def fetch_collection(uid):
