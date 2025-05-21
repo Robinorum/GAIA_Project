@@ -23,7 +23,8 @@ jobs:
       - name: Recreate Ip_config file
         working-directory: code/app/GAIA
         run: |
-            echo "${{ secrets.IP_CONFIG_CONTENT}}" > lib/Ip_config.dart
+            mkdir -p lib/config
+            echo "${{ secrets.IP_CONFIG_CONTENT}}" > lib/config/ip_config.dart
 
       - name: Analyze code
         working-directory: code/app/GAIA
