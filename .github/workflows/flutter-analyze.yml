@@ -20,6 +20,11 @@ jobs:
         working-directory: code/app/GAIA
         run: flutter pub get
 
+      - name: Recreate Ip_config file
+        working-directory: code/app/GAIA
+        run: |
+            echo "${{ secrets.IP_CONFIG_CONTENT}}" > lib/Ip_config.dart
+
       - name: Analyze code
         working-directory: code/app/GAIA
         run: flutter analyze
