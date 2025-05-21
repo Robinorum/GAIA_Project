@@ -12,11 +12,11 @@ class MuseumQuestPage extends StatefulWidget {
   @override
   State<MuseumQuestPage> createState() => _MuseumQuestPageState();
 }
-
 class _MuseumQuestPageState extends State<MuseumQuestPage> {
   String? questImageUrl;
   bool isLoading = true;
   String? error;
+  bool noQuest = false;
 
   @override
   void initState() {
@@ -26,21 +26,32 @@ class _MuseumQuestPageState extends State<MuseumQuestPage> {
 
   Future<void> _loadQuestImage() async {
     try {
-      // Récupère l'ID utilisateur depuis une méthode ou un service global
       final userId = Provider.of<UserProvider>(context, listen: false).user;
       final uid = userId?.id ?? "default_uid";
-
-
 
       final imageUrl = await UserService().initQuestMuseum(
         uid,
         widget.museum.officialId,
       );
+
       if (!mounted) return;
-      setState(() {
-        questImageUrl = imageUrl;
-        isLoading = false;
-      });
+
+      if (imageUrl == "NO_QUEST") {
+        setState(() {
+          noQuest = true;
+          isLoading = false;
+        });
+      } else if (imageUrl.startsWith("ERROR:")) {
+        setState(() {
+          error = imageUrl.substring(6);
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          questImageUrl = imageUrl;
+          isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         error = e.toString();
@@ -63,33 +74,48 @@ class _MuseumQuestPageState extends State<MuseumQuestPage> {
             ? const Center(child: CircularProgressIndicator())
             : error != null
                 ? Center(child: Text("Erreur : $error"))
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        museum.title,
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        "Voici votre quête actuelle :",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      const SizedBox(height: 16),
-                      if (questImageUrl != null)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            questImageUrl!,
-                            fit: BoxFit.cover,
-                            height: 300,
-                            width: double.infinity,
+                : noQuest
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.info_outline, size: 80, color: Colors.grey),
+                            const SizedBox(height: 16),
+                            Text(
+                              "Aucune quête disponible pour ce musée pour le moment.",
+                              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            museum.title,
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                           ),
-                        )
-                      else
-                        const Text("Aucune image disponible pour cette quête."),
-                    ],
-                  ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Voici votre quête actuelle :",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          const SizedBox(height: 16),
+                          if (questImageUrl != null)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                questImageUrl!,
+                                fit: BoxFit.cover,
+                                height: 300,
+                                width: double.infinity,
+                              ),
+                            )
+                          else
+                            const Text("Aucune image disponible pour cette quête."),
+                        ],
+                      ),
       ),
     );
   }

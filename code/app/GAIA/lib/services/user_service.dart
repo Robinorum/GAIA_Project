@@ -160,10 +160,14 @@ class UserService {
           final Map<String, dynamic> responseData = jsonDecode(response.body);
           final String data = responseData['image_url'] ?? [];
           return data;
-        } else {
+        } 
+        else if (response.statusCode == 204){
+          return "NO_QUEST";
+        }  
+        else {
         throw Exception("Échec de mise à jour du profil: ${response.body}");
       }
-
+       
     }
     catch (e) {
       return "Erreur lors de l'initialisation de la quête: $e";
