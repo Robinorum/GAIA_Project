@@ -162,7 +162,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         FloatingActionButton.extended(
                           onPressed: () async {
                             try {
-                              final quizz = await QuizzService().fetchQuizz(_artwork.id);
+                              final quizz = await QuizzService().fetchQuizz(_artwork);
                                
                               Navigator.push(
                                 context,
