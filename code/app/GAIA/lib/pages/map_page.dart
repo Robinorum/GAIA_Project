@@ -79,9 +79,10 @@ class _MapPageState extends State<MapPage> {
       setState(() {
         _museums = _sortMuseumsForList(museums);
       });
-      _filterMapMuseums();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _fetchMuseumsForCurrentBounds();
+      });
     } catch (e) {
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erreur chargement musées : $e")),
       );
@@ -90,22 +91,36 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  void _filterMapMuseums() {
-    final bounds = _mapController.bounds;
-    final query = _searchQuery.toLowerCase();
+  Timer? _debounceTimer;
 
+  void _onMapMove() {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
+
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+      _fetchMuseumsForCurrentBounds();
+    });
+  }
+
+  Future<void> _fetchMuseumsForCurrentBounds() async {
+    final bounds = _mapController.bounds;
     if (bounds == null) return;
 
-    setState(() {
-      _visibleMuseumsOnMap = _museums.where((museum) {
-        final point =
-            LatLng(museum.location.latitude, museum.location.longitude);
-        final inBounds = bounds.contains(point);
-        final match = museum.title.toLowerCase().contains(query) ||
-            museum.city.toLowerCase().contains(query);
-        return inBounds && match;
-      }).toList();
-    });
+    final swLat = bounds.southWest.latitude;
+    final swLng = bounds.southWest.longitude;
+    final neLat = bounds.northEast.latitude;
+    final neLng = bounds.northEast.longitude;
+
+    try {
+      final museums = await _museumService.fetchMuseumsInBounds(
+        swLat: swLat,
+        swLng: swLng,
+        neLat: neLat,
+        neLng: neLng,
+      );
+      setState(() {
+        _visibleMuseumsOnMap = museums;
+      });
+    } catch (e) {}
   }
 
   List<Museum> _filteredMuseumsForList(List<Museum> museums) {
@@ -140,7 +155,7 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       _searchQuery = query.toLowerCase();
     });
-    _filterMapMuseums();
+    _fetchMuseumsForCurrentBounds();
   }
 
   @override
@@ -204,7 +219,7 @@ class _MapPageState extends State<MapPage> {
                         mapController: _mapController,
                         currentLocation: _currentLocation,
                         markerSize: _markerSize,
-                        onMapMove: _filterMapMuseums,
+                        onMapMove: _onMapMove,
                       )
                     : MuseumListView(
                         museums: _filteredMuseumsForList(_museums),

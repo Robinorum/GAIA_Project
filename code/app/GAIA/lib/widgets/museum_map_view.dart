@@ -33,6 +33,45 @@ class MuseumMapView extends StatelessWidget {
     );
   }
 
+  Marker _buildMuseumMarker(BuildContext context, Museum museum) {
+    final point = LatLng(museum.location.latitude, museum.location.longitude);
+    final distance = currentLocation != null
+        ? _calculateDistance(currentLocation!, point)
+        : 0.0;
+
+    return Marker(
+      point: point,
+      width: markerSize,
+      height: markerSize,
+      builder: (_) => GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DetailMuseumPage(museum: museum),
+          ),
+        ),
+        child: Tooltip(
+          message:
+              '${museum.title}\n${(distance / 1000).toStringAsFixed(2)} km',
+          child: Icon(Icons.location_on, color: Colors.red, size: markerSize),
+        ),
+      ),
+    );
+  }
+
+  Marker _buildUserMarker() {
+    return Marker(
+      point: currentLocation!,
+      width: markerSize,
+      height: markerSize,
+      builder: (_) => Transform.translate(
+        offset: Offset(0, -markerSize / 2),
+        child:
+            Icon(Icons.person_pin_circle, size: markerSize, color: Colors.blue),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,49 +94,17 @@ class MuseumMapView extends StatelessWidget {
               ),
               MarkerClusterLayerWidget(
                 options: MarkerClusterLayerOptions(
-                  maxClusterRadius: 45,
+                  maxClusterRadius: 75,
                   size: const Size(50, 50),
                   fitBoundsOptions:
                       const FitBoundsOptions(padding: EdgeInsets.all(50)),
-                  markers: museums.map((museum) {
-                    final point = LatLng(
-                      museum.location.latitude,
-                      museum.location.longitude,
-                    );
-                    final distance = currentLocation != null
-                        ? _calculateDistance(currentLocation!, point)
-                        : 0.0;
-
-                    return Marker(
-                      point: point,
-                      width: markerSize,
-                      height: markerSize,
-                      builder: (_) => GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailMuseumPage(
-                                  museum: museum),
-                            ),
-                          );
-                        },
-                        child: Tooltip(
-                          message:
-                              '${museum.title}\n${(distance / 1000).toStringAsFixed(2)} km',
-                          child: Icon(
-                            Icons.location_on,
-                            color: Colors.red,
-                            size: markerSize,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                  markers: museums
+                      .map((museum) => _buildMuseumMarker(context, museum))
+                      .toList(),
                   builder: (context, markers) => Container(
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: Colors.red.withAlpha((0.6 * 255).toInt()),
+                      color: Colors.red.withOpacity(0.6),
                       shape: BoxShape.circle,
                     ),
                     child: Text('${markers.length}',
@@ -106,20 +113,7 @@ class MuseumMapView extends StatelessWidget {
                 ),
               ),
               if (currentLocation != null)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: currentLocation!,
-                      width: markerSize,
-                      height: markerSize,
-                      builder: (_) => Transform.translate(
-                        offset: Offset(0, -markerSize / 2),
-                        child: Icon(Icons.person_pin_circle,
-                            size: markerSize, color: Colors.blue),
-                      ),
-                    )
-                  ],
-                ),
+                MarkerLayer(markers: [_buildUserMarker()]),
             ],
           ),
           if (currentLocation != null)
@@ -127,9 +121,7 @@ class MuseumMapView extends StatelessWidget {
               bottom: 20,
               right: 20,
               child: FloatingActionButton(
-                onPressed: () {
-                  mapController.move(currentLocation!, 12.0);
-                },
+                onPressed: () => mapController.move(currentLocation!, 12.0),
                 backgroundColor: Colors.blue,
                 child: const Icon(Icons.my_location),
               ),

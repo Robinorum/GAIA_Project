@@ -72,6 +72,48 @@ def get_museums():
         print(f"Error retrieving museums: {e}")
         return jsonify([])
 
+@app.route("/museums-in-bounds", methods=["GET"])
+def get_museums_in_bounds():
+    try:
+        sw_lat = float(request.args.get("sw_lat"))
+        sw_lng = float(request.args.get("sw_lng"))
+        ne_lat = float(request.args.get("ne_lat"))
+        ne_lng = float(request.args.get("ne_lng"))
+        search = request.args.get('search', '').lower().strip()
+
+        if not (-90 <= sw_lat <= 90 and -90 <= ne_lat <= 90 and -180 <= sw_lng <= 180 and -180 <= ne_lng <= 180):
+            return jsonify({"error": "Invalid coordinates"}), 400
+
+        museums_ref = db.collection('museums')
+        museums = museums_ref.stream()
+
+        museums_list = []
+        for museum in museums:
+            data = museum.to_dict()
+            lat = data.get("location", {}).get("latitude")
+            lng = data.get("location", {}).get("longitude")
+            title = data.get("title", "").lower()
+            city = data.get("city", "").lower()
+
+            if lat is not None and lng is not None:
+                # Check bounds
+                in_bounds = sw_lat <= lat <= ne_lat and sw_lng <= lng <= ne_lng
+
+                # Check search query presence in title or city
+                matches_search = True  # Par défaut vrai si search vide
+                if search:
+                    matches_search = (search in title) or (search in city)
+
+                if in_bounds and matches_search:
+                    data['id'] = museum.id
+                    museums_list.append(data)
+
+        return jsonify(museums_list)
+    except Exception as e:
+        print(f"Error retrieving museums in bounds: {e}")
+        return jsonify([]), 500
+
+
 @app.route("/museums/<museum_id>/artworks", methods=["GET"])
 def get_artworks_by_museum(museum_id):
     try:
