@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:GAIA/config/ip_config.dart';
 import 'package:GAIA/model/artwork.dart';
 import '../services/http_service.dart';
+import 'dart:developer' as developer;
 
 class RecommendationService {
   final HttpService _httpService = HttpService();
@@ -17,7 +18,7 @@ class RecommendationService {
 
         List<dynamic> recommendations = jsonDecode(response.body)['data'];
 
-        print('Fetched recommendations IDs: ${recommendations.map((r) => r['id']).toList()}');
+        developer.log('Fetched recommendations IDs: ${recommendations.map((r) => r['id']).toList()}');
         
 
         return recommendations.map((artworkJson) {

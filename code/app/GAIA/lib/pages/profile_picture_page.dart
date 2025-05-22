@@ -124,12 +124,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:GAIA/provider/user_provider.dart';
+import 'dart:developer' as developer;
 
 class ProfilePicturePage extends StatefulWidget {
   const ProfilePicturePage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _ProfilePicturePageState createState() => _ProfilePicturePageState();
 }
 
@@ -153,7 +155,7 @@ class _ProfilePicturePageState extends State<ProfilePicturePage> {
         imagePaths = paths;
       });
     } catch (e) {
-      print("Error loading images: $e");
+      developer.log("Error loading images: $e");
     }
   }
 
@@ -182,10 +184,13 @@ class _ProfilePicturePageState extends State<ProfilePicturePage> {
                     try {
                       await user?.updateProfilePhoto(imagePaths[index]);
                       // Une fois l'image mise à jour, notifie les autres widgets
+                      // ignore: use_build_context_synchronously
                       Provider.of<UserProvider>(context, listen: false)
                           .updateProfileImage(imagePaths[index]);
+                      // ignore: use_build_context_synchronously
                       Navigator.pop(context); // Retour à la page précédente
                     } catch (e) {
+                      // ignore: use_build_context_synchronously
                       ScaffoldMessenger.of(context)
                           .showSnackBar(SnackBar(content: Text('Erreur: $e')));
                     }

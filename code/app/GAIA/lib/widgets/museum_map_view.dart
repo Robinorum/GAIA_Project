@@ -97,7 +97,7 @@ class MuseumMapView extends StatelessWidget {
                   builder: (context, markers) => Container(
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.6),
+                      color: Colors.red.withAlpha((0.6 * 255).toInt()),
                       shape: BoxShape.circle,
                     ),
                     child: Text('${markers.length}',

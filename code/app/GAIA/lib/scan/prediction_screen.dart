@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:GAIA/model/artwork.dart';
 import 'package:GAIA/pages/home_page.dart';
 import 'package:GAIA/services/user_service.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:GAIA/provider/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer' as developer;
 
 class PredictionScreen extends StatefulWidget {
   final Map<String, dynamic> artworkData;
@@ -11,6 +12,7 @@ class PredictionScreen extends StatefulWidget {
   const PredictionScreen({required this.artworkData, super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _PredictionScreenState createState() => _PredictionScreenState();
 }
 
@@ -30,7 +32,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
   void _initializeArtwork() {
     _artwork = Artwork.fromJson(widget.artworkData);
-    print("Artwork ID : ${_artwork.id}");
+    developer.log("Artwork ID : ${_artwork.id}");
   }
 
   bool isArtworkAlreadyInCollection(List<Artwork> collection) {
@@ -69,7 +71,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.3),
+                                color: Colors.grey.withAlpha((0.3 * 255).toInt()),
                                 spreadRadius: 2,
                                 blurRadius: 5,
                                 offset: const Offset(0, 3),
@@ -134,6 +136,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                               await UserService()
                                   .majQuest(user.id, _artwork.movement);
 
+                              // ignore: use_build_context_synchronously
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(success
@@ -146,6 +149,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
                               if (success) {
                                 Navigator.pushAndRemoveUntil(
+                                  // ignore: use_build_context_synchronously
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => const HomePage()),

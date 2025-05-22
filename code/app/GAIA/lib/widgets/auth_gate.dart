@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:GAIA/pages/home_page.dart';
 import 'package:GAIA/login/login_page.dart';
 import 'package:provider/provider.dart';
-import 'package:GAIA/provider/userProvider.dart';
-import 'package:GAIA/model/appUser.dart'; // Modèle AppUser
+import 'package:GAIA/provider/user_provider.dart';
+import 'package:GAIA/model/app_user.dart'; // Modèle AppUser
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});

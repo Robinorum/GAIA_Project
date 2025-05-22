@@ -13,6 +13,7 @@ class DetailMuseumPage extends StatefulWidget {
   const DetailMuseumPage({super.key, required this.museum});
 
   @override
+  // ignore: library_private_types_in_public_api
   _DetailMuseumPageState createState() => _DetailMuseumPageState();
 }
 
@@ -30,7 +31,9 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
   Future<void> _getUserLocationAndDistance() async {
     try {
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        ),
       );
 
       final userLoc = LatLng(position.latitude, position.longitude);
@@ -50,6 +53,7 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
         _distance = distance;
       });
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erreur de localisation : $e")),
       );

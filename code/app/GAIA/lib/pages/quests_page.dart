@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-import 'package:GAIA/model/GeneralQuest.dart';
+import 'package:GAIA/model/general_quest.dart';
 import 'package:GAIA/pages/all_quest_page.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:GAIA/provider/user_provider.dart';
 import 'package:GAIA/services/general_quest_service.dart';
 import 'package:GAIA/services/user_service.dart';
 import 'package:flutter/material.dart';
@@ -172,7 +172,7 @@ class _QuestsPageState extends State<QuestsPage> {
                     child: Container(
                       height: 120,
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),

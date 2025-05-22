@@ -3,7 +3,7 @@ import 'package:GAIA/model/artwork.dart';
 import 'package:GAIA/model/museum.dart';
 import 'package:GAIA/services/artwork_service.dart';
 import 'package:GAIA/services/profilage_service.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:GAIA/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:GAIA/services/user_service.dart';
 import 'package:GAIA/pages/detail_museum_page.dart';
@@ -142,6 +142,7 @@ class HeartIcon extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _HeartIconState createState() => _HeartIconState();
 }
 

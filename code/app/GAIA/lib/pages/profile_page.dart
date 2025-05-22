@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:GAIA/provider/user_provider.dart';
 import 'package:GAIA/pages/settings_page.dart';
 import 'package:GAIA/pages/museum_completion_page.dart';
 import 'package:GAIA/pages/profile_picture_page.dart';
@@ -243,7 +243,7 @@ class _ProfilePageState extends State<ProfilePage> {
         leading: Text("Top $rank :",
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         title: Text(name, style: const TextStyle(fontSize: 16)),
-        tileColor: color.withOpacity(0.3),
+        tileColor: color.withAlpha((0.3 * 255).toInt()),
       ),
     );
   }

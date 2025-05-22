@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:GAIA/model/GeneralQuest.dart';
+import 'package:GAIA/model/general_quest.dart';
 import 'package:GAIA/services/http_service.dart';
 import 'package:GAIA/config/ip_config.dart';
 class GeneralQuestService {

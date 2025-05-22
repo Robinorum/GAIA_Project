@@ -2,13 +2,14 @@ import 'package:GAIA/pages/detail_artwork_page.dart';
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
 import '../model/artwork.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:GAIA/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 
 class CollectionPage extends StatefulWidget {
   const CollectionPage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _CollectionPageState createState() => _CollectionPageState();
 }
 
@@ -117,7 +118,7 @@ class _CollectionPageState extends State<CollectionPage> {
                             selectedColor: Theme.of(context)
                                 .colorScheme
                                 .primary
-                                .withOpacity(0.2),
+                                .withAlpha((0.2 * 255).toInt()),
                           );
                         }).toList(),
                       ),
