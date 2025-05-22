@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:GAIA/model/artwork.dart';
-import 'package:GAIA/pages/home_page.dart';
 import 'package:GAIA/scan/quizz_screen.dart';
 import 'package:GAIA/services/user_service.dart';
 import 'package:GAIA/provider/userProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:GAIA/services/quizz_service.dart';
-
 
 class PredictionScreen extends StatefulWidget {
   final Map<String, dynamic> artworkData;
@@ -27,13 +25,11 @@ class _PredictionScreenState extends State<PredictionScreen> {
     _initializeArtwork();
 
     final user = Provider.of<UserProvider>(context, listen: false).user;
-    _collectionFuture =
-        UserService().fetchCollection(user!.id); // Chargé une seule fois
+    _collectionFuture = UserService().fetchCollection(user!.id);
   }
 
   void _initializeArtwork() {
     _artwork = Artwork.fromJson(widget.artworkData);
-    print("Artwork ID : ${_artwork.id}");
   }
 
   bool isArtworkAlreadyInCollection(List<Artwork> collection) {
@@ -42,7 +38,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<UserProvider>(context).user;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Prédiction')),
@@ -99,16 +94,14 @@ class _PredictionScreenState extends State<PredictionScreen> {
                       const SizedBox(height: 8),
                       Text(
                         'Année: ${_artwork.date}',
-                        style:
-                            const TextStyle(fontSize: 16, color: Colors.grey),
+                        style: const TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         _artwork.description,
                         style: const TextStyle(fontSize: 16),
                       ),
-                      const SizedBox(
-                          height: 100), // Pour laisser de l'espace au bouton
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -117,78 +110,44 @@ class _PredictionScreenState extends State<PredictionScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 20),
                     child: alreadyCollected
-                  ? ElevatedButton.icon(
-                      onPressed: null,
-                      icon: const Icon(Icons.check),
-                      label: const Text("Œuvre déjà collectée"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        foregroundColor: Colors.white,
-                        disabledBackgroundColor: Colors.grey.shade400,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      ),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        FloatingActionButton.extended(
-                          onPressed: () async {
-                            bool success = await UserService()
-                                .addArtworks(user!.id, _artwork.id);
-                            await UserService()
-                                .majQuest(user.id, _artwork.movement);
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(success
-                                    ? "Oeuvre ajoutée à la collection !"
-                                    : "Erreur lors de l'ajout."),
-                                backgroundColor: success ? Colors.green : Colors.red,
-                              ),
-                            );
-
-                            if (success) {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => const HomePage()),
-                                (route) => false,
-                              );
-                            }
-                          },
-                          label: const Text("Ajouter à la collection"),
-                          icon: const Icon(Icons.add),
-                        ),
-                        const SizedBox(width: 12),
-                        FloatingActionButton.extended(
-                          onPressed: () async {
-                            try {
-                              final quizz = await QuizzService().fetchQuizz(_artwork);
-                               
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => QuizzScreen(
-                                    quizz: quizz,
-                                    artwork: _artwork,
+                        ? ElevatedButton.icon(
+                            onPressed: null,
+                            icon: const Icon(Icons.check),
+                            label: const Text("Œuvre déjà collectée"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey,
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: Colors.grey.shade400,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                            ),
+                          )
+                        : FloatingActionButton.extended(
+                            onPressed: () async {
+                              try {
+                                final quizz = await QuizzService().fetchQuizz(_artwork);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => QuizzScreen(
+                                      quizz: quizz,
+                                      artwork: _artwork,
+                                    ),
                                   ),
-                                ),
-                              );
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Erreur : $e"),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          },
-                          label: const Text("Créer le quizz"),
-                          icon: const Icon(Icons.quiz),
-                          backgroundColor: Colors.orange,
-                        ),
-                      ],
-                    ),
-
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Erreur : $e"),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            },
+                            label: const Text("Lancer le quizz pour valider le tableau"),
+                            icon: const Icon(Icons.quiz),
+                            backgroundColor: Colors.orange,
+                          ),
                   ),
                 )
               ],
