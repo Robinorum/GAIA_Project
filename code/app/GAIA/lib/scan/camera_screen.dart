@@ -7,6 +7,7 @@ class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _CameraScreenState createState() => _CameraScreenState();
 }
 
@@ -82,6 +83,7 @@ class _CameraScreenState extends State<CameraScreen> {
           await _predictionService.predictArtwork(photo.path);
 
       // Ferme la boîte de dialogue de chargement
+      // ignore: use_build_context_synchronously
       Navigator.pop(context);
 
       setState(() {
@@ -90,6 +92,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
       if (artworkData['id'] != null) {
         Navigator.push(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(
             builder: (context) => PredictionScreen(
@@ -99,6 +102,7 @@ class _CameraScreenState extends State<CameraScreen> {
         );
       } else {
         showDialog(
+          // ignore: use_build_context_synchronously
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('No matches found'),
@@ -114,12 +118,14 @@ class _CameraScreenState extends State<CameraScreen> {
       }
     } catch (e) {
       // Ferme la boîte de dialogue en cas d'erreur
+      // ignore: use_build_context_synchronously
       Navigator.pop(context);
 
       setState(() {
         _isLoading = false;
       });
 
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de la capture: $e')),
       );

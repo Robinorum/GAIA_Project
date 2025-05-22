@@ -1,11 +1,11 @@
-import 'package:GAIA/pages/profile_page.dart';
+import 'package:gaia/pages/profile_page.dart';
 import 'package:flutter/material.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:gaia/provider/user_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:GAIA/pages/collection_page.dart';
-import 'package:GAIA/pages/map_page.dart';
-import 'package:GAIA/pages/quests_page.dart';
-import 'package:GAIA/pages/detail_artwork_page.dart';
+import 'package:gaia/pages/collection_page.dart';
+import 'package:gaia/pages/map_page.dart';
+import 'package:gaia/pages/quests_page.dart';
+import 'package:gaia/pages/detail_artwork_page.dart';
 import '../component/custom_bottom_nav.dart';
 import '../scan/camera_screen.dart';
 import '../services/recommendation_service.dart';
@@ -105,7 +105,9 @@ class _HomeContentState extends State<HomeContent> {
   Future<void> _getUserLocation() async {
     try {
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      ),
       );
 
       setState(() {
@@ -114,6 +116,7 @@ class _HomeContentState extends State<HomeContent> {
 
       _sortAndUpdateMuseums();
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error getting location: $e")),
       );
@@ -337,6 +340,7 @@ class _HomeContentState extends State<HomeContent> {
           );
 
           Navigator.push(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
               builder: (context) => DetailArtworkPage(
@@ -409,6 +413,7 @@ class _HomeContentState extends State<HomeContent> {
           );
 
           Navigator.push(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
               builder: (context) => DetailMuseumPage(

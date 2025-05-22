@@ -6,6 +6,7 @@ class MuseumCompletionPage extends StatefulWidget {
   const MuseumCompletionPage({super.key, required this.visitedMuseums});
 
   @override
+  // ignore: library_private_types_in_public_api
   _MuseumCompletionPageState createState() => _MuseumCompletionPageState();
 }
 

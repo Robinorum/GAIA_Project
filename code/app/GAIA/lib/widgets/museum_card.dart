@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:GAIA/model/museum.dart';
+import 'package:gaia/model/museum.dart';
 
 class MuseumCard extends StatelessWidget {
   final Museum museum;

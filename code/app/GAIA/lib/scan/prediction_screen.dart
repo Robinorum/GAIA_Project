@@ -12,6 +12,7 @@ class PredictionScreen extends StatefulWidget {
   const PredictionScreen({required this.artworkData, super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _PredictionScreenState createState() => _PredictionScreenState();
 }
 
@@ -67,7 +68,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.3),
+                                color: Colors.grey.withAlpha((0.3 * 255).toInt()),
                                 spreadRadius: 2,
                                 blurRadius: 5,
                                 offset: const Offset(0, 3),

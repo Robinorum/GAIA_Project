@@ -50,7 +50,7 @@ class _QuizzScreenState extends State<QuizzScreen> {
               String answer = entry.value;
               String letter = ["A", "B", "C", "D"][index];
               return _buildAnswerButton(answer, letter);
-            }).toList(),
+            }),
             const SizedBox(height: 30),
             if (answered)
               ElevatedButton(

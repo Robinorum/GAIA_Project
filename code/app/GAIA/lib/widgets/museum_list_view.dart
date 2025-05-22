@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:GAIA/model/museum.dart';
+import 'package:gaia/model/museum.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:GAIA/pages/detail_museum_page.dart';
-import 'package:GAIA/widgets/museum_card.dart';
+import 'package:gaia/pages/detail_museum_page.dart';
+import 'package:gaia/widgets/museum_card.dart';
 
 class MuseumListView extends StatelessWidget {
   final List<Museum> museums;

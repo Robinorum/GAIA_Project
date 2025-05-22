@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:GAIA/provider/themeProvider.dart';
+import 'package:gaia/provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:GAIA/login/login_page.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:gaia/login/login_page.dart';
+import 'package:gaia/provider/user_provider.dart';
 
 class SettingsPage extends StatefulWidget {
   final Function(bool isDarkMode) onToggleTheme;
@@ -101,7 +101,9 @@ class _SettingsPageState extends State<SettingsPage> {
             ElevatedButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
+                // ignore: use_build_context_synchronously
                 Provider.of<UserProvider>(context, listen: false).clearUser();
+                // ignore: use_build_context_synchronously
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(
                     builder: (context) => const LoginPage(title: 'Login Page'),

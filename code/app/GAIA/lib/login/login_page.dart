@@ -1,6 +1,6 @@
-import 'package:GAIA/model/appUser.dart';
-import 'package:GAIA/provider/userProvider.dart';
-import 'package:GAIA/pages/home_page.dart';
+import 'package:gaia/model/app_user.dart';
+import 'package:gaia/provider/user_provider.dart';
+import 'package:gaia/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -147,12 +147,14 @@ class _LoginPageState extends State<LoginPage> {
             movements: Map<String, double>.from(
                 userData['preferences']?['movement'] ?? {}),
           );
-
+          
           // Ajouter l'utilisateur au UserProvider
+          // ignore: use_build_context_synchronously
           Provider.of<UserProvider>(context, listen: false).setUser(user);
 
           // Redirection vers la page d'accueil
           Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(builder: (context) => const HomePage()),
           );
@@ -211,14 +213,17 @@ class _LoginPageState extends State<LoginPage> {
               userData['preferences']?['movement'] ?? {}),
         );
 
+        // ignore: use_build_context_synchronously
         Provider.of<UserProvider>(context, listen: false).setUser(user);
 
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (context) => const HomePage()),
         );
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erreur de connexion avec Google : $e")),
       );

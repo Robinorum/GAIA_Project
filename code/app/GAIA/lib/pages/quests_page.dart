@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:GAIA/model/GeneralQuest.dart';
 import 'package:GAIA/model/museum.dart';
 import 'package:GAIA/pages/all_quest_page.dart';
