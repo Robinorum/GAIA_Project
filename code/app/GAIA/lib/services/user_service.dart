@@ -95,7 +95,7 @@ class UserService {
 
   Future<bool> majQuest(String userId, String artworkMovement) async {
     try {
-      final url = IpConfig.generalQuest(userId);
+      final url = IpConfig.majQuest(userId);
       final response = await _httpService.put(
         url,
         body: {'movement': artworkMovement},
@@ -117,7 +117,7 @@ class UserService {
 
   Future<List<Map<String, dynamic>>> getQuests(String userId) async {
     try {
-      final response = await _httpService.get(IpConfig.generalQuest(userId));
+      final response = await _httpService.get(IpConfig.getQuests(userId));
 
       if (response.statusCode == 200) {
         print("Réponse reçue: ${response.body}");
