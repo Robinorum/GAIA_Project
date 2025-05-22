@@ -383,7 +383,7 @@ def init_quest_museum(uid):
             artworks = quest.get("artworks", [])
             if not artworks:
                 print(f"Aucune œuvre à valider pour le musée {museum_id}.")
-                return 0
+                return '', 204
             else:
                 print("Artwork to validate :", artworks[0])
                 artwork= get_artwork_by_id(artworks[0])
@@ -404,6 +404,7 @@ def init_quest_museum(uid):
                 artwork_ids = [doc.id for doc in liste_artworks]
             else:
                 print(" Aucun artwork trouvé pour le musée :", museum_id)
+                return '', 204
 
             random.shuffle(artwork_ids)
             artwork_ids.sort(key=lambda doc_id: 0 if doc_id in liste_recommendations else 1)
