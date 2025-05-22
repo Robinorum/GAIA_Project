@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:GAIA/model/artwork.dart';
-import 'package:GAIA/scan/quizz_screen.dart';
-import 'package:GAIA/services/user_service.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:gaia/model/artwork.dart';
+import 'package:gaia/scan/quizz_screen.dart';
+import 'package:gaia/services/user_service.dart';
+import 'package:gaia/provider/user_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:GAIA/services/quizz_service.dart';
+import 'package:gaia/services/quizz_service.dart';
 
 class PredictionScreen extends StatefulWidget {
   final Map<String, dynamic> artworkData;
@@ -128,6 +128,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                               try {
                                 final quizz = await QuizzService().fetchQuizz(_artwork);
                                 Navigator.push(
+                                  // ignore: use_build_context_synchronously
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => QuizzScreen(
@@ -137,6 +138,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                   ),
                                 );
                               } catch (e) {
+                                // ignore: use_build_context_synchronously
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text("Erreur : $e"),

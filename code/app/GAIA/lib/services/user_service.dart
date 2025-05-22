@@ -157,7 +157,7 @@ class UserService {
         body: body,
       );
       if (response.statusCode == 200) {
-        print("Réponse reçue: ${response.body}");
+        developer.log("Réponse reçue: ${response.body}");
           final Map<String, dynamic> responseData = jsonDecode(response.body);
           final String data = responseData['image_url'] ?? [];
           return data;
@@ -174,7 +174,7 @@ class UserService {
       return "Erreur lors de l'initialisation de la quête: $e";
     }
   }
-  Future<bool> majQuestMuseum(String userId, String museumId, String ArtworkId) async 
+  Future<bool> majQuestMuseum(String userId, String museumId, String artworkId) async 
   {
 
     return false;

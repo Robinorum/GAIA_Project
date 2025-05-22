@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:GAIA/model/quizz.dart';
-import 'package:GAIA/model/artwork.dart';
-import 'package:GAIA/pages/home_page.dart';
-import 'package:GAIA/services/user_service.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:gaia/model/quizz.dart';
+import 'package:gaia/model/artwork.dart';
+import 'package:gaia/pages/home_page.dart';
+import 'package:gaia/services/user_service.dart';
+import 'package:gaia/provider/user_provider.dart';
 
 class QuizzScreen extends StatefulWidget {
   final Quizz quizz;
@@ -61,6 +61,7 @@ class _QuizzScreenState extends State<QuizzScreen> {
                     bool success = await UserService().addArtworks(user!.id, widget.artwork.id);
                     await UserService().majQuest(user.id, widget.artwork.movement);
 
+                    // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(success
@@ -72,21 +73,22 @@ class _QuizzScreenState extends State<QuizzScreen> {
                   }
 
                   Navigator.pushAndRemoveUntil(
+                    // ignore: use_build_context_synchronously
                     context,
                     MaterialPageRoute(builder: (context) => const HomePage()),
                     (route) => false,
                   );
                 },
-                child: Text(
-                  selectedLetter == widget.quizz.bonneLettre
-                      ? "Ajouter à la collection"
-                      : "Retourner à l'accueil",
-                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: selectedLetter == widget.quizz.bonneLettre
                       ? Colors.green
                       : Colors.red,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                ),
+                child: Text(
+                  selectedLetter == widget.quizz.bonneLettre
+                      ? "Ajouter à la collection"
+                      : "Retourner à l'accueil",
                 ),
               ),
           ],

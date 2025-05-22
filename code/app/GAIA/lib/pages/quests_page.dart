@@ -1,16 +1,17 @@
 import 'dart:ui';
-import 'package:GAIA/model/GeneralQuest.dart';
-import 'package:GAIA/model/museum.dart';
-import 'package:GAIA/pages/all_quest_page.dart';
-import 'package:GAIA/pages/museum_quest_page.dart';
-import 'package:GAIA/provider/userProvider.dart';
-import 'package:GAIA/services/general_quest_service.dart';
-import 'package:GAIA/services/museum_service.dart';
-import 'package:GAIA/services/user_service.dart';
+import 'package:gaia/model/general_quest.dart';
+import 'package:gaia/model/museum.dart';
+import 'package:gaia/pages/all_quest_page.dart';
+import 'package:gaia/pages/museum_quest_page.dart';
+import 'package:gaia/provider/user_provider.dart';
+import 'package:gaia/services/general_quest_service.dart';
+import 'package:gaia/services/museum_service.dart';
+import 'package:gaia/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer' as developer;
 
 class QuestsPage extends StatefulWidget {
   const QuestsPage({super.key});
@@ -52,9 +53,6 @@ class _QuestsPageState extends State<QuestsPage> {
   }
 
   void _loadRecommendations() {
-    final user = Provider.of<UserProvider>(context, listen: false).user;
-    final uid = user?.id ?? "default_uid";
-
     setState(() {
       _recommendedMuseums = MuseumService().fetchMuseums().then((museums) {
         return museums;
@@ -65,7 +63,9 @@ class _QuestsPageState extends State<QuestsPage> {
   Future<void> _getUserLocation() async {
     try {
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      ),
       );
 
       setState(() {
@@ -74,6 +74,7 @@ class _QuestsPageState extends State<QuestsPage> {
 
       _sortAndUpdateMuseums();
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error getting location: $e")),
       );
@@ -100,7 +101,7 @@ class _QuestsPageState extends State<QuestsPage> {
 
       setState(() {
         _recommendedMuseums = Future.value(topMuseums);
-        print ("\n\n\n\n\n 123 $_recommendedMuseums");
+        developer.log("\n\n\n\n\n 123 $_recommendedMuseums");
       });
     });
   }
@@ -340,7 +341,7 @@ class _QuestsPageState extends State<QuestsPage> {
               child: Container(
                 height: 120,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withAlpha((0.1 * 255).toInt()),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
