@@ -79,16 +79,16 @@ class _QuizzScreenState extends State<QuizzScreen> {
                     (route) => false,
                   );
                 },
-                child: Text(
-                  selectedLetter == widget.quizz.bonneLettre
-                      ? "Ajouter à la collection"
-                      : "Retourner à l'accueil",
-                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: selectedLetter == widget.quizz.bonneLettre
                       ? Colors.green
                       : Colors.red,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                ),
+                child: Text(
+                  selectedLetter == widget.quizz.bonneLettre
+                      ? "Ajouter à la collection"
+                      : "Retourner à l'accueil",
                 ),
               ),
           ],
