@@ -1,15 +1,14 @@
-import 'package:gaia/pages/detail_artwork_page.dart';
 import 'package:flutter/material.dart';
-import '../services/user_service.dart';
-import '../model/artwork.dart';
-import 'package:gaia/provider/user_provider.dart';
 import 'package:provider/provider.dart';
+import '../model/artwork.dart';
+import '../services/user_service.dart';
+import '../provider/user_provider.dart';
+import 'package:gaia/pages/detail_artwork_page.dart';
 
 class CollectionPage extends StatefulWidget {
   const CollectionPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _CollectionPageState createState() => _CollectionPageState();
 }
 
@@ -43,6 +42,8 @@ class _CollectionPageState extends State<CollectionPage> {
     "Hyperréalisme"
   ];
 
+  String _sortOrder = 'asc'; // 'asc' ou 'desc'
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +67,15 @@ class _CollectionPageState extends State<CollectionPage> {
 
         return matchesSearch && matchesMovement;
       }).toList();
+
+      _sortArtworks();
+    });
+  }
+
+  void _sortArtworks() {
+    _filteredArtworks.sort((a, b) {
+      int comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+      return _sortOrder == 'asc' ? comparison : -comparison;
     });
   }
 
@@ -78,6 +88,7 @@ class _CollectionPageState extends State<CollectionPage> {
       ),
       builder: (context) {
         List<String> tempSelection = List.from(_selectedMovements);
+        String tempSortOrder = _sortOrder;
 
         return DraggableScrollableSheet(
           expand: false,
@@ -108,11 +119,9 @@ class _CollectionPageState extends State<CollectionPage> {
                             selected: isSelected,
                             onSelected: (bool selected) {
                               setModalState(() {
-                                if (selected) {
-                                  tempSelection.add(movement);
-                                } else {
-                                  tempSelection.remove(movement);
-                                }
+                                selected
+                                    ? tempSelection.add(movement)
+                                    : tempSelection.remove(movement);
                               });
                             },
                             selectedColor: Theme.of(context)
@@ -123,6 +132,34 @@ class _CollectionPageState extends State<CollectionPage> {
                         }).toList(),
                       ),
                       const SizedBox(height: 20),
+                      const Divider(),
+                      const SizedBox(height: 10),
+                      const Text(
+                        "Trier les œuvres par nom",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      DropdownButton<String>(
+                        value: tempSortOrder,
+                        isExpanded: true,
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setModalState(() => tempSortOrder = newValue);
+                          }
+                        },
+                        items: [
+                          DropdownMenuItem(
+                            value: 'asc',
+                            child: Text('Ordre alphabétique (A → Z)'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'desc',
+                            child: Text('Ordre alphabétique inverse (Z → A)'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -130,6 +167,7 @@ class _CollectionPageState extends State<CollectionPage> {
                             onPressed: () {
                               setState(() {
                                 _selectedMovements.clear();
+                                _sortOrder = 'asc';
                                 _filterArtworks();
                               });
                               Navigator.pop(context);
@@ -140,6 +178,7 @@ class _CollectionPageState extends State<CollectionPage> {
                             onPressed: () {
                               setState(() {
                                 _selectedMovements = tempSelection;
+                                _sortOrder = tempSortOrder;
                                 _filterArtworks();
                               });
                               Navigator.pop(context);
@@ -179,7 +218,7 @@ class _CollectionPageState extends State<CollectionPage> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: "Search artworks...",
+                      hintText: "Rechercher une œuvre...",
                       prefixIcon: const Icon(Icons.search),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
@@ -218,18 +257,19 @@ class _CollectionPageState extends State<CollectionPage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text("Error : ${snapshot.error}"));
+                  return Center(child: Text("Erreur : ${snapshot.error}"));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No artworks found."));
+                  return const Center(child: Text("Aucune œuvre trouvée."));
                 }
 
                 if (_allArtworks.isEmpty) {
                   _allArtworks = snapshot.data!;
                   _filteredArtworks = _allArtworks;
+                  _sortArtworks();
                 }
 
                 return _filteredArtworks.isEmpty
-                    ? const Center(child: Text("No artworks found."))
+                    ? const Center(child: Text("Aucune œuvre trouvée."))
                     : GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
