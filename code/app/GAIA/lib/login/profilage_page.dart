@@ -27,9 +27,11 @@ class _ProfilagePageState extends State<ProfilagePage> {
 
   void handleSwipe(String direction, Artwork artwork) async {
     setState(() {
+      final user = Provider.of<UserProvider>(context, listen: false).user;
       if (direction == 'right') {
-        final user = Provider.of<UserProvider>(context, listen: false).user;
-        ProfilageService().modifyBrands(artwork, user!, "like");
+        UserService().toggleLike(artwork, user!, "like");
+      } else {
+        UserService().toggleLike(artwork, user!, "dislike");
       }
       currentIndex++;
       offset = 0;

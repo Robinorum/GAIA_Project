@@ -3,6 +3,8 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 import os
+
+import requests
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 from PIL import Image
 import io
@@ -11,14 +13,18 @@ import torch
 from torchvision.models import efficientnet_b3, EfficientNet_B3_Weights
 
 import random
-#from google import genai
+import google.generativeai as genai
 
 from functions.prediction_functions import crop_image_with_yolo, find_most_similar_image, get_link_with_id, get_by_url
 from functions.recommandation_functions import get_user_preferences, get_artworks, get_previous_recommendations, get_user_collection, update
 from functions.user_functions import get_artworks_by_ids, get_collection
 
+
 #INITIALISATION DE FLASK
 
+key = os.getenv("GEMINI_KEY")
+
+genai.configure(api_key=key)
 
 app = Flask(__name__)
 cred = credentials.Certificate('testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json')
@@ -37,7 +43,6 @@ model.eval()
 model.to(device)
 
 
-#client = genai.Client(api_key="")
 
 index = faiss.read_index("AI_tools/index_joconde2.faiss")
 faiss.omp_set_num_threads(1)
@@ -51,7 +56,7 @@ faiss.omp_set_num_threads(1)
 #MUSEUM_FUNCTIONS
 
 
-@app.route("/api/museums", methods=["GET"])
+@app.route("/museums", methods=["GET"])
 def get_museums():
     try:
         museums_ref = db.collection('museums')
@@ -68,7 +73,7 @@ def get_museums():
         print(f"Error retrieving museums: {e}")
         return jsonify([])
 
-@app.route("/api/museums/<museum_id>/artworks", methods=["GET"])
+@app.route("/museums/<museum_id>/artworks", methods=["GET"])
 def get_artworks_by_museum(museum_id):
     try:
         artworks_ref = db.collection('artworks')
@@ -92,7 +97,7 @@ def get_artworks_by_museum(museum_id):
 # PREDICTION_SERVICE
 
 
-@app.route('/api/predict', methods=['POST'])
+@app.route('/prediction', methods=['POST'])
 def predict():
     if 'file' not in request.files:
         return jsonify({"error": "Aucune image envoyée"}), 400
@@ -112,22 +117,15 @@ def predict():
         return jsonify({"error": str(e)}), 500
     
 
-#QUIZZ_FUNCTIONS
-
-
-# @app.route('/api/quizz/<artworkId>', methods=["GET"])
-# def create_quizz(artworkId):
-#     try:
-#         artwork= get_artworks_by_ids(artworkId)
+#QUIZZ_FUNCTIONS - NOT HERE ANYMORE MOUAHAHAH
 
 
 
 
 #RECO_FUNCTIONS
 
-
-@app.route("/api/recom_maj/<uid>", methods=["GET"])
-def maj_recommendation(uid):
+@app.route("/users/<uid>/recommendations", methods=["PUT"])
+def update_recommendations(uid):
     try:
         user_preferences = get_user_preferences(uid)
         previous_recommendations = get_previous_recommendations(uid)
@@ -173,11 +171,9 @@ def maj_recommendation(uid):
         }, 500
 
 
-@app.route("/api/recom_get/<uid>", methods=["GET"])
+@app.route("/users/<uid>/recommendations", methods=["GET"])
 def get_recommendations(uid):
     try:
-        # Connexion à Firestore
-        db = firestore.client()
         doc_ref = db.collection('accounts').document(uid)
         doc = doc_ref.get()
 
@@ -215,10 +211,9 @@ def get_recommendations(uid):
 
 
 
-@app.route("/api/add_artwork/<userId>/<artworkId>", methods=["GET"])
-def add_brand_byId(userId, artworkId):
-    db = firestore.client()
-    doc_ref = db.collection('accounts').document(userId)
+@app.route("/users/<uid>/artworks/<artworkId>", methods=["POST"])
+def add_collection(uid, artworkId):
+    doc_ref = db.collection('accounts').document(uid)
     doc = doc_ref.get()
     
     if doc.exists:
@@ -232,13 +227,12 @@ def add_brand_byId(userId, artworkId):
             doc_ref.update({'collection': collection})
         else:
             doc_ref.update({'collection': [collection]})
-        return "Artwork liked successfully", 200
-    return f"Document for user {userId} does not exist.", 404
+        return "Artwork added successfully", 200
+    return f"Document for user {uid} does not exist.", 404
 
-@app.route("/api/state_brand/<userId>/<artworkId>", methods=["GET"])
-def state_brand_byId(userId, artworkId):
-    db = firestore.client()
-    doc_ref = db.collection('accounts').document(userId)
+@app.route("/users/<uid>/like/<artworkId>", methods=["GET"])
+def get_like_state(uid, artworkId):
+    doc_ref = db.collection('accounts').document(uid)
     doc = doc_ref.get()
     if doc.exists:
         data = doc.to_dict()
@@ -250,29 +244,74 @@ def state_brand_byId(userId, artworkId):
     print("tableau non liké")
     return jsonify({"result": False}), 200
 
+@app.route("/users/<uid>/like/<artworkId>", methods=["POST"])
+def toggle_like(uid, artworkId):
+    data = request.get_json()
+    action = data.get("action")
+    movement = data.get("movement")
+    previous_profile = data.get("previous_profile", {})
 
-@app.route("/api/fetch_col/<uid>", methods=["GET"])
+    if action not in ["like", "dislike"]:
+        return jsonify({"error": "Invalid action"}), 400
+
+    doc_ref = db.collection('accounts').document(uid)
+    doc = doc_ref.get()
+    if not doc.exists:
+        return jsonify({"error": "User not found"}), 404
+
+    user_data = doc.to_dict()
+    current_likes = user_data.get("brands", [])
+
+    updated = False
+    if action == "like" and artworkId not in current_likes:
+        current_likes.append(artworkId)
+        updated = True
+    elif action == "dislike" and artworkId in current_likes:
+        current_likes.remove(artworkId)
+        updated = True
+
+    if updated:
+        try:
+            response = requests.post(
+                "http://localhost:5002/profilage",
+                json={
+                    "uid": uid,
+                    "action": action,
+                    "movement": movement,
+                    "previous_profile": previous_profile
+                }
+            )
+            response.raise_for_status()
+            new_profile = response.json().get("profile")
+            doc_ref.update({
+                "brands": current_likes,
+                "profile": new_profile
+            })
+        except Exception as e:
+            app.logger.error(f"Error calling profiling service: {e}")
+            return jsonify({"error": "Profiling failed"}), 500
+
+    return jsonify({"likes": current_likes}), 200
+
+@app.route("/users/<uid>/collection", methods=["GET"])
 def fetch_collection(uid):
     collection_ids = get_collection(uid)
     
     if collection_ids:
         print(f"Collection for UID {uid} contains {len(collection_ids)} artworks.")
         artworks = get_artworks_by_ids(collection_ids)
-        
-        if artworks:
-            return jsonify({"success": True, "data": artworks}), 200
-        else:
-            print("No matching artworks found in Firestore.")
-            return jsonify({"success": False, "data": []}), 404
-    
+        return jsonify({"success": True, "data": artworks or []}), 200
+
+    # Même si aucune œuvre ou aucune collection
     print(f"No collection found for UID {uid}.")
-    return jsonify({"success": False, "data": []}), 404
+    return jsonify({"success": True, "data": []}), 200
 
+@app.route("/users/<uid>/quests", methods=["PUT"])
+def update_general_quest_progress(uid):
+    data = request.get_json()
+    movement = data.get("movement")
 
-@app.route("/api/maj_quest/<userId>/<artworkMovement>", methods=["GET"])
-def maj_quest_byId(userId, artworkMovement):
-    db = firestore.client()
-    doc_ref = db.collection('accounts').document(userId)
+    doc_ref = db.collection('accounts').document(uid)
     doc = doc_ref.get()
     
     if not doc.exists:
@@ -290,7 +329,7 @@ def maj_quest_byId(userId, artworkMovement):
         quest_data = quest.to_dict()
         quest_id = quest.id  
 
-        if quest_data.get('movement') == artworkMovement or quest_data.get('movement') == "All":
+        if quest_data.get('movement') == movement or quest_data.get('movement') == "All":
             if quest_id in user_quests:
                 user_quests[quest_id]['progression'] += 1  
             else:
@@ -302,10 +341,10 @@ def maj_quest_byId(userId, artworkMovement):
     doc_ref.update({'quests': user_quests}) 
     return  200    
     
-@app.route("/api/get_quest/<userId>", methods=["GET"])
-def get_quests(userId):
-    db = firestore.client()
-    doc_ref = db.collection('accounts').document(userId)
+@app.route("/users/<uid>/quests", methods=["GET"])
+def get_general_quests(uid):
+    
+    doc_ref = db.collection('accounts').document(uid)
     doc = doc_ref.get()
     
     if not doc.exists:
@@ -321,67 +360,6 @@ def get_quests(userId):
     filtered_quests = [{"id": quest_id, "progression": data.get("progression", 0)} for quest_id, data in user_quests.items()]
     print(filtered_quests)
     return {"quests": filtered_quests}, 200
-
-
-@app.route("/api/put-profile/<uid>", methods=["PUT"])
-def update_profile(uid):
-    try:
-        # Récupérer les données JSON envoyées dans la requête
-        data = request.get_json()
-        movements = data.get("movements", {})
-        artwork_id = data.get("liked_artworks")
-        action = data.get("action")
-        print(f"artwork id : {artwork_id}")
-        
-        if not isinstance(movements, dict):  # On vérifie que 'movements' est un dictionnaire
-            return jsonify({"error": "Invalid profile format. 'movements' should be a dictionary."}), 400
-
-        # Accès à la collection Firestore
-        doc_ref = db.collection('accounts').document(uid)
-        doc = doc_ref.get()
-
-        if not doc.exists:
-            app.logger.error(f"User with UID {uid} not found.")
-            return jsonify({"error": "User not found"}), 404
-
-        current_data = doc.to_dict()
-        current_likes = current_data.get("brands", [])
-
-        if action == "like":
-
-            if artwork_id not in current_likes:
-                current_likes.append(artwork_id)
-        
-        if action == "dislike":
-
-            if artwork_id in current_likes:
-                current_likes.remove(artwork_id)
-                print("TABLEAU SUPPR")
-
-        doc_ref.update({
-            "preferences.movements": movements,
-            "brands": current_likes
-        })
-        
-        updated_doc = doc_ref.get()
-        updated_data = updated_doc.to_dict()
-
-        return jsonify({
-            "uid": uid,
-            "movements": updated_data.get('preferences', {}).get('movements', {}),
-            "message": "Profile updated successfully."
-        }), 200
-    except Exception as e:
-        app.logger.error(f"Error updating profile for {uid}: {str(e)}")
-        return jsonify({
-            "uid": uid,
-            "error": f"An error occurred while updating the profile: {str(e)}"
-        }), 500
- 
-
-
-
-
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

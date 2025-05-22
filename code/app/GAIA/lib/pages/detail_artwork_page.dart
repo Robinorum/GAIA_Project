@@ -80,7 +80,8 @@ class DetailArtworkPage extends StatelessWidget {
                     const Divider(height: 40),
                     const Text(
                       "Exposé à :",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
                     InkWell(
@@ -112,7 +113,8 @@ class DetailArtworkPage extends StatelessWidget {
                             ),
                             Text(
                               "${museum.city}, ${museum.departement}",
-                              style: const TextStyle(fontSize: 16, color: Colors.grey),
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.grey),
                             ),
                           ],
                         ),
@@ -172,9 +174,9 @@ class _HeartIconState extends State<HeartIcon> {
 
     final user = Provider.of<UserProvider>(context, listen: false).user;
     if (isLiked) {
-      ProfilageService().modifyBrands(widget.artwork, user!, "like");
+      UserService().toggleLike(widget.artwork, user!, "like");
     } else {
-      ProfilageService().modifyBrands(widget.artwork, user!, "dislike");
+      UserService().toggleLike(widget.artwork, user!, "dislike");
     }
   }
 

@@ -36,23 +36,19 @@ def update_profile(profile, movement, action, alpha=0.1):
 
 
 
-@app.route("/api/profilage", methods=["POST"])
+@app.route("/profilage", methods=["POST"])
 def profilage():
     data = request.get_json()
-    print(f"Received data: {data}")
 
     uid = data.get("uid")
-    artwork_id = data.get("artwork_id")
     movement = data.get("movement")
     previous_profile = data.get("previous_profile", {})
-    action = data.get("action")  # "like" ou "dislike"
+    action = data.get("action")
 
     if not previous_profile:
-        print("Aucun profil précédent trouvé, initialisation d'un nouveau profil")
         previous_profile = init_profile()
 
     if not movement:
-        print(f"Aucun mouvement valide trouvé, renvoi du profil précédent : {previous_profile}")
         return jsonify({
             "uid": uid,
             "profile": previous_profile,
@@ -60,28 +56,10 @@ def profilage():
         })
 
     profile = update_profile(previous_profile, movement, action)
-    print(f"Profil mis à jour pour {uid} après {action} sur {movement} : {profile}")
-
-    try:
-        print(f"Sending PUT request to update profile for UID: {uid}")
-        response = requests.put(
-            f"http://localhost:5001/api/put-profile/{uid}",
-            json={"movements": profile, "liked_artworks": artwork_id, "action": action},
-            timeout=10
-        )
-        response.raise_for_status()
-
-    except requests.exceptions.RequestException as e:
-        return jsonify({
-            "uid": uid,
-            "profile": profile,
-            "error": f"Erreur lors de la mise à jour du profil dans le monolithe : {str(e)}"
-        }), 500
 
     return jsonify({
         "uid": uid,
-        "updated_profile": profile,
-        "message": "Profil mis à jour avec succès via le monolithe."
+        "profile": profile
     }), 200
 
 if __name__ == "__main__":
