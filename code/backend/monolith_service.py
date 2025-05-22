@@ -17,8 +17,7 @@ import google.generativeai as genai
 
 from functions.prediction_functions import crop_image_with_yolo, find_most_similar_image, get_link_with_id, get_by_url
 from functions.recommandation_functions import get_user_preferences, get_artworks, get_previous_recommendations, get_user_collection, update
-from functions.user_functions import get_artworks_by_ids, get_collection
-
+from functions.user_functions import get_artworks_by_ids, get_collection, get_artwork_by_id
 
 #INITIALISATION DE FLASK
 
@@ -360,6 +359,176 @@ def get_general_quests(uid):
     filtered_quests = [{"id": quest_id, "progression": data.get("progression", 0)} for quest_id, data in user_quests.items()]
     print(filtered_quests)
     return {"quests": filtered_quests}, 200
+
+
+@app.route("/users/<uid>/museum-quests", methods=["POST"])
+def init_quest_museum(uid):
+    
+    artwork_ids = []
+
+    data = request.get_json()
+    museum_id = data.get("museum_id")
+    
+    doc_ref = db.collection('accounts').document(uid)
+    user_db =doc_ref.get()
+
+    if user_db.exists:
+        user_data = user_db.to_dict()
+        liste_recommendations = user_data.get('reco', [])
+        quete_museum = user_data.get('quete_museum', [])
+        collection_user= user_data.get('collection', [])
+        quest = next((q for q in quete_museum if q.get("id") == museum_id), None)
+        
+        if quest:
+            artworks = quest.get("artworks", [])
+            if not artworks:
+                print(f"Aucune œuvre à valider pour le musée {museum_id}.")
+                return 0
+            else:
+                print("Artwork to validate :", artworks[0])
+                artwork= get_artwork_by_id(artworks[0])
+                print(artwork)
+                #return artwork
+                return jsonify({"image_url": artwork.get("image_url")}), 200
+        
+        else :
+            for reco in liste_recommendations:
+                print("Reco :", reco)
+        
+        
+            liste_artworks_museum = firestore.client().collection('artworks').where('id_museum', '==', museum_id).get()
+            liste_artworks = [doc for doc in liste_artworks_museum if doc.id not in collection_user]
+
+            
+            if liste_artworks:
+                artwork_ids = [doc.id for doc in liste_artworks]
+            else:
+                print(" Aucun artwork trouvé pour le musée :", museum_id)
+
+            random.shuffle(artwork_ids)
+            artwork_ids.sort(key=lambda doc_id: 0 if doc_id in liste_recommendations else 1)
+            nouvelle_quete = {
+                "id": museum_id,
+                "artworks": artwork_ids
+            }
+
+            quete_museum = [q for q in quete_museum if q.get("id") != museum_id]
+            quete_museum.append(nouvelle_quete)
+
+            doc_ref.set({
+                "quete_museum": quete_museum
+            }, merge=True)
+            print(artwork_ids[0]) 
+            artwork= get_artwork_by_id(artwork_ids[0])
+            print(artwork)
+            #return artwork
+            return jsonify({"image_url": artwork.get("image_url")}), 200
+            
+    else:
+        print(f" Le document avec l'UID '{uid}' n'existe pas dans 'accounts'.")
+
+
+@app.route("/users/<uid>/museum-quests", methods=["PUT"])
+def update_quest_museum(uid): 
+    
+    data= request.get_json()
+    artworkId = data.get("artworkId")
+    museum_id = data.get("museum_id")
+
+    
+    doc_ref = firestore.client().collection('accounts').document(uid)
+    user_db = doc_ref.get()
+    
+    if user_db.exists:
+        user_data = user_db.to_dict()
+        quete_museum = user_data.get('quete_museum', [])
+
+        if not quete_museum:
+            print("Pas de quêtes en cours.")
+            return 0
+        quest = next((q for q in quete_museum if q.get("id") == museum_id), None)
+        if not quest:
+            print(f"Aucune quête trouvée pour le musée {museum_id}.")
+            return 0
+
+        artworks = quest.get("artworks", [])
+        if not artworks:
+            print(f"Aucune œuvre à valider pour le musée {museum_id}.")
+            return 0
+
+        if artworkId == artworks[0]:
+            artworks.pop(0)
+
+            updated_quete_museum = [
+                {**q, "artworks": artworks} if q.get("id") == museum_id else q
+                for q in quete_museum
+            ]
+            doc_ref.set({"quete_museum": updated_quete_museum}, merge=True)
+
+            print("Œuvre validée, quête mise à jour.")
+            return 1
+        else:
+            print("Ce n'est pas la bonne œuvre à valider.")
+            return 0
+    else:
+        print("Utilisateur introuvable.")
+        return 0
+
+@app.route("/users/<uid>/profile", methods=["PUT"])
+def update_profile(uid):
+    try:
+        # Récupérer les données JSON envoyées dans la requête
+        data = request.get_json()
+        movements = data.get("movements", {})
+        artwork_id = data.get("liked_artworks")
+        action = data.get("action")
+        print(f"artwork id : {artwork_id}")
+        
+        if not isinstance(movements, dict):  # On vérifie que 'movements' est un dictionnaire
+            return jsonify({"error": "Invalid profile format. 'movements' should be a dictionary."}), 400
+
+        # Accès à la collection Firestore
+        doc_ref = db.collection('accounts').document(uid)
+        doc = doc_ref.get()
+
+        if not doc.exists:
+            app.logger.error(f"User with UID {uid} not found.")
+            return jsonify({"error": "User not found"}), 404
+
+        current_data = doc.to_dict()
+        current_likes = current_data.get("brands", [])
+
+        if action == "like":
+
+            if artwork_id not in current_likes:
+                current_likes.append(artwork_id)
+        
+        if action == "dislike":
+
+            if artwork_id in current_likes:
+                current_likes.remove(artwork_id)
+                print("TABLEAU SUPPR")
+
+        doc_ref.update({
+            "preferences.movements": movements,
+            "brands": current_likes
+        })
+        
+        updated_doc = doc_ref.get()
+        updated_data = updated_doc.to_dict()
+
+        return jsonify({
+            "uid": uid,
+            "movements": updated_data.get('preferences', {}).get('movements', {}),
+            "message": "Profile updated successfully."
+        }), 200
+    except Exception as e:
+        app.logger.error(f"Error updating profile for {uid}: {str(e)}")
+        return jsonify({
+            "uid": uid,
+            "error": f"An error occurred while updating the profile: {str(e)}"
+        }), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

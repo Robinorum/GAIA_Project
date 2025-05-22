@@ -146,4 +146,38 @@ class UserService {
       return [];
     }
   }
+  Future<String> initQuestMuseum(String userId, String museumId) async 
+  {
+    try {
+      final body = {
+        'museum_id': museumId
+      };
+      final response = await _httpService.post(
+        IpConfig.museumQuest(userId),
+        body: body,
+      );
+      if (response.statusCode == 200) {
+        print("Réponse reçue: ${response.body}");
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          final String data = responseData['image_url'] ?? [];
+          return data;
+        } 
+        else if (response.statusCode == 204){
+          return "NO_QUEST";
+        }  
+        else {
+        throw Exception("Échec de mise à jour du profil: ${response.body}");
+      }
+       
+    }
+    catch (e) {
+      return "Erreur lors de l'initialisation de la quête: $e";
+    }
+  }
+  Future<bool> majQuestMuseum(String userId, String museumId, String ArtworkId) async 
+  {
+
+    return false;
+  }
+
 }

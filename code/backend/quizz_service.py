@@ -72,6 +72,8 @@ def create_quizz():
         Mouvement du tableau : {movement}
         Techniques utilisés : {techniques_used}
 
+        Je veux que tu te base principalement sur la description, si il n'y a pas assez d'informations, utilise autre chose. N'hesite pas a user de tes connaissances, par exemple si le tableau parle d'un personnage connu.
+
         J'aimerai que tu me gènères ça sous cette forme. Je veux EXACTEMENT cette forme, sans phrase avant comme "voici la question généré...":
 
         EXEMPLE :
