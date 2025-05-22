@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:GAIA/model/quizz.dart';
-import 'package:GAIA/model/artwork.dart';
-import 'package:GAIA/pages/home_page.dart';
+import 'package:gaia/model/quizz.dart';
+import 'package:gaia/model/artwork.dart';
+import 'package:gaia/pages/home_page.dart';
 
 class QuizzScreen extends StatefulWidget {
   final Quizz quizz;
@@ -47,7 +47,7 @@ class _QuizzScreenState extends State<QuizzScreen> {
               String answer = entry.value;
               String letter = ["A", "B", "C", "D"][index];
               return _buildAnswerButton(answer, letter);
-            }).toList(),
+            }),
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: answered

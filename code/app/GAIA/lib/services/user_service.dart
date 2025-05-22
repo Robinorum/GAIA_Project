@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:gaia/model/app_user.dart';
 import 'package:gaia/model/artwork.dart';
 import 'package:gaia/services/http_service.dart';
 import 'package:gaia/config/ip_config.dart';

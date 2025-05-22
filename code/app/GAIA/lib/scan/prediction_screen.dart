@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gaia/model/artwork.dart';
 import 'package:gaia/pages/home_page.dart';
+import 'package:gaia/scan/quizz_screen.dart';
+import 'package:gaia/services/quizz_service.dart';
 import 'package:gaia/services/user_service.dart';
 import 'package:gaia/provider/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -150,6 +152,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
 
                             if (success) {
                               Navigator.pushAndRemoveUntil(
+                                // ignore: use_build_context_synchronously
                                 context,
                                 MaterialPageRoute(builder: (context) => const HomePage()),
                                 (route) => false,
@@ -166,6 +169,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                               final quizz = await QuizzService().fetchQuizz(_artwork);
                                
                               Navigator.push(
+                                // ignore: use_build_context_synchronously
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => QuizzScreen(
@@ -175,6 +179,7 @@ class _PredictionScreenState extends State<PredictionScreen> {
                                 ),
                               );
                             } catch (e) {
+                              // ignore: use_build_context_synchronously
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text("Erreur : $e"),
@@ -189,19 +194,6 @@ class _PredictionScreenState extends State<PredictionScreen> {
                         ),
                       ],
                     ),
-                              if (success) {
-                                Navigator.pushAndRemoveUntil(
-                                  // ignore: use_build_context_synchronously
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const HomePage()),
-                                  (route) => false,
-                                );
-                              }
-                            },
-                            label: const Text("Ajouter à la collection"),
-                            icon: const Icon(Icons.add),
-                          ),
                   ),
                 )
               ],

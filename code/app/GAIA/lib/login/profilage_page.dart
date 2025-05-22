@@ -1,5 +1,6 @@
 import 'package:gaia/services/profilage_service.dart';
 import 'package:flutter/material.dart';
+import 'package:gaia/services/user_service.dart';
 import 'package:provider/provider.dart';
 import '../model/artwork.dart';
 import 'package:gaia/provider/user_provider.dart';
