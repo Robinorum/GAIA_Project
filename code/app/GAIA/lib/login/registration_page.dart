@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'profilage_page.dart';
-import 'package:GAIA/provider/userProvider.dart';
-import 'package:GAIA/model/appUser.dart';
+import 'package:gaia/provider/user_provider.dart';
+import 'package:gaia/model/app_user.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -74,6 +74,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           .where('email', isEqualTo: emailController.text)
           .get();
       if (emailSnapshot.docs.isNotEmpty) {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("This email is already in use.")),
         );
@@ -86,6 +87,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           .where('username', isEqualTo: usernameController.text)
           .get();
       if (usernameSnapshot.docs.isNotEmpty) {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("This username is already in use.")),
         );
@@ -98,6 +100,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           !RegExp(r'[a-z]').hasMatch(passwordController.text) ||
           !RegExp(r'\d').hasMatch(passwordController.text) ||
           !RegExp(r'[@$!%*?&]').hasMatch(passwordController.text)) {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -155,18 +158,22 @@ class _RegistrationPageState extends State<RegistrationPage> {
       );
 
       // Add the user to the UserProvider
+      // ignore: use_build_context_synchronously
       Provider.of<UserProvider>(context, listen: false).setUser(user);
 
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("User registered successfully!")),
       );
 
       // Navigate to ProfilagePage
       Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (context) => const ProfilagePage()),
       );
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Registration error: $e")),
       );

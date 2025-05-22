@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:GAIA/provider/userProvider.dart';
-import 'package:GAIA/widgets/auth_gate.dart';
+import 'package:gaia/provider/user_provider.dart';
+import 'package:gaia/widgets/auth_gate.dart';
 import 'package:provider/provider.dart';
-import 'package:GAIA/provider/themeProvider.dart'; // Import du ThemeProvider
+import 'package:gaia/provider/theme_provider.dart'; // Import du ThemeProvider
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Camera Prediction App',
       theme: themeProvider.currentTheme, // Utilisation du thème dynamique
-      home: AuthGate(),
+      home: const AuthGate(),
     );
   }
 }

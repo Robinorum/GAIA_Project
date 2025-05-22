@@ -1,9 +1,9 @@
-import 'package:GAIA/model/GeneralQuest.dart';
-import 'package:GAIA/services/general_quest_service.dart';
-import 'package:GAIA/services/user_service.dart';
+import 'package:gaia/model/general_quest.dart';
+import 'package:gaia/services/general_quest_service.dart';
+import 'package:gaia/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:gaia/provider/user_provider.dart';
 
 class AllQuestsPage extends StatefulWidget {
   const AllQuestsPage({super.key});

@@ -1,0 +1,10 @@
+numpy
+Pillow
+torch
+torchvision
+firebase-admin
+opencv-python
+ultralytics
+flask
+requests
+faiss-cpu

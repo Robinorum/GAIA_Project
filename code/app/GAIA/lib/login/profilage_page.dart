@@ -1,10 +1,10 @@
-import 'package:GAIA/services/profilage_service.dart';
-import 'package:GAIA/services/user_service.dart';
+import 'package:gaia/services/profilage_service.dart';
 import 'package:flutter/material.dart';
+import 'package:gaia/services/user_service.dart';
 import 'package:provider/provider.dart';
 import '../model/artwork.dart';
-import 'package:GAIA/provider/userProvider.dart';
-import 'package:GAIA/pages/home_page.dart';
+import 'package:gaia/provider/user_provider.dart';
+import 'package:gaia/pages/home_page.dart';
 import '../services/recommendation_service.dart';
 
 class ProfilagePage extends StatefulWidget {
@@ -44,6 +44,7 @@ class _ProfilagePageState extends State<ProfilagePage> {
         RecommendationService().majRecommendations(uid);
         _recommendedArtworks.then((_) {
           Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(builder: (context) => const HomePage()),
           );
@@ -134,7 +135,7 @@ class _ProfilagePageState extends State<ProfilagePage> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withAlpha((0.2 * 255).toInt()),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),

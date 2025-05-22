@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'http_service.dart';
-import 'package:GAIA/config/ip_config.dart';
+import 'package:gaia/config/ip_config.dart';
 import "../model/quizz.dart";
 import "../model/artwork.dart";
+import 'dart:developer' as developer;
 
 class QuizzService {
 
@@ -24,7 +25,7 @@ class QuizzService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      print("Quizz data: $data");
+      developer.log("Quizz data: $data");
       return Quizz.fromJson(data);
     } else {
       throw Exception("Failed to load quizz");

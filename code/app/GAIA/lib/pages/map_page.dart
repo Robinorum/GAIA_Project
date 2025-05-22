@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:GAIA/model/museum.dart';
-import 'package:GAIA/services/museum_service.dart';
+import 'package:gaia/model/museum.dart';
+import 'package:gaia/services/museum_service.dart';
 import '../widgets/museum_list_view.dart';
 import '../widgets/museum_map_view.dart';
 
@@ -66,6 +66,7 @@ class _MapPageState extends State<MapPage> {
         });
       });
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erreur localisation : $e")),
       );
@@ -80,6 +81,7 @@ class _MapPageState extends State<MapPage> {
       });
       _filterMapMuseums();
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erreur chargement musées : $e")),
       );
@@ -119,12 +121,12 @@ class _MapPageState extends State<MapPage> {
     if (_currentLocation == null) return museums;
 
     museums.sort((a, b) {
-      final distA = Distance().as(
+      final distA = const Distance().as(
         LengthUnit.Meter,
         _currentLocation!,
         LatLng(a.location.latitude, a.location.longitude),
       );
-      final distB = Distance().as(
+      final distB = const Distance().as(
         LengthUnit.Meter,
         _currentLocation!,
         LatLng(b.location.latitude, b.location.longitude),

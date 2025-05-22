@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:developer' as developer;
 
 class AppUser {
   final String id;
@@ -36,7 +37,7 @@ class AppUser {
         'profilePhoto': newProfilePhoto, // Mise à jour de la photo de profil
       });
     } catch (e) {
-      print('Erreur lors de la mise à jour de la photo de profil: $e');
+      developer.log('Erreur lors de la mise à jour de la photo de profil: $e');
       throw Exception('Erreur lors de la mise à jour de la photo de profil');
     }
   }
