@@ -1,7 +1,7 @@
-import 'package:GAIA/provider/userProvider.dart';
+import 'package:gaia/provider/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:GAIA/model/museum.dart';
-import 'package:GAIA/services/user_service.dart';
+import 'package:gaia/model/museum.dart';
+import 'package:gaia/services/user_service.dart';
 import 'package:provider/provider.dart';
 
 class MuseumQuestPage extends StatefulWidget {
@@ -79,7 +79,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.info_outline, size: 80, color: Colors.grey),
+                            const Icon(Icons.info_outline, size: 80, color: Colors.grey),
                             const SizedBox(height: 16),
                             Text(
                               "Aucune quête disponible pour ce musée pour le moment.",
