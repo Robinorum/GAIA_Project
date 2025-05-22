@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:GAIA/model/app_user.dart';
-import 'package:GAIA/model/artwork.dart';
-import 'package:GAIA/services/http_service.dart';
-import 'package:GAIA/config/ip_config.dart';
+import 'package:gaia/model/app_user.dart';
+import 'package:gaia/model/artwork.dart';
+import 'package:gaia/services/http_service.dart';
+import 'package:gaia/config/ip_config.dart';
 
 class ProfilageService {
   final HttpService _httpService = HttpService();

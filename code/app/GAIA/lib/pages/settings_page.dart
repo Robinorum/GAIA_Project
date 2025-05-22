@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:GAIA/provider/theme_provider.dart';
+import 'package:gaia/provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:GAIA/login/login_page.dart';
-import 'package:GAIA/provider/user_provider.dart';
+import 'package:gaia/login/login_page.dart';
+import 'package:gaia/provider/user_provider.dart';
 
 class SettingsPage extends StatefulWidget {
   final Function(bool isDarkMode) onToggleTheme;

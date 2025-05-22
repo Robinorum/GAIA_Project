@@ -124,7 +124,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
-import 'package:GAIA/provider/user_provider.dart';
+import 'package:gaia/provider/user_provider.dart';
 import 'dart:developer' as developer;
 
 class ProfilePicturePage extends StatefulWidget {

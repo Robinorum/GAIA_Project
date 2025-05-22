@@ -1,9 +1,9 @@
-import 'package:GAIA/services/profilage_service.dart';
+import 'package:gaia/services/profilage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/artwork.dart';
-import 'package:GAIA/provider/user_provider.dart';
-import 'package:GAIA/pages/home_page.dart';
+import 'package:gaia/provider/user_provider.dart';
+import 'package:gaia/pages/home_page.dart';
 import '../services/recommendation_service.dart';
 
 class ProfilagePage extends StatefulWidget {

@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:GAIA/model/general_quest.dart';
-import 'package:GAIA/services/http_service.dart';
-import 'package:GAIA/config/ip_config.dart';
+import 'package:gaia/model/general_quest.dart';
+import 'package:gaia/services/http_service.dart';
+import 'package:gaia/config/ip_config.dart';
 class GeneralQuestService {
   final HttpService _httpService = HttpService();
 

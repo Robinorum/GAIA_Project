@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:GAIA/config/ip_config.dart';
-import 'package:GAIA/model/artwork.dart';
+import 'package:gaia/config/ip_config.dart';
+import 'package:gaia/model/artwork.dart';
 import '../services/http_service.dart';
 import 'dart:developer' as developer;
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:GAIA/model/artwork.dart';
-import 'package:GAIA/pages/home_page.dart';
-import 'package:GAIA/services/user_service.dart';
-import 'package:GAIA/provider/user_provider.dart';
+import 'package:gaia/model/artwork.dart';
+import 'package:gaia/pages/home_page.dart';
+import 'package:gaia/services/user_service.dart';
+import 'package:gaia/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:developer' as developer;
 

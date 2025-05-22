@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:GAIA/model/museum.dart';
-import 'package:GAIA/services/museum_service.dart';
+import 'package:gaia/model/museum.dart';
+import 'package:gaia/services/museum_service.dart';
 import '../widgets/museum_list_view.dart';
 import '../widgets/museum_map_view.dart';
 

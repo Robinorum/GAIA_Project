@@ -1,8 +1,8 @@
-import 'package:GAIA/pages/detail_artwork_page.dart';
+import 'package:gaia/pages/detail_artwork_page.dart';
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
 import '../model/artwork.dart';
-import 'package:GAIA/provider/user_provider.dart';
+import 'package:gaia/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 
 class CollectionPage extends StatefulWidget {

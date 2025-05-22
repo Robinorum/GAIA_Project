@@ -1,11 +1,11 @@
-import 'package:GAIA/pages/profile_page.dart';
+import 'package:gaia/pages/profile_page.dart';
 import 'package:flutter/material.dart';
-import 'package:GAIA/provider/user_provider.dart';
+import 'package:gaia/provider/user_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:GAIA/pages/collection_page.dart';
-import 'package:GAIA/pages/map_page.dart';
-import 'package:GAIA/pages/quests_page.dart';
-import 'package:GAIA/pages/detail_artwork_page.dart';
+import 'package:gaia/pages/collection_page.dart';
+import 'package:gaia/pages/map_page.dart';
+import 'package:gaia/pages/quests_page.dart';
+import 'package:gaia/pages/detail_artwork_page.dart';
 import '../component/custom_bottom_nav.dart';
 import '../scan/camera_screen.dart';
 import '../services/recommendation_service.dart';

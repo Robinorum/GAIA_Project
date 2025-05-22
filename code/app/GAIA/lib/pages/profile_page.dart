@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:GAIA/provider/user_provider.dart';
-import 'package:GAIA/pages/settings_page.dart';
-import 'package:GAIA/pages/museum_completion_page.dart';
-import 'package:GAIA/pages/profile_picture_page.dart';
-import 'package:GAIA/services/profilage_service.dart';
+import 'package:gaia/provider/user_provider.dart';
+import 'package:gaia/pages/settings_page.dart';
+import 'package:gaia/pages/museum_completion_page.dart';
+import 'package:gaia/pages/profile_picture_page.dart';
+import 'package:gaia/services/profilage_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

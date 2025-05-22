@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:GAIA/model/artwork.dart';
-import 'package:GAIA/model/museum.dart';
-import 'package:GAIA/services/artwork_service.dart';
-import 'package:GAIA/services/profilage_service.dart';
-import 'package:GAIA/provider/user_provider.dart';
+import 'package:gaia/model/artwork.dart';
+import 'package:gaia/model/museum.dart';
+import 'package:gaia/services/artwork_service.dart';
+import 'package:gaia/services/profilage_service.dart';
+import 'package:gaia/provider/user_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:GAIA/services/user_service.dart';
-import 'package:GAIA/pages/detail_museum_page.dart';
+import 'package:gaia/services/user_service.dart';
+import 'package:gaia/pages/detail_museum_page.dart';
 
 class DetailArtworkPage extends StatelessWidget {
   final Artwork artwork;

@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:GAIA/model/artwork.dart';
-import 'package:GAIA/services/http_service.dart';
-import 'package:GAIA/config/ip_config.dart';
+import 'package:gaia/model/artwork.dart';
+import 'package:gaia/services/http_service.dart';
+import 'package:gaia/config/ip_config.dart';
 import 'dart:developer' as developer;
 
 

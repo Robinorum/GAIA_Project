@@ -3,8 +3,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
-import 'package:GAIA/model/museum.dart';
-import 'package:GAIA/pages/detail_museum_page.dart';
+import 'package:gaia/model/museum.dart';
+import 'package:gaia/pages/detail_museum_page.dart';
 
 class MuseumMapView extends StatelessWidget {
   final List<Museum> museums;

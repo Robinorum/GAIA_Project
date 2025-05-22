@@ -1,10 +1,10 @@
 import 'dart:ui';
 
-import 'package:GAIA/model/general_quest.dart';
-import 'package:GAIA/pages/all_quest_page.dart';
-import 'package:GAIA/provider/user_provider.dart';
-import 'package:GAIA/services/general_quest_service.dart';
-import 'package:GAIA/services/user_service.dart';
+import 'package:gaia/model/general_quest.dart';
+import 'package:gaia/pages/all_quest_page.dart';
+import 'package:gaia/provider/user_provider.dart';
+import 'package:gaia/services/general_quest_service.dart';
+import 'package:gaia/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

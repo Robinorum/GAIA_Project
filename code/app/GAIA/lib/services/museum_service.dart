@@ -2,7 +2,7 @@ import 'dart:convert';
 import '../model/museum.dart';
 import '../model/artwork.dart';
 import 'http_service.dart';
-import 'package:GAIA/config/ip_config.dart';
+import 'package:gaia/config/ip_config.dart';
 
 class MuseumService {
   Future<List<Museum>> fetchMuseums() async {

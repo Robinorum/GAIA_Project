@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'profilage_page.dart';
-import 'package:GAIA/provider/user_provider.dart';
-import 'package:GAIA/model/app_user.dart';
+import 'package:gaia/provider/user_provider.dart';
+import 'package:gaia/model/app_user.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});

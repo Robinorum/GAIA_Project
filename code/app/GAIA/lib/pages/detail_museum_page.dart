@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:GAIA/model/museum.dart';
-import 'package:GAIA/model/artwork.dart';
-import 'package:GAIA/services/museum_service.dart';
-import 'package:GAIA/pages/detail_artwork_page.dart';
+import 'package:gaia/model/museum.dart';
+import 'package:gaia/model/artwork.dart';
+import 'package:gaia/services/museum_service.dart';
+import 'package:gaia/pages/detail_artwork_page.dart';
 import 'dart:math';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';

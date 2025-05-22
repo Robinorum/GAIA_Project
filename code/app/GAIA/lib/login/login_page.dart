@@ -1,6 +1,6 @@
-import 'package:GAIA/model/app_user.dart';
-import 'package:GAIA/provider/user_provider.dart';
-import 'package:GAIA/pages/home_page.dart';
+import 'package:gaia/model/app_user.dart';
+import 'package:gaia/provider/user_provider.dart';
+import 'package:gaia/pages/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
