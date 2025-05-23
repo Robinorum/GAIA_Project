@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gaia/config/ip_config.dart';
 import 'package:gaia/services/http_service.dart';
 
 class ChangePasswordPage extends StatefulWidget {
@@ -42,7 +43,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       await user.reauthenticateWithCredential(cred);
 
       final response = await httpService.put(
-        'http://127.0.0.1:5000/monolith/users/${user.uid}/change-password',
+        IpConfig.userPassword(user.uid),
         body: {'new_password': newPassword},
       );
 
