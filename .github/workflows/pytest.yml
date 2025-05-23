@@ -22,6 +22,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Write Firebase credentials file from secret
+        working-directory: code/backend
         run: |
           echo "${{ secrets.DB_KEY }}" > testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json
 
