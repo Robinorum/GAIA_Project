@@ -131,7 +131,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
             const SizedBox(height: 20),
-            _buildSectionTitle("Favourite Movement"),
+            _buildSectionTitle("Mouvement préféré"),
             // Utilisation de FutureBuilder pour les mouvements favoris
             FutureBuilder<List<String>>(
               future: ProfilageService().fetchTopMovements(user.id),
@@ -139,9 +139,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator(); // Chargement
                 } else if (snapshot.hasError) {
-                  return const Text("Failed to load movements"); // Erreur
+                  return const Text("Aucun mouvement favori"); // Erreur
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text("No movements found"); // Aucune donnée
+                  return const Text("Aucun mouvement favori"); // Aucune donnée
                 }
 
                 final movements = snapshot.data!;
@@ -174,7 +174,7 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
             const SizedBox(height: 20),
-            _buildSectionTitle("Visited Museum"),
+            _buildSectionTitle("Musées visités"),
             Column(
               children: visitedMuseums
                   .take(3)
@@ -192,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           MuseumCompletionPage(visitedMuseums: visitedMuseums)),
                 );
               },
-              child: const Text("See All",
+              child: const Text("Tout voir",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 20),

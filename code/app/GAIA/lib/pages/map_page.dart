@@ -65,11 +65,8 @@ class _MapPageState extends State<MapPage> {
           _currentLocation = LatLng(position.latitude, position.longitude);
         });
       });
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur localisation : $e")),
-      );
+    } catch (e, stack) {
+      debugPrint("Erreur localisation : $e\n$stack");
     }
   }
 
@@ -79,12 +76,11 @@ class _MapPageState extends State<MapPage> {
       setState(() {
         _museums = _sortMuseumsForList(museums);
       });
-      _filterMapMuseums();
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur chargement musées : $e")),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _filterMapMuseums();
+      });
+    } catch (e, stack) {
+      debugPrint("Erreur chargement musées : $e\n$stack");
     } finally {
       setState(() => _loading = false);
     }

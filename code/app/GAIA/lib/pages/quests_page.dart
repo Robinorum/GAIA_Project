@@ -30,14 +30,11 @@ class _QuestsPageState extends State<QuestsPage> {
   LatLng? _currentLocation;
   late Future<List<Museum>> _recommendedMuseums;
 
-
-
-
   @override
   void initState() {
     super.initState();
-      _loadRecommendations();
-      _getUserLocation();
+    _loadRecommendations();
+    _getUserLocation();
     final user = Provider.of<UserProvider>(context, listen: false).user;
     final uid = user?.id ?? "default_uid";
 
@@ -64,8 +61,8 @@ class _QuestsPageState extends State<QuestsPage> {
     try {
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-      ),
+          accuracy: LocationAccuracy.high,
+        ),
       );
 
       setState(() {
@@ -74,10 +71,7 @@ class _QuestsPageState extends State<QuestsPage> {
 
       _sortAndUpdateMuseums();
     } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error getting location: $e")),
-      );
+      developer.log("Error getting location: $e");
     }
   }
 
@@ -101,7 +95,6 @@ class _QuestsPageState extends State<QuestsPage> {
 
       setState(() {
         _recommendedMuseums = Future.value(topMuseums);
-        developer.log("\n\n\n\n\n 123 $_recommendedMuseums");
       });
     });
   }
@@ -123,6 +116,7 @@ class _QuestsPageState extends State<QuestsPage> {
 
     return museums;
   }
+
   double _calculateDistance(LatLng start, LatLng end) {
     return Geolocator.distanceBetween(
       start.latitude,
@@ -254,128 +248,130 @@ class _QuestsPageState extends State<QuestsPage> {
             const Text("Quête du musée",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
-         FutureBuilder<List<Museum>>(
-  future: _recommendedMuseums,
-  builder: (context, snapshot) {
-    if (snapshot.connectionState != ConnectionState.done) {
-      return const Center(child: CircularProgressIndicator());
-    }
+            FutureBuilder<List<Museum>>(
+              future: _recommendedMuseums,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-    final museums = snapshot.data ?? [];
+                final museums = snapshot.data ?? [];
 
-    if (museums.isNotEmpty) {
-  final museum = museums.first;
+                if (museums.isNotEmpty) {
+                  final museum = museums.first;
 
-  return GestureDetector(
-    onTap: () {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Commencer la quête"),
-          content: Text(
-              "Souhaitez-vous commencer les quêtes du musée ${museum.title} ?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Annuler"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MuseumQuestPage(museum: museum),
-                  ),
-                );
+                  return GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Commencer la quête"),
+                          content: Text(
+                              "Souhaitez-vous commencer les quêtes du musée ${museum.title} ?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text("Annuler"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        MuseumQuestPage(museum: museum),
+                                  ),
+                                );
+                              },
+                              child: const Text("Commencer"),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.green[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.green),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.museum,
+                              color: Colors.green, size: 40),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Musée détecté à proximité",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.green[800],
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "Cliquez pour démarrer les quêtes du musée ${museum.title}",
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                } else {
+                  return Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          child: Container(
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color:
+                                  Colors.black.withAlpha((0.1 * 255).toInt()),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Positioned.fill(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.lock, size: 36, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text(
+                              "Quête exclusive",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              "Veuillez vous rapprocher d'un musée\npour débloquer les quêtes",
+                              textAlign: TextAlign.center,
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }
               },
-              child: const Text("Commencer"),
             ),
-          ],
-        ),
-      );
-    },
-    child: Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.green[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.green),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.museum, color: Colors.green, size: 40),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Musée détecté à proximité",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.green[800],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Cliquez pour démarrer les quêtes du musée ${museum.title}",
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
- else {
-      return Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-          const Positioned.fill(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.lock, size: 36, color: Colors.grey),
-                SizedBox(height: 8),
-                Text(
-                  "Quête exclusive",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "Veuillez vous rapprocher d'un musée\npour débloquer les quêtes",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-    }
-  },
-),
-
           ],
         ),
       ),

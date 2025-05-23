@@ -44,10 +44,16 @@ class Artwork {
 
   Image toImage() {
     if (image.isEmpty) {
-      return Image.asset('assets/images/placeholder.png', fit: BoxFit.cover); // Image par défaut si vide
+      return Image.asset('assets/images/placeholder_paint.png', fit: BoxFit.cover); // Image par défaut si vide
     }
 
     // Image depuis une URL
-    return Image.network(image, fit: BoxFit.cover);
+    return Image.network(
+      image,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+      return Image.asset('assets/images/placeholder_paint.png', fit: BoxFit.cover);
+      },
+    );
   }
 }
