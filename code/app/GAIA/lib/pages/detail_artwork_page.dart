@@ -62,12 +62,9 @@ class DetailArtworkPage extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Text(
-                    "Erreur lors du chargement du musée : ${snapshot.error}",
-                    style: const TextStyle(color: Colors.red),
-                  );
-                } else if (!snapshot.hasData || snapshot.data == null) {
+                } else if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    snapshot.data == null) {
                   return const Text("Musée inconnu.");
                 }
 

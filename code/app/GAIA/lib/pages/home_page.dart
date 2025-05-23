@@ -106,8 +106,8 @@ class _HomeContentState extends State<HomeContent> {
     try {
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-      ),
+          accuracy: LocationAccuracy.high,
+        ),
       );
 
       setState(() {
@@ -115,11 +115,8 @@ class _HomeContentState extends State<HomeContent> {
       });
 
       _sortAndUpdateMuseums();
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error getting location: $e")),
-      );
+    } catch (e, stack) {
+      debugPrint("Erreur localisation : $e\n$stack");
     }
   }
 
@@ -189,13 +186,13 @@ class _HomeContentState extends State<HomeContent> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Hi, ${user != null && user.username.isNotEmpty ? user.username : "Guest"} 👋',
+                    'Salut, ${user != null && user.username.isNotEmpty ? user.username : "Invité"} 👋',
                     style: const TextStyle(
                         fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    "Explore the museum",
+                    "Explore les musées !",
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ],
@@ -224,22 +221,22 @@ class _HomeContentState extends State<HomeContent> {
               )
             ],
           ),
-          const SizedBox(height: 24),
-          TextField(
-            decoration: InputDecoration(
-              hintText: "Search places",
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: Colors.grey[200],
-            ),
-          ),
+          // const SizedBox(height: 24),
+          // TextField(
+          //   decoration: InputDecoration(
+          //     hintText: "Search places",
+          //     prefixIcon: const Icon(Icons.search),
+          //     border: OutlineInputBorder(
+          //       borderRadius: BorderRadius.circular(12),
+          //       borderSide: BorderSide.none,
+          //     ),
+          //     filled: true,
+          //     fillColor: Colors.grey[200],
+          //   ),
+          // ),
           const SizedBox(height: 24),
           const Text(
-            "Recommended Artworks",
+            "Oeuvres recommandées",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -250,15 +247,12 @@ class _HomeContentState extends State<HomeContent> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      "Error loading artworks: ${snapshot.error}",
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No artworks found."));
+                } else if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    snapshot.data!.isEmpty) {
+                  debugPrint("Error or empty artworks: ${snapshot.error}");
+                  return const Center(
+                      child: Text("Aucune oeuvre recommandée !"));
                 }
 
                 final artworks = snapshot.data!;
@@ -274,7 +268,7 @@ class _HomeContentState extends State<HomeContent> {
           ),
           const SizedBox(height: 24),
           const Text(
-            "Recommended Museums",
+            "Musées Recommandés",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -289,15 +283,11 @@ class _HomeContentState extends State<HomeContent> {
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      "Error loading museums: ${snapshot.error}",
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No museums found."));
+                } else if (snapshot.hasError ||
+                    !snapshot.hasData ||
+                    snapshot.data!.isEmpty) {
+                  debugPrint("Error or empty artworks: ${snapshot.error}");
+                  return const Center(child: Text("Aucun musée disponible."));
                 }
 
                 final museums = snapshot.data!;
@@ -336,7 +326,7 @@ class _HomeContentState extends State<HomeContent> {
         artworks.then((artworksList) {
           final selectedArtwork = artworksList.firstWhere(
             (artwork) => artwork.title == title,
-            orElse: () => throw Exception('Artwork not found'),
+            orElse: () => throw Exception('Oeuvre non trouvée'),
           );
 
           Navigator.push(
@@ -409,7 +399,7 @@ class _HomeContentState extends State<HomeContent> {
         museums.then((museumsList) {
           final selectedMuseum = museumsList.firstWhere(
             (museum) => museum.title == title,
-            orElse: () => throw Exception('Museum not found'),
+            orElse: () => throw Exception('Musée non trouvé'),
           );
 
           Navigator.push(
@@ -484,7 +474,7 @@ class _HomeContentState extends State<HomeContent> {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                "${(distance / 1000).toStringAsFixed(2)} km away",
+                "À ${(distance / 1000).toStringAsFixed(2)} km",
                 style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
             ),

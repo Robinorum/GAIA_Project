@@ -24,7 +24,8 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
   @override
   void initState() {
     super.initState();
-    _artworksFuture = MuseumService().fetchArtworksByMuseum(widget.museum.officialId);
+    _artworksFuture =
+        MuseumService().fetchArtworksByMuseum(widget.museum.officialId);
     _getUserLocationAndDistance();
   }
 
@@ -32,7 +33,7 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
     try {
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
+          accuracy: LocationAccuracy.high,
         ),
       );
 
@@ -73,7 +74,8 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
               Center(child: widget.museum.toImage()),
               const SizedBox(height: 16),
               Text(widget.museum.title,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Text("${widget.museum.city}, ${widget.museum.departement}",
                   style: const TextStyle(fontSize: 18, color: Colors.grey)),
@@ -83,8 +85,9 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
                   const Icon(Icons.location_on),
                   const SizedBox(width: 8),
                   _distance != null
-                      ? Text("${(_distance! / 1000).toStringAsFixed(2)} km away",
-                          style: const TextStyle(fontSize: 16, color: Colors.grey))
+                      ? Text("À ${(_distance! / 1000).toStringAsFixed(2)} km",
+                          style:
+                              const TextStyle(fontSize: 16, color: Colors.grey))
                       : const CircularProgressIndicator(),
                 ],
               ),
@@ -95,22 +98,21 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
               Text("Place: ${widget.museum.place}",
                   style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 24),
-
               const Text("Voici un aperçu de ce que vous pourrez découvrir :",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
-
               FutureBuilder<List<Artwork>>(
                 future: _artworksFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(
-                        child: Text("Error loading artworks: ${snapshot.error}",
-                            style: const TextStyle(color: Colors.red)));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text("No artworks found in this museum."));
+                  } else if (snapshot.hasError ||
+                      !snapshot.hasData ||
+                      snapshot.data!.isEmpty) {
+                    debugPrint("Error loading artworks: ${snapshot.error}");
+
+                    return const Center(
+                        child: Text("Aucune oeuvre disponible pour ce musée."));
                   }
 
                   final artworks = snapshot.data!;
@@ -121,7 +123,8 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
                   return GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 0.75,
                       crossAxisSpacing: 10,
@@ -136,7 +139,8 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => DetailArtworkPage(artwork: artwork),
+                              builder: (context) =>
+                                  DetailArtworkPage(artwork: artwork),
                             ),
                           );
                         },
