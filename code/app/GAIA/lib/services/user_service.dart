@@ -146,38 +146,53 @@ class UserService {
       return [];
     }
   }
-  Future<String> initQuestMuseum(String userId, String museumId) async 
-  {
+  Future<String> initQuestMuseum(String userId, String museumId) async {
     try {
       final body = {
-        'museum_id': museumId
+        'museum_id': museumId,
       };
+
       final response = await _httpService.post(
         IpConfig.museumQuest(userId),
         body: body,
       );
+
       if (response.statusCode == 200) {
-        developer.log("Réponse reçue: ${response.body}");
-          final Map<String, dynamic> responseData = jsonDecode(response.body);
-          final String data = responseData['image_url'] ?? [];
-          return data;
-        } 
-        else if (response.statusCode == 204){
-          return "NO_QUEST";
-        }  
-        else {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        return responseData['image_url'] ?? '';
+      } else if (response.statusCode == 204) {
+        return "NO_QUEST";
+      } else if (response.statusCode == 208) {
+        return "QUEST_ALREADY_COMPLETED";
+      } else {
         throw Exception("Échec de mise à jour du profil: ${response.body}");
       }
-       
-    }
-    catch (e) {
-      return "Erreur lors de l'initialisation de la quête: $e";
+    } catch (e) {
+      return "ERROR:$e";
     }
   }
-  Future<bool> majQuestMuseum(String userId, String museumId, String artworkId) async 
-  {
 
-    return false;
+  Future<bool> majQuestMuseum(String userId, String museumId, String artworkId) async {
+    try {
+      final body = {
+        'museum_id': museumId,
+        'artworkId': artworkId,
+      };
+
+      final response = await _httpService.put(
+        IpConfig.museumQuest(userId),
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print("Erreur de mise à jour : ${response.statusCode} - ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Exception lors de la mise à jour : $e");
+      return false;
+    }
   }
-
 }
