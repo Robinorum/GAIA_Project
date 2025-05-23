@@ -23,7 +23,7 @@ jobs:
       - name: Decode and recreate ip_config.dart
         working-directory: code/app/GAIA
         run: |
-          echo "${{ secrets.IP_CONFIG_CONTENT }}" | base64 -d > lib/config/ip_config.dart
+          echo "${{ secrets.IP_CONFIG_CONTENT}}" | base64 -d > lib/config/ip_config.dart
 
       - name: Recreate Ip_config file
         working-directory: code/backend
