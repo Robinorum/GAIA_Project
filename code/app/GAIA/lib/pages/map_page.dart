@@ -65,11 +65,8 @@ class _MapPageState extends State<MapPage> {
           _currentLocation = LatLng(position.latitude, position.longitude);
         });
       });
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur localisation : $e")),
-      );
+    } catch (e, stack) {
+      debugPrint("Erreur localisation : $e\n$stack");
     }
   }
 
@@ -82,10 +79,8 @@ class _MapPageState extends State<MapPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _fetchMuseumsForCurrentBounds();
       });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur chargement musées : $e")),
-      );
+    } catch (e, stack) {
+      debugPrint("Erreur chargement musées : $e\n$stack");
     } finally {
       setState(() => _loading = false);
     }
@@ -120,7 +115,9 @@ class _MapPageState extends State<MapPage> {
       setState(() {
         _visibleMuseumsOnMap = museums;
       });
-    } catch (e) {}
+    } catch (e, stack) {
+      debugPrint("Erreur chargement musées sur la carte : $e\n$stack");
+    }
   }
 
   List<Museum> _filteredMuseumsForList(List<Museum> museums) {

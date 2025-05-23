@@ -68,8 +68,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              theme.colorScheme.primary.withOpacity(0.1),
-              theme.colorScheme.secondary.withOpacity(0.05),
+              theme.colorScheme.primary.withAlpha((0.1 * 255).toInt()),
+              theme.colorScheme.secondary.withAlpha((0.05 * 255).toInt()),
               Colors.white,
             ],
           ),
@@ -113,7 +113,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.primary.withOpacity(0.3),
+                color: theme.colorScheme.primary.withAlpha((0.3 * 255).toInt()),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -130,14 +130,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           'Bienvenue',
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onBackground,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           'Connectez-vous pour découvrir l\'art',
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onBackground.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
           ),
         ),
       ],
@@ -147,7 +147,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   Widget _buildLoginForm(ThemeData theme) {
     return Card(
       elevation: 8,
-      shadowColor: theme.colorScheme.primary.withOpacity(0.1),
+      shadowColor: theme.colorScheme.primary.withAlpha((0.1 * 255).toInt()),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -173,7 +173,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface
+                      .withAlpha((0.6 * 255).toInt()),
                 ),
                 onPressed: () {
                   setState(() {
@@ -255,7 +256,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           backgroundColor: theme.colorScheme.primary,
           foregroundColor: Colors.white,
           elevation: 4,
-          shadowColor: theme.colorScheme.primary.withOpacity(0.3),
+          shadowColor: theme.colorScheme.primary.withAlpha((0.3 * 255).toInt()),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -285,7 +286,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       children: [
         Expanded(
           child: Divider(
-            color: theme.colorScheme.onSurface.withOpacity(0.2),
+            color: theme.colorScheme.onSurface.withAlpha((0.2 * 255).toInt()),
           ),
         ),
         Padding(
@@ -390,7 +391,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: theme.colorScheme.error.withOpacity(0.1),
+          color: theme.colorScheme.error.withAlpha((0.1 * 255).toInt()),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

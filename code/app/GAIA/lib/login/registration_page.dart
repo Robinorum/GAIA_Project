@@ -103,7 +103,7 @@ class _RegistrationPageState extends State<RegistrationPage>
               onPressed: () => Navigator.pop(context),
               icon: Icon(
                 Icons.arrow_back_ios,
-                color: theme.colorScheme.onBackground,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const Spacer(),
@@ -140,14 +140,14 @@ class _RegistrationPageState extends State<RegistrationPage>
           'Créer un compte',
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onBackground,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           'Rejoignez notre communauté d\'art',
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onBackground.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
       ],
@@ -339,7 +339,7 @@ class _RegistrationPageState extends State<RegistrationPage>
           backgroundColor: theme.colorScheme.primary,
           foregroundColor: Colors.white,
           elevation: 4,
-          shadowColor: theme.colorScheme.primary.withOpacity(0.3),
+          shadowColor: theme.colorScheme.primary.withAlpha((0.3 * 255).toInt()),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

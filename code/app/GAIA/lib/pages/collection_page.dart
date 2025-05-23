@@ -9,10 +9,10 @@ class CollectionPage extends StatefulWidget {
   const CollectionPage({super.key});
 
   @override
-  _CollectionPageState createState() => _CollectionPageState();
+  CollectionPageState createState() => CollectionPageState();
 }
 
-class _CollectionPageState extends State<CollectionPage> {
+class CollectionPageState extends State<CollectionPage> {
   late Future<List<Artwork>> _artworks;
   List<Artwork> _allArtworks = [];
   List<Artwork> _filteredArtworks = [];
@@ -148,7 +148,7 @@ class _CollectionPageState extends State<CollectionPage> {
                             setModalState(() => tempSortOrder = newValue);
                           }
                         },
-                        items: [
+                        items: const [
                           DropdownMenuItem(
                             value: 'asc',
                             child: Text('Ordre alphabétique (A → Z)'),
