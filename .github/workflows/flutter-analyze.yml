@@ -26,6 +26,11 @@ jobs:
             mkdir -p lib/config
             echo "${{ secrets.IP_CONFIG_CONTENT}}" > lib/config/ip_config.dart
 
+      - name: Recreate Ip_config file
+        working-directory: code/backend
+        run: |
+            echo "${{ secrets.CONFIG_CONTENT}}" > config.py
+
       - name: Analyze code
         working-directory: code/app/GAIA
         run: flutter analyze
