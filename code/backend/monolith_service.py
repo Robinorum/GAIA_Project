@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import auth, credentials, firestore
 
 import os
 
@@ -72,46 +72,46 @@ def get_museums():
         print(f"Error retrieving museums: {e}")
         return jsonify([])
 
-@app.route("/museums-in-bounds", methods=["GET"])
-def get_museums_in_bounds():
-    try:
-        sw_lat = float(request.args.get("sw_lat"))
-        sw_lng = float(request.args.get("sw_lng"))
-        ne_lat = float(request.args.get("ne_lat"))
-        ne_lng = float(request.args.get("ne_lng"))
-        search = request.args.get('search', '').lower().strip()
+# @app.route("/museums-in-bounds", methods=["GET"])
+# def get_museums_in_bounds():
+#     try:
+#         sw_lat = float(request.args.get("sw_lat"))
+#         sw_lng = float(request.args.get("sw_lng"))
+#         ne_lat = float(request.args.get("ne_lat"))
+#         ne_lng = float(request.args.get("ne_lng"))
+#         search = request.args.get('search', '').lower().strip()
 
-        if not (-90 <= sw_lat <= 90 and -90 <= ne_lat <= 90 and -180 <= sw_lng <= 180 and -180 <= ne_lng <= 180):
-            return jsonify({"error": "Invalid coordinates"}), 400
+#         if not (-90 <= sw_lat <= 90 and -90 <= ne_lat <= 90 and -180 <= sw_lng <= 180 and -180 <= ne_lng <= 180):
+#             return jsonify({"error": "Invalid coordinates"}), 400
 
-        museums_ref = db.collection('museums')
-        museums = museums_ref.stream()
+#         museums_ref = db.collection('museums')
+#         museums = museums_ref.stream()
 
-        museums_list = []
-        for museum in museums:
-            data = museum.to_dict()
-            lat = data.get("location", {}).get("latitude")
-            lng = data.get("location", {}).get("longitude")
-            title = data.get("title", "").lower()
-            city = data.get("city", "").lower()
+#         museums_list = []
+#         for museum in museums:
+#             data = museum.to_dict()
+#             lat = data.get("location", {}).get("latitude")
+#             lng = data.get("location", {}).get("longitude")
+#             title = data.get("title", "").lower()
+#             city = data.get("city", "").lower()
 
-            if lat is not None and lng is not None:
-                # Check bounds
-                in_bounds = sw_lat <= lat <= ne_lat and sw_lng <= lng <= ne_lng
+#             if lat is not None and lng is not None:
+#                 # Check bounds
+#                 in_bounds = sw_lat <= lat <= ne_lat and sw_lng <= lng <= ne_lng
 
-                # Check search query presence in title or city
-                matches_search = True  # Par défaut vrai si search vide
-                if search:
-                    matches_search = (search in title) or (search in city)
+#                 # Check search query presence in title or city
+#                 matches_search = True  # Par défaut vrai si search vide
+#                 if search:
+#                     matches_search = (search in title) or (search in city)
 
-                if in_bounds and matches_search:
-                    data['id'] = museum.id
-                    museums_list.append(data)
+#                 if in_bounds and matches_search:
+#                     data['id'] = museum.id
+#                     museums_list.append(data)
 
-        return jsonify(museums_list)
-    except Exception as e:
-        print(f"Error retrieving museums in bounds: {e}")
-        return jsonify([]), 500
+#         return jsonify(museums_list)
+#     except Exception as e:
+#         print(f"Error retrieving museums in bounds: {e}")
+#         return jsonify([]), 500
 
 
 @app.route("/museums/<museum_id>/artworks", methods=["GET"])
@@ -250,6 +250,65 @@ def get_recommendations(uid):
 
 #USER_FUNCTIONS
 
+@app.route('/users/<uid>/email', methods=['PUT'])
+def update_user_email(uid):
+    try:
+        data = request.get_json()
+        new_email = data.get('email')
+
+        if not new_email:
+            return jsonify({"error": "Email is required"}), 400
+
+        auth.update_user(uid, email=new_email)
+
+        user_ref = db.collection("accounts").document(uid)
+        if user_ref.get().exists:
+            user_ref.update({"email": new_email})
+        else:
+            return jsonify({"error": f"User {uid} not found in Firestore"}), 404
+
+        return jsonify({"message": "Email updated successfully"}), 200
+
+    except auth.EmailAlreadyExistsError:
+        return jsonify({"error": "Email already in use"}), 400
+    except auth.UserNotFoundError:
+        return jsonify({"error": f"User {uid} not found in Firebase"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/users/<uid>/change-password", methods=["PUT"])
+def change_password(uid):
+    data = request.get_json()
+    new_password = data.get("new_password")
+
+    # Password requirements:
+    # - At least 14 characters
+    # - At least one uppercase letter
+    # - At least one lowercase letter
+    # - At least one digit
+    # - At least one special character (@$!%*?&)
+    if (
+        not new_password
+        or len(new_password) < 14
+        or not any(c.isupper() for c in new_password)
+        or not any(c.islower() for c in new_password)
+        or not any(c.isdigit() for c in new_password)
+        or not any(c in "@$!%*?&" for c in new_password)
+    ):
+        return jsonify({"error": "Le mot de passe ne respecte pas les exigences (14 caractères, majuscule, minuscule, chiffre, caractère spécial)."}), 400
+
+    try:
+        auth.update_user(uid, password=new_password)
+
+        # db.collection("accounts").document(uid).update({
+        #     "password_changed_at": firestore.SERVER_TIMESTAMP
+        # })
+
+        return jsonify({"message": "Mot de passe mis à jour avec succès."}), 200
+    except auth.UserNotFoundError:
+        return jsonify({"error": "Utilisateur introuvable."}), 404
+    except Exception as e:
+        return jsonify({"error": f"Erreur lors de la mise à jour : {str(e)}"}), 500
 
 
 @app.route("/users/<uid>/artworks/<artworkId>", methods=["POST"])

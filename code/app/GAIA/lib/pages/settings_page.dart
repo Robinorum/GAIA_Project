@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gaia/provider/theme_provider.dart';
+import 'package:gaia/settings/change_email_page.dart';
+import 'package:gaia/settings/change_password_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gaia/login/login_page.dart';
@@ -79,7 +81,11 @@ class _SettingsPageState extends State<SettingsPage> {
             _buildListTile(
               title: "Changer l'adresse mail",
               onTap: () {
-                // Navigation vers une page de modification de l'email
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ChangeEmailPage(),
+                  ),
+                );
               },
             ),
             _buildListTile(
@@ -91,7 +97,11 @@ class _SettingsPageState extends State<SettingsPage> {
             _buildListTile(
               title: "Change le mot de passe",
               onTap: () {
-                // Navigation vers une page de modification du mot de passe
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ChangePasswordPage(),
+                  ),
+                );
               },
             ),
             const Divider(),
