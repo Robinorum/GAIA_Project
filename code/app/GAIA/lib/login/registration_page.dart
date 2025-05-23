@@ -67,8 +67,8 @@ class _RegistrationPageState extends State<RegistrationPage>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              theme.colorScheme.primary.withOpacity(0.1),
-              theme.colorScheme.secondary.withOpacity(0.05),
+              theme.colorScheme.primary.withAlpha((0.1 * 255).toInt()),
+              theme.colorScheme.secondary.withAlpha((0.05 * 255).toInt()),
               Colors.white,
             ],
           ),
@@ -123,7 +123,7 @@ class _RegistrationPageState extends State<RegistrationPage>
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.primary.withOpacity(0.3),
+                color: theme.colorScheme.primary.withAlpha((0.3 * 255).toInt()),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -147,7 +147,7 @@ class _RegistrationPageState extends State<RegistrationPage>
         Text(
           'Rejoignez notre communauté d\'art',
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
           ),
         ),
       ],
@@ -157,7 +157,7 @@ class _RegistrationPageState extends State<RegistrationPage>
   Widget _buildRegistrationForm(ThemeData theme) {
     return Card(
       elevation: 8,
-      shadowColor: theme.colorScheme.primary.withOpacity(0.1),
+      shadowColor: theme.colorScheme.primary.withAlpha((0.1 * 255).toInt()),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -192,7 +192,7 @@ class _RegistrationPageState extends State<RegistrationPage>
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withAlpha((0.6* 255).toInt()),
                 ),
                 onPressed: () {
                   setState(() {
@@ -279,10 +279,10 @@ class _RegistrationPageState extends State<RegistrationPage>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.05),
+        color: theme.colorScheme.primary.withAlpha((0.05 * 255).toInt()),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.2),
+          color: theme.colorScheme.primary.withAlpha((0.2 * 255).toInt()),
         ),
       ),
       child: Column(
@@ -314,14 +314,14 @@ class _RegistrationPageState extends State<RegistrationPage>
           Icon(
             Icons.circle,
             size: 4,
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            color: theme.colorScheme.onSurface.withAlpha((0.6 * 255).toInt()),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
               ),
             ),
           ),
@@ -374,7 +374,7 @@ class _RegistrationPageState extends State<RegistrationPage>
         text: TextSpan(
           text: "Déjà un compte ? ",
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
           ),
           children: [
             TextSpan(

@@ -294,13 +294,13 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           child: Text(
             'ou',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withAlpha((0.6 * 255).toInt()),
             ),
           ),
         ),
         Expanded(
           child: Divider(
-            color: theme.colorScheme.onSurface.withOpacity(0.2),
+            color: theme.colorScheme.onSurface.withAlpha((0.2 * 255).toInt()),
           ),
         ),
       ],
@@ -318,7 +318,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               },
         style: OutlinedButton.styleFrom(
           side: BorderSide(
-            color: theme.colorScheme.outline.withOpacity(0.5),
+            color: theme.colorScheme.outline.withAlpha((0.5 * 255).toInt()),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -364,7 +364,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         text: TextSpan(
           text: "Pas encore de compte ? ",
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
           ),
           children: [
             TextSpan(
