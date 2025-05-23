@@ -24,7 +24,7 @@ jobs:
       - name: Write Firebase credentials file from secret
         working-directory: code/backend
         run: |
-          echo "${{ secrets.DB_KEY }}" > testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json
+          printf "%s" "${{ secrets.DB_KEY }}" > testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json
 
       - name: Run Pytest
         working-directory: code/backend
