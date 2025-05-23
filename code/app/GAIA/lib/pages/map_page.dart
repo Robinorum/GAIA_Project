@@ -77,7 +77,7 @@ class _MapPageState extends State<MapPage> {
         _museums = _sortMuseumsForList(museums);
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _fetchMuseumsForCurrentBounds();
+        _filterMapMuseums();
       });
     } catch (e, stack) {
       debugPrint("Erreur chargement musées : $e\n$stack");
@@ -92,32 +92,26 @@ class _MapPageState extends State<MapPage> {
     if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
 
     _debounceTimer = Timer(const Duration(milliseconds: 400), () {
-      _fetchMuseumsForCurrentBounds();
+      _filterMapMuseums();
     });
   }
 
-  Future<void> _fetchMuseumsForCurrentBounds() async {
+  void _filterMapMuseums() {
     final bounds = _mapController.bounds;
+    final query = _searchQuery.toLowerCase();
+
     if (bounds == null) return;
 
-    final swLat = bounds.southWest.latitude;
-    final swLng = bounds.southWest.longitude;
-    final neLat = bounds.northEast.latitude;
-    final neLng = bounds.northEast.longitude;
-
-    try {
-      final museums = await _museumService.fetchMuseumsInBounds(
-        swLat: swLat,
-        swLng: swLng,
-        neLat: neLat,
-        neLng: neLng,
-      );
-      setState(() {
-        _visibleMuseumsOnMap = museums;
-      });
-    } catch (e, stack) {
-      debugPrint("Erreur chargement musées sur la carte : $e\n$stack");
-    }
+    setState(() {
+      _visibleMuseumsOnMap = _museums.where((museum) {
+        final point =
+            LatLng(museum.location.latitude, museum.location.longitude);
+        final inBounds = bounds.contains(point);
+        final match = museum.title.toLowerCase().contains(query) ||
+            museum.city.toLowerCase().contains(query);
+        return inBounds && match;
+      }).toList();
+    });
   }
 
   List<Museum> _filteredMuseumsForList(List<Museum> museums) {
@@ -152,7 +146,7 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       _searchQuery = query.toLowerCase();
     });
-    _fetchMuseumsForCurrentBounds();
+    _filterMapMuseums();
   }
 
   @override
@@ -216,7 +210,7 @@ class _MapPageState extends State<MapPage> {
                         mapController: _mapController,
                         currentLocation: _currentLocation,
                         markerSize: _markerSize,
-                        onMapMove: _onMapMove,
+                        onMapMove: _filterMapMuseums,
                       )
                     : MuseumListView(
                         museums: _filteredMuseumsForList(_museums),
