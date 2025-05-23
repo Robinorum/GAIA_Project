@@ -21,6 +21,10 @@ jobs:
           pip install pytest
           pip install -r requirements.txt
 
+      - name: Write Firebase credentials file from secret
+        run: |
+          echo "${{ secrets.DB_KEY }}" > testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json
+
       - name: Run Pytest
         working-directory: code/backend
         run: PYTHONPATH=. pytest --disable-warnings
