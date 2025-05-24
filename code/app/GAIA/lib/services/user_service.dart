@@ -146,6 +146,45 @@ class UserService {
       return [];
     }
   }
+Future<String> verifQuestMuseum(String userId, String museumId, String artworkId) async {
+  try {
+    final body = {
+      'museum_id': museumId,
+      'artwork_id': artworkId,
+    };
+
+    final response = await _httpService.post(
+      IpConfig.verifQuest(userId),
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      final message = responseData['message'];
+      developer.log("Réponse de la vérification de la quête: $message");
+      switch (message) {
+        case "Correct":
+          return "CORRECT";
+        case "Incorrect":
+          return "INCORRECT";
+        case "Vide":
+          return "QUEST_FINISHED";
+        case "Not_Initialized":
+          return "MUSEUM_NOT_FOUND_IN_QUESTS";
+        default:
+          return "UNKNOWN_RESPONSE";
+      }
+    } else {
+      throw Exception("Erreur inattendue: ${response.statusCode} - ${response.body}");
+    }
+  } catch (e) {
+    return "ERROR:$e";
+  }
+}
+
+
+
+
   Future<String> initQuestMuseum(String userId, String museumId) async {
     try {
       final body = {

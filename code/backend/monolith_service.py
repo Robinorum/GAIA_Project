@@ -402,6 +402,37 @@ def get_general_quests(uid):
     print(filtered_quests)
     return {"quests": filtered_quests}, 200
 
+@app.route("/users/<uid>/verif-quests", methods=["POST"])
+def get_verif_museum(uid):
+    data = request.get_json()
+    artwork_id = data.get("artwork_id")
+    museum_id = data.get("museum_id")
+
+    print(f"Artwork ID: {artwork_id}, Museum ID: {museum_id}")
+
+    doc_ref = db.collection('accounts').document(uid)
+    user_db = doc_ref.get()
+    
+    if not user_db.exists:
+        return jsonify({"message": "Utilisateur introuvable"}), 404
+
+    user_data = user_db.to_dict()
+    quete_museum = user_data.get('quete_museum', [])
+    quest = next((q for q in quete_museum if q.get("id") == museum_id), None)
+
+    if not quest:
+        return jsonify({"message": "Not_Initialized"}), 200
+
+    artworks = quest.get("artworks", [])
+    if not artworks:
+        print(f"Aucune œuvre à valider pour le musée {museum_id}.")
+        return jsonify({"message": "Vide"}), 200
+
+    if artworks[0] == artwork_id:
+        return jsonify({"message": "Correct"}), 200
+    else:
+        print("Ce n'est pas la bonne œuvre à valider.")
+        return jsonify({"message": "Incorrect"}), 200
 
 @app.route("/users/<uid>/museum-quests", methods=["POST"])
 def init_quest_museum(uid):
