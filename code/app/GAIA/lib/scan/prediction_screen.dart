@@ -16,10 +16,10 @@ class PredictionScreen extends StatefulWidget {
   const PredictionScreen({required this.artworkData, super.key});
 
   @override
-  _PredictionScreenState createState() => _PredictionScreenState();
+  PredictionScreenState createState() => PredictionScreenState();
 }
 
-class _PredictionScreenState extends State<PredictionScreen> {
+class PredictionScreenState extends State<PredictionScreen> {
   late Artwork _artwork;
   late Future<List<Artwork>> _collectionFuture;
   LatLng? _currentLocation;
@@ -60,12 +60,15 @@ class _PredictionScreenState extends State<PredictionScreen> {
         ),
       );
 
+      if (!mounted) return;
+
       setState(() {
         _currentLocation = LatLng(position.latitude, position.longitude);
       });
 
       _sortAndUpdateMuseums();
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error getting location: $e")),
       );
@@ -104,10 +107,10 @@ class _PredictionScreenState extends State<PredictionScreen> {
       _artwork.id,
     );
 
+    if (!mounted) return;
+
     setState(() {
       _verifResult = result;
-      print("_verifResult = $_verifResult");
-
     });
   }
 
@@ -204,88 +207,96 @@ class _PredictionScreenState extends State<PredictionScreen> {
                     ],
                   ),
                 ),
-               Align(
-  alignment: Alignment.bottomCenter,
-  child: Padding(
-    padding: const EdgeInsets.only(bottom: 20),
-    child: alreadyCollected
-      ? ElevatedButton.icon(
-          onPressed: null,
-          icon: const Icon(Icons.check),
-          label: const Text("Œuvre déjà collectée"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor: Colors.grey.shade400,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
-        )
-      : _verifResult == "QUEST_FINISHED"
-          ? ElevatedButton.icon(
-              onPressed: null,
-              icon: const Icon(Icons.block),
-              label: const Text("Aucune œuvre à valider"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: Colors.grey.shade400,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-            )
-          : _verifResult == "INCORRECT"
-              ? ElevatedButton.icon(
-                  onPressed: null,
-                  icon: const Icon(Icons.warning),
-                  label: const Text("Mauvaise œuvre pour la quête"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.shade300,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.red.shade200,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  ),
-                )
-              : _verifResult == "CORRECT"
-                  ? FloatingActionButton.extended(
-                      onPressed: () async {
-                        try {
-                          final quizz = await QuizzService().fetchQuizz(_artwork);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => QuizzScreen(
-                                quizz: quizz,
-                                artwork: _artwork,
-                              ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: alreadyCollected
+                        ? ElevatedButton.icon(
+                            onPressed: null,
+                            icon: const Icon(Icons.check),
+                            label: const Text("Œuvre déjà collectée"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey,
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: Colors.grey.shade400,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
                             ),
-                          );
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("Erreur : $e"),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      },
-                      label: const Text("Lancer le quizz pour valider le tableau"),
-                      icon: const Icon(Icons.quiz),
-                      backgroundColor: Colors.orange,
-                    )
-                  : _verifResult == "MUSEUM_NOT_FOUND_IN_QUESTS"
-                      ? ElevatedButton.icon(
-                          onPressed: null,
-                          icon: const Icon(Icons.error_outline),
-                          label: const Text("Les quêtes de ce musée n'ont pas été activées"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange.shade200,
-                            foregroundColor: Colors.black87,
-                            disabledBackgroundColor: Colors.orange.shade100,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          ),
-                        )
-                      : Container(), // Rien si autre cas (ou loader)
-
-
+                          )
+                        : _verifResult == "QUEST_FINISHED"
+                            ? ElevatedButton.icon(
+                                onPressed: null,
+                                icon: const Icon(Icons.block),
+                                label: const Text("Aucune œuvre à valider"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.grey,
+                                  foregroundColor: Colors.white,
+                                  disabledBackgroundColor: Colors.grey.shade400,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 12),
+                                ),
+                              )
+                            : _verifResult == "INCORRECT"
+                                ? ElevatedButton.icon(
+                                    onPressed: null,
+                                    icon: const Icon(Icons.warning),
+                                    label: const Text("Mauvaise œuvre pour la quête"),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red.shade300,
+                                      foregroundColor: Colors.white,
+                                      disabledBackgroundColor: Colors.red.shade200,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 24, vertical: 12),
+                                    ),
+                                  )
+                                : _verifResult == "CORRECT"
+                                    ? FloatingActionButton.extended(
+                                        onPressed: () async {
+                                          try {
+                                            final quizz = await QuizzService()
+                                                .fetchQuizz(_artwork);
+                                            if (!mounted) return;
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => QuizzScreen(
+                                                  quizz: quizz,
+                                                  artwork: _artwork,
+                                                ),
+                                              ),
+                                            );
+                                          } catch (e) {
+                                            if (!mounted) return;
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text("Erreur : $e"),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        label: const Text(
+                                            "Lancer le quizz pour valider le tableau"),
+                                        icon: const Icon(Icons.quiz),
+                                        backgroundColor: Colors.orange,
+                                      )
+                                    : _verifResult == "MUSEUM_NOT_FOUND_IN_QUESTS"
+                                        ? ElevatedButton.icon(
+                                            onPressed: null,
+                                            icon: const Icon(Icons.error_outline),
+                                            label: const Text(
+                                                "Les quêtes de ce musée n'ont pas été activées"),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.orange.shade200,
+                                              foregroundColor: Colors.black87,
+                                              disabledBackgroundColor:
+                                                  Colors.orange.shade100,
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 24, vertical: 12),
+                                            ),
+                                          )
+                                        : Container(), // Rien si autre cas (ou loader)
                   ),
                 )
               ],

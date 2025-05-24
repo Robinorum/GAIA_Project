@@ -226,11 +226,11 @@ Future<String> verifQuestMuseum(String userId, String museumId, String artworkId
       if (response.statusCode == 200) {
         return true;
       } else {
-        print("Erreur de mise à jour : ${response.statusCode} - ${response.body}");
+        developer.log("Erreur de mise à jour : ${response.statusCode} - ${response.body}");
         return false;
       }
     } catch (e) {
-      print("Exception lors de la mise à jour : $e");
+      developer.log("Exception lors de la mise à jour : $e");
       return false;
     }
   }
