@@ -264,6 +264,7 @@ class PredictionScreenState extends State<PredictionScreen> {
                                                 .fetchQuizz(_artwork);
                                             if (!mounted) return;
                                             Navigator.push(
+                                              // ignore: use_build_context_synchronously
                                               currentContext,
                                               MaterialPageRoute(
                                                 builder: (context) =>
@@ -275,6 +276,7 @@ class PredictionScreenState extends State<PredictionScreen> {
                                             );
                                           } catch (e) {
                                             if (!mounted) return;
+                                            // ignore: use_build_context_synchronously
                                             ScaffoldMessenger.of(currentContext)
                                                 .showSnackBar(
                                               SnackBar(
