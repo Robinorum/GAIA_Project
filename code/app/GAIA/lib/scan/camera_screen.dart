@@ -72,7 +72,7 @@ class _CameraScreenState extends State<CameraScreen> {
             children: [
               CircularProgressIndicator(),
               SizedBox(height: 12),
-              Text("Scanning ..."),
+              Text("Scan en cours ..."),
             ],
           ),
         ),
@@ -105,8 +105,8 @@ class _CameraScreenState extends State<CameraScreen> {
           // ignore: use_build_context_synchronously
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('No matches found'),
-            content: const Text('No recognized artwork in the image.'),
+            title: const Text('Error de reconnaissance'),
+            content: const Text('Aucun tableau reconnu à partir de l\'image'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -125,10 +125,7 @@ class _CameraScreenState extends State<CameraScreen> {
         _isLoading = false;
       });
 
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la capture: $e')),
-      );
+      debugPrint('Erreur lors de la capture: $e');
     }
   }
 
@@ -182,7 +179,7 @@ class _CameraScreenState extends State<CameraScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  'Tap to capture a photo',
+                  'Appuyez pour scanner l\'art !',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,

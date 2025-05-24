@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Camera Prediction App',
+      title: 'GAIA',
       theme: themeProvider.currentTheme, // Utilisation du thème dynamique
       home: const AuthGate(),
     );

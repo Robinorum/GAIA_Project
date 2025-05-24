@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gaia/provider/theme_provider.dart';
+import 'package:gaia/settings/change_email_page.dart';
+import 'package:gaia/settings/change_password_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gaia/login/login_page.dart';
@@ -16,7 +18,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _isNotificationsEnabled = true;
-  String _selectedLanguage = 'English';
+  String _selectedLanguage = 'Français';
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Settings"),
+        title: const Text("Paramètres"),
         backgroundColor: Theme.of(context).primaryColor,
         elevation: 4.0,
       ),
@@ -33,9 +35,9 @@ class _SettingsPageState extends State<SettingsPage> {
         child: ListView(
           children: [
             // Section Apparence
-            _buildSectionTitle("Appearance"),
+            _buildSectionTitle("Thème"),
             _buildListTile(
-              title: "Dark Mode",
+              title: "Thème sombre",
               trailing: Switch(
                 value: themeProvider.isDarkMode,
                 onChanged: (value) {
@@ -49,7 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
             // Section Notifications
             _buildSectionTitle("Notifications"),
             _buildListTile(
-              title: "Enable Notifications",
+              title: "Activer les notifications",
               trailing: Switch(
                 value: _isNotificationsEnabled,
                 onChanged: (value) {
@@ -62,9 +64,9 @@ class _SettingsPageState extends State<SettingsPage> {
             const Divider(),
 
             // Section Langue
-            _buildSectionTitle("Language"),
+            _buildSectionTitle("Langue"),
             ListTile(
-              title: const Text("Language", style: TextStyle(fontSize: 18)),
+              title: const Text("Langue", style: TextStyle(fontSize: 18)),
               subtitle:
                   Text(_selectedLanguage, style: const TextStyle(fontSize: 16)),
               trailing: const Icon(Icons.arrow_forward_ios),
@@ -75,23 +77,31 @@ class _SettingsPageState extends State<SettingsPage> {
             const Divider(),
 
             // Section Compte
-            _buildSectionTitle("Account"),
+            _buildSectionTitle("Compte"),
             _buildListTile(
-              title: "Change Email",
+              title: "Changer l'adresse mail",
               onTap: () {
-                // Navigation vers une page de modification de l'email
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ChangeEmailPage(),
+                  ),
+                );
               },
             ),
             _buildListTile(
-              title: "Change Username",
+              title: "Changer le nom d'utilisateur",
               onTap: () {
                 // Navigation vers une page de modification du mot de passe
               },
             ),
             _buildListTile(
-              title: "Change Password",
+              title: "Change le mot de passe",
               onTap: () {
-                // Navigation vers une page de modification du mot de passe
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ChangePasswordPage(),
+                  ),
+                );
               },
             ),
             const Divider(),
@@ -106,7 +116,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 // ignore: use_build_context_synchronously
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(
-                    builder: (context) => const LoginPage(title: 'Login Page'),
+                    builder: (context) =>
+                        const LoginPage(title: "Page d'authentification"),
                   ),
                   (Route<dynamic> route) => false,
                 );
@@ -119,7 +130,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               child: const Text(
-                "Log Out",
+                "Se déconnecter",
                 style:
                     TextStyle(fontSize: 16, color: Colors.white), // White text
               ),
@@ -158,7 +169,7 @@ class _SettingsPageState extends State<SettingsPage> {
       tileColor: Theme.of(context).cardColor,
       subtitle: trailing == null
           ? null
-          : const Text("Tap to change", style: TextStyle(fontSize: 14)),
+          : const Text("Appuyez pour changer", style: TextStyle(fontSize: 14)),
     );
   }
 
@@ -169,24 +180,24 @@ class _SettingsPageState extends State<SettingsPage> {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Select Language"),
+          title: const Text("Sélectionner une langue"),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                ListTile(
-                  title: const Text("English"),
-                  onTap: () {
-                    setState(() {
-                      _selectedLanguage = 'English';
-                    });
-                    Navigator.of(context).pop();
-                  },
-                ),
                 ListTile(
                   title: const Text("Français"),
                   onTap: () {
                     setState(() {
                       _selectedLanguage = 'Français';
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ListTile(
+                  title: const Text("English"),
+                  onTap: () {
+                    setState(() {
+                      _selectedLanguage = 'English';
                     });
                     Navigator.of(context).pop();
                   },

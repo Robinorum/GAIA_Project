@@ -65,11 +65,8 @@ class _MapPageState extends State<MapPage> {
           _currentLocation = LatLng(position.latitude, position.longitude);
         });
       });
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur localisation : $e")),
-      );
+    } catch (e, stack) {
+      debugPrint("Erreur localisation : $e\n$stack");
     }
   }
 
@@ -80,47 +77,31 @@ class _MapPageState extends State<MapPage> {
         _museums = _sortMuseumsForList(museums);
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _fetchMuseumsForCurrentBounds();
+        _filterMapMuseums();
       });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur chargement musées : $e")),
-      );
+    } catch (e, stack) {
+      debugPrint("Erreur chargement musées : $e\n$stack");
     } finally {
       setState(() => _loading = false);
     }
   }
 
-  Timer? _debounceTimer;
-
-  void _onMapMove() {
-    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
-
-    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
-      _fetchMuseumsForCurrentBounds();
-    });
-  }
-
-  Future<void> _fetchMuseumsForCurrentBounds() async {
+  void _filterMapMuseums() {
     final bounds = _mapController.bounds;
+    final query = _searchQuery.toLowerCase();
+
     if (bounds == null) return;
 
-    final swLat = bounds.southWest.latitude;
-    final swLng = bounds.southWest.longitude;
-    final neLat = bounds.northEast.latitude;
-    final neLng = bounds.northEast.longitude;
-
-    try {
-      final museums = await _museumService.fetchMuseumsInBounds(
-        swLat: swLat,
-        swLng: swLng,
-        neLat: neLat,
-        neLng: neLng,
-      );
-      setState(() {
-        _visibleMuseumsOnMap = museums;
-      });
-    } catch (e) {}
+    setState(() {
+      _visibleMuseumsOnMap = _museums.where((museum) {
+        final point =
+            LatLng(museum.location.latitude, museum.location.longitude);
+        final inBounds = bounds.contains(point);
+        final match = museum.title.toLowerCase().contains(query) ||
+            museum.city.toLowerCase().contains(query);
+        return inBounds && match;
+      }).toList();
+    });
   }
 
   List<Museum> _filteredMuseumsForList(List<Museum> museums) {
@@ -155,7 +136,7 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       _searchQuery = query.toLowerCase();
     });
-    _fetchMuseumsForCurrentBounds();
+    _filterMapMuseums();
   }
 
   @override
@@ -219,7 +200,7 @@ class _MapPageState extends State<MapPage> {
                         mapController: _mapController,
                         currentLocation: _currentLocation,
                         markerSize: _markerSize,
-                        onMapMove: _onMapMove,
+                        onMapMove: _filterMapMuseums,
                       )
                     : MuseumListView(
                         museums: _filteredMuseumsForList(_museums),
