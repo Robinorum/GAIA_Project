@@ -169,7 +169,8 @@ class PredictionScreenState extends State<PredictionScreen> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                                color:
+                                    Colors.grey.withAlpha((0.3 * 255).toInt()),
                                 spreadRadius: 2,
                                 blurRadius: 5,
                                 offset: const Offset(0, 3),
@@ -196,7 +197,8 @@ class PredictionScreenState extends State<PredictionScreen> {
                       const SizedBox(height: 8),
                       Text(
                         'Année: ${_artwork.date}',
-                        style: const TextStyle(fontSize: 16, color: Colors.grey),
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -241,11 +243,13 @@ class PredictionScreenState extends State<PredictionScreen> {
                                 ? ElevatedButton.icon(
                                     onPressed: null,
                                     icon: const Icon(Icons.warning),
-                                    label: const Text("Mauvaise œuvre pour la quête"),
+                                    label: const Text(
+                                        "Mauvaise œuvre pour la quête"),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.red.shade300,
                                       foregroundColor: Colors.white,
-                                      disabledBackgroundColor: Colors.red.shade200,
+                                      disabledBackgroundColor:
+                                          Colors.red.shade200,
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 24, vertical: 12),
                                     ),
@@ -253,14 +257,17 @@ class PredictionScreenState extends State<PredictionScreen> {
                                 : _verifResult == "CORRECT"
                                     ? FloatingActionButton.extended(
                                         onPressed: () async {
+                                          final currentContext =
+                                              context; // capture du context
                                           try {
                                             final quizz = await QuizzService()
                                                 .fetchQuizz(_artwork);
                                             if (!mounted) return;
                                             Navigator.push(
-                                              context,
+                                              currentContext,
                                               MaterialPageRoute(
-                                                builder: (context) => QuizzScreen(
+                                                builder: (context) =>
+                                                    QuizzScreen(
                                                   quizz: quizz,
                                                   artwork: _artwork,
                                                 ),
@@ -268,7 +275,8 @@ class PredictionScreenState extends State<PredictionScreen> {
                                             );
                                           } catch (e) {
                                             if (!mounted) return;
-                                            ScaffoldMessenger.of(context).showSnackBar(
+                                            ScaffoldMessenger.of(currentContext)
+                                                .showSnackBar(
                                               SnackBar(
                                                 content: Text("Erreur : $e"),
                                                 backgroundColor: Colors.red,
@@ -281,19 +289,24 @@ class PredictionScreenState extends State<PredictionScreen> {
                                         icon: const Icon(Icons.quiz),
                                         backgroundColor: Colors.orange,
                                       )
-                                    : _verifResult == "MUSEUM_NOT_FOUND_IN_QUESTS"
+                                    : _verifResult ==
+                                            "MUSEUM_NOT_FOUND_IN_QUESTS"
                                         ? ElevatedButton.icon(
                                             onPressed: null,
-                                            icon: const Icon(Icons.error_outline),
+                                            icon:
+                                                const Icon(Icons.error_outline),
                                             label: const Text(
                                                 "Les quêtes de ce musée n'ont pas été activées"),
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.orange.shade200,
+                                              backgroundColor:
+                                                  Colors.orange.shade200,
                                               foregroundColor: Colors.black87,
                                               disabledBackgroundColor:
                                                   Colors.orange.shade100,
-                                              padding: const EdgeInsets.symmetric(
-                                                  horizontal: 24, vertical: 12),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 24,
+                                                      vertical: 12),
                                             ),
                                           )
                                         : Container(), // Rien si autre cas (ou loader)
