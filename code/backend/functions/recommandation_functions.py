@@ -112,7 +112,8 @@ def update(uid, previous_recommendations, new_recommendations):
     """
     Met à jour les recommandations dans Firestore.
     """
-    updated_reco = previous_recommendations[-5:] + [art['id'] for art in new_recommendations]
+
+    updated_reco = previous_recommendations[-20000:] + [art['id'] for art in new_recommendations]
     new_recommendations_ids = [art['id'] for art in new_recommendations]
 
     doc_ref = db.collection('accounts').document(uid)
