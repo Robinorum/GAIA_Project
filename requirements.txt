@@ -9,3 +9,4 @@ flask
 requests
 faiss-cpu
 pytest
+redis
