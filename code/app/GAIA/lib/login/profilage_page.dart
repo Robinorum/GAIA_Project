@@ -1,4 +1,4 @@
-import 'package:gaia/services/profilage_service.dart';
+import 'package:gaia/services/artwork_service.dart';
 import 'package:flutter/material.dart';
 import 'package:gaia/services/user_service.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +23,7 @@ class _ProfilagePageState extends State<ProfilagePage> {
   @override
   void initState() {
     super.initState();
-    _recommendedArtworks = ProfilageService().fetchArtworks();
+    _recommendedArtworks = ArtworkService().fetchArtworks();
   }
 
   void handleSwipe(String direction, Artwork artwork) async {
@@ -37,20 +37,46 @@ class _ProfilagePageState extends State<ProfilagePage> {
       currentIndex++;
       offset = 0;
       angle = 0;
-
-      if (currentIndex == 5) {
-        final user = Provider.of<UserProvider>(context, listen: false).user;
-        final uid = user?.id ?? 'Default-uid';
-        RecommendationService().majRecommendations(uid);
-        _recommendedArtworks.then((_) {
-          Navigator.pushReplacement(
-            // ignore: use_build_context_synchronously
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
-        });
-      }
     });
+
+    if (currentIndex == 5) {
+      _handleProfilageCompleted();
+    }
+  }
+
+  Future<void> _handleProfilageCompleted() async {
+    // Affiche une roue de chargement
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final uid = user?.id ?? 'Default-uid';
+
+    // Met à jour les recommandations
+    final newArtworks = await RecommendationService().majRecommendations(uid);
+
+
+    // Ferme le loader
+    if (mounted) Navigator.of(context).pop();
+
+    // Redirige vers la HomePage si recommandations disponibles
+    if (newArtworks.isNotEmpty) {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Aucune recommandation trouvée."),
+        ));
+      }
+    }
   }
 
   @override
@@ -117,7 +143,7 @@ class _ProfilagePageState extends State<ProfilagePage> {
         child: Transform.rotate(
           angle: angle * 3.14 / 180,
           child: AnimatedContainer(
-            key: ValueKey(artwork.id), // Ajout d’une Key unique
+            key: ValueKey(artwork.id),
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             child: Column(
@@ -126,7 +152,6 @@ class _ProfilagePageState extends State<ProfilagePage> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: RepaintBoundary(
-                    // Ajout de RepaintBoundary
                     child: Container(
                       height: 400,
                       width: 300,
@@ -145,7 +170,6 @@ class _ProfilagePageState extends State<ProfilagePage> {
                         placeholder: const AssetImage('assets/placeholder.png'),
                         image: artwork.toImage().image,
                         fit: BoxFit.cover,
-                        // Remplacement du placeholder par un CircularProgressIndicator
                         fadeInCurve: Curves.easeIn,
                         fadeInDuration: const Duration(milliseconds: 300),
                         imageErrorBuilder: (context, error, stackTrace) {
@@ -153,7 +177,6 @@ class _ProfilagePageState extends State<ProfilagePage> {
                               child: Icon(Icons.error,
                                   color: Colors.red, size: 50));
                         },
-                        // Affichage du CircularProgressIndicator pendant le chargement
                         placeholderErrorBuilder: (context, error, stackTrace) {
                           return const Center(
                               child: CircularProgressIndicator());

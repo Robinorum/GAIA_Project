@@ -74,6 +74,22 @@ class UserService {
     }
   }
 
+
+
+  Future<AppUser?> fetchProfile(String uid) async {
+    try {
+      final response = await _httpService.get(IpConfig.fetchProfile(uid));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return AppUser.fromAuth(data);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<bool> addArtworks(String userId, String artworkId) async {
     try {
       final response = await _httpService.post(

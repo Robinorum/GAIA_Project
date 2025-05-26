@@ -26,6 +26,7 @@ key = os.getenv("GEMINI_KEY")
 genai.configure(api_key=key)
 
 app = Flask(__name__)
+
 cred = credentials.Certificate('testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json')
 firebase_admin.initialize_app(cred)
 
@@ -385,7 +386,7 @@ def toggle_like(uid, artworkId):
             new_profile = response.json().get("profile")
             doc_ref.update({
                 "brands": current_likes,
-                "profile": new_profile
+                "preferences.movements": new_profile
             })
         except Exception as e:
             app.logger.error(f"Error calling profiling service: {e}")
@@ -659,6 +660,38 @@ def update_profile(uid):
             "uid": uid,
             "error": f"An error occurred while updating the profile: {str(e)}"
         }), 500
+    
+
+@app.route("/users/<uid>", methods=["GET"])
+def get_user(uid):
+    doc_ref = db.collection('accounts').document(uid)
+    doc = doc_ref.get()
+    if doc.exists:
+        user_data = doc.to_dict()
+        user_data['uid'] = uid
+        return jsonify({"success": True, "user": user_data}), 200
+    return jsonify({"success": False, "error": f"User {uid} not found"}), 404
+    
+
+
+@app.route("/profiling/artworks", methods=["GET"])
+def get_5_artworks():
+    
+    ids = [str(random.randint(0, 40000)) for _ in range(5)]
+    artworks = get_artworks_by_ids(ids)
+
+    if artworks:
+        return jsonify({"success": True, "data": artworks})
+    else:
+        return jsonify({"success": False, "message": "Artworks pas générés"}), 404
+    
+
+
+
+    
+    
+
+
 
 
 if __name__ == "__main__":
