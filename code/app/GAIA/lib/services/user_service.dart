@@ -90,6 +90,7 @@ class UserService {
     }
   }
 
+
   Future<bool> addArtworks(String userId, String artworkId) async {
     try {
       final response = await _httpService.post(
