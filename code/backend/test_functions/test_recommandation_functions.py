@@ -1,5 +1,6 @@
+import firebase_admin
 import pytest
-from firebase_admin import firestore
+from firebase_admin import firestore, credentials
 from unittest.mock import patch, MagicMock
 from functions.recommandation_functions import (
     get_user_preferences,
@@ -7,6 +8,9 @@ from functions.recommandation_functions import (
     get_user_collection,
     update,
 )
+
+cred = credentials.Certificate('testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json')
+firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
