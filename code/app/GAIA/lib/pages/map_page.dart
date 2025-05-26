@@ -86,16 +86,6 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Timer? _debounceTimer;
-
-  void _onMapMove() {
-    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
-
-    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
-      _filterMapMuseums();
-    });
-  }
-
   void _filterMapMuseums() {
     final bounds = _mapController.bounds;
     final query = _searchQuery.toLowerCase();

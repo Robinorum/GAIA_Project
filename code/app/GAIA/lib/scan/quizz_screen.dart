@@ -60,6 +60,7 @@ class _QuizzScreenState extends State<QuizzScreen> {
                   if (selectedLetter == widget.quizz.bonneLettre) {
                     bool success = await UserService().addArtworks(user!.id, widget.artwork.id);
                     await UserService().majQuest(user.id, widget.artwork.movement);
+                    await UserService().majQuestMuseum(user.id, widget.artwork.idMuseum, widget.artwork.id);
 
                     // ignore: use_build_context_synchronously
                     ScaffoldMessenger.of(context).showSnackBar(
