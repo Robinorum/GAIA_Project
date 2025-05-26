@@ -9,6 +9,7 @@ db = firestore.client()
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
+
 def get_user_preferences(uid):
     try:
         doc_ref = db.collection('accounts').document(uid)
@@ -97,7 +98,7 @@ def get_artworks():
 
 
 def update(uid, previous_recommendations, new_recommendations):
-    updated_reco = previous_recommendations[-1000:] + [art['id'] for art in new_recommendations]
+    updated_reco = previous_recommendations[-5:] + [art['id'] for art in new_recommendations]
     new_recommendationsid = [art['id'] for art in new_recommendations]
 
     doc_ref = db.collection('accounts').document(uid)

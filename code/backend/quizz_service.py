@@ -86,7 +86,8 @@ def create_quizz():
         response = requests.post(
             "http://localhost:5000/gemini/generate",
             json={"prompt": prompt},
-            headers={"Authorization": auth_header}
+            headers={"Authorization": auth_header},
+            timeout=5
         )
         
         if response.status_code != 200:
@@ -106,8 +107,6 @@ def create_quizz():
         }, 500
 
 
-
-    
 if __name__ == "__main__":
     app.run(debug=False, port=5003)
 
