@@ -1,7 +1,5 @@
 import json
 import redis
-import firebase_admin
-from firebase_admin import credentials, firestore
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
