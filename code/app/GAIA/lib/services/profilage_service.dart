@@ -31,21 +31,6 @@ class ProfilageService {
     }
   }
 
-  // Fonction pour récupérer les artworks d'un utilisateur
-  Future<List<Artwork>> fetchArtworks() async {
-    final response = await _httpService.get(IpConfig.profilingArtworks);
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body)['data'];
-
-      return data.map((item) {
-        return Artwork.fromJson(item);
-      }).toList();
-    } else {
-      throw Exception("Failed to load artworks: ${response.statusCode}");
-    }
-  }
-
   Future<List<String>> fetchTopMovements(String uid) async {
     try {
       final response = await _httpService.get('${IpConfig.topBrands}$uid');
