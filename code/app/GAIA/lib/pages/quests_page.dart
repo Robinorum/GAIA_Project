@@ -29,12 +29,20 @@ class _QuestsPageState extends State<QuestsPage> {
   List<Map<String, dynamic>> _questProgressData = [];
   LatLng? _currentLocation;
   late Future<List<Museum>> _recommendedMuseums;
+  
+  // Nouveaux états pour gérer le musée actuel
+  Museum? _currentMuseum;
+  bool _isInMuseum = false;
+  String? _currentQuestImageUrl;
+  bool _isLoadingQuest = false;
+  List<String> _completedQuests = [];
 
   @override
   void initState() {
     super.initState();
     _loadRecommendations();
     _getUserLocation();
+    _checkCurrentMuseum();
     final user = Provider.of<UserProvider>(context, listen: false).user;
     final uid = user?.id ?? "default_uid";
 
@@ -47,6 +55,139 @@ class _QuestsPageState extends State<QuestsPage> {
         _questProgressData = progressData;
       });
     });
+  }
+
+  Future<void> _checkCurrentMuseum() async {
+    try {
+      final user = Provider.of<UserProvider>(context, listen: false).user;
+      final uid = user?.id ?? "default_uid";
+      
+      // Récupérer le musée actuel depuis la BDD
+      final currentMuseumId = await _userService.getCurrentMuseum(uid);
+      
+      if (currentMuseumId != null) {
+        // Récupérer les détails du musée
+        final museums = await MuseumService().fetchMuseums();
+        final museum = museums.firstWhere(
+          (m) => m.officialId == currentMuseumId,
+          orElse: () => throw Exception("Musée non trouvé"),
+        );
+        
+        setState(() {
+          _currentMuseum = museum;
+          _isInMuseum = true;
+        });
+        
+        await _loadCurrentQuest();
+      }
+    } catch (e) {
+      developer.log("Erreur lors de la vérification du musée actuel: $e");
+    }
+  }
+
+  Future<void> _loadCurrentQuest() async {
+    if (!_isInMuseum || _currentMuseum == null) return;
+    
+    setState(() {
+      _isLoadingQuest = true;
+    });
+
+    try {
+      final user = Provider.of<UserProvider>(context, listen: false).user;
+      final uid = user?.id ?? "default_uid";
+
+      final imageUrl = await _userService.initQuestMuseum(
+        uid,
+        _currentMuseum!.officialId,
+      );
+
+      if (!mounted) return;
+
+      if (imageUrl == "QUEST_ALREADY_COMPLETED") {
+        // Marquer la quête comme complétée et charger la suivante
+        _completedQuests.add(_currentMuseum!.officialId);
+        await _loadCurrentQuest(); // Récursif pour charger la suivante
+      } else if (imageUrl == "NO_QUEST") {
+        setState(() {
+          _currentQuestImageUrl = null;
+          _isLoadingQuest = false;
+        });
+      } else if (!imageUrl.startsWith("Erreur")) {
+        setState(() {
+          _currentQuestImageUrl = imageUrl;
+          _isLoadingQuest = false;
+        });
+      } else {
+        setState(() {
+          _currentQuestImageUrl = null;
+          _isLoadingQuest = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _currentQuestImageUrl = null;
+        _isLoadingQuest = false;
+      });
+    }
+  }
+
+  Future<void> _enterMuseum(Museum museum) async {
+    try {
+      final user = Provider.of<UserProvider>(context, listen: false).user;
+      final uid = user?.id ?? "default_uid";
+      
+      // Mettre à jour la BDD avec le musée actuel
+      await _userService.setCurrentMuseum(uid, museum.officialId);
+      
+      setState(() {
+        _currentMuseum = museum;
+        _isInMuseum = true;
+      });
+      
+      await _loadCurrentQuest();
+    } catch (e) {
+      developer.log("Erreur lors de l'entrée dans le musée: $e");
+    }
+  }
+
+  Future<void> _exitMuseum() async {
+    try {
+      final user = Provider.of<UserProvider>(context, listen: false).user;
+      final uid = user?.id ?? "default_uid";
+      
+      // Remettre à null dans la BDD
+      await _userService.setCurrentMuseum(uid, null);
+      
+      setState(() {
+        _currentMuseum = null;
+        _isInMuseum = false;
+        _currentQuestImageUrl = null;
+        _completedQuests.clear();
+      });
+    } catch (e) {
+      developer.log("Erreur lors de la sortie du musée: $e");
+    }
+  }
+
+  void _checkDistanceFromMuseum() {
+    if (!_isInMuseum || _currentMuseum == null || _currentLocation == null) return;
+    
+    final museumLocation = LatLng(
+      _currentMuseum!.location.latitude, 
+      _currentMuseum!.location.longitude
+    );
+    
+    final distance = _calculateDistance(_currentLocation!, museumLocation);
+    
+    // Si l'utilisateur s'éloigne trop (plus de 2km), sortir automatiquement
+    if (distance > 2000) {
+      _exitMuseum();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Vous vous êtes éloigné du musée. Quête interrompue."),
+        ),
+      );
+    }
   }
 
   void _loadRecommendations() {
@@ -70,6 +211,7 @@ class _QuestsPageState extends State<QuestsPage> {
       });
 
       _sortAndUpdateMuseums();
+      _checkDistanceFromMuseum(); // Vérifier la distance si dans un musée
     } catch (e) {
       developer.log("Error getting location: $e");
     }
@@ -79,18 +221,14 @@ class _QuestsPageState extends State<QuestsPage> {
     if (_currentLocation == null) return;
 
     _recommendedMuseums.then((museums) {
-      // Filtrer les musées à une distance maximale de 50 km
       final nearbyMuseums = museums.where((museum) {
         final museumLocation =
             LatLng(museum.location.latitude, museum.location.longitude);
         final distance = _calculateDistance(_currentLocation!, museumLocation);
-        return distance <= 2000; // Distance maximale de 2km
+        return distance <= 2000;
       }).toList();
 
-      // Trier les musées restants par distance
       final sortedMuseums = _sortMuseumsByDistance(nearbyMuseums);
-
-      // Limiter à 10 musées
       final topMuseums = sortedMuseums.take(1).toList();
 
       setState(() {
@@ -126,11 +264,262 @@ class _QuestsPageState extends State<QuestsPage> {
     );
   }
 
+  Widget _buildMuseumQuestSection() {
+    if (_isInMuseum && _currentMuseum != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Quête du musée",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                onPressed: _exitMuseum,
+                icon: Image.asset(
+                  'assets/icons/exit.png',
+                  width: 24,
+                  height: 24,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Musée: ${_currentMuseum!.title}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.blue[800],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (_isLoadingQuest)
+                  const Center(child: CircularProgressIndicator())
+                else if (_currentQuestImageUrl != null)
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MuseumQuestPage(
+                            museum: _currentMuseum!,
+                          ),
+                        ),
+                      ).then((_) {
+                        // Recharger la quête au retour
+                        _loadCurrentQuest();
+                      });
+                    },
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            _currentQuestImageUrl!,
+                            fit: BoxFit.cover,
+                            height: 120,
+                            width: double.infinity,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "Appuyez pour voir les détails de la quête",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  const Text(
+                    "Aucune quête disponible pour le moment",
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+              ],
+            ),
+          ),
+          // Afficher les quêtes complétées
+          if (_completedQuests.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const Text(
+              "Quêtes complétées:",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            ..._completedQuests.map((questId) => Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green[600]),
+                  const SizedBox(width: 8),
+                  const Text(
+                    "Quête complétée",
+                    style: TextStyle(color: Colors.green),
+                  ),
+                ],
+              ),
+            )),
+          ],
+        ],
+      );
+    } else {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Quête du musée",
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          FutureBuilder<List<Museum>>(
+            future: _recommendedMuseums,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final museums = snapshot.data ?? [];
+
+              if (museums.isNotEmpty) {
+                final museum = museums.first;
+
+                return GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text("Entrer dans le musée"),
+                        content: Text(
+                            "Souhaitez-vous entrer dans le musée ${museum.title} et commencer les quêtes ?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text("Annuler"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _enterMuseum(museum);
+                            },
+                            child: const Text("Entrer"),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.green[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.museum, color: Colors.green, size: 40),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Musée détecté à proximité",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Colors.green[800],
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Cliquez pour entrer dans le musée ${museum.title}",
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              } else {
+                return Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                        child: Container(
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Positioned.fill(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.lock, size: 36, color: Colors.grey),
+                          SizedBox(height: 8),
+                          Text(
+                            "Quête exclusive",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Veuillez vous rapprocher d'un musée\npour débloquer les quêtes",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
+          ),
+        ],
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: const Text("Quêtes"), automaticallyImplyLeading: false),
+      appBar: AppBar(
+        title: const Text("Quêtes"),
+        automaticallyImplyLeading: false,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -245,133 +634,7 @@ class _QuestsPageState extends State<QuestsPage> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text("Quête du musée",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            FutureBuilder<List<Museum>>(
-              future: _recommendedMuseums,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final museums = snapshot.data ?? [];
-
-                if (museums.isNotEmpty) {
-                  final museum = museums.first;
-
-                  return GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text("Commencer la quête"),
-                          content: Text(
-                              "Souhaitez-vous commencer les quêtes du musée ${museum.title} ?"),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text("Annuler"),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        MuseumQuestPage(museum: museum),
-                                  ),
-                                );
-                              },
-                              child: const Text("Commencer"),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.green[50],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.green),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.museum,
-                              color: Colors.green, size: 40),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Musée détecté à proximité",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.green[800],
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "Cliquez pour démarrer les quêtes du musée ${museum.title}",
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                } else {
-                  return Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                          child: Container(
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color:
-                                  Colors.black.withAlpha((0.1 * 255).toInt()),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Positioned.fill(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.lock, size: 36, color: Colors.grey),
-                            SizedBox(height: 8),
-                            Text(
-                              "Quête exclusive",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              "Veuillez vous rapprocher d'un musée\npour débloquer les quêtes",
-                              textAlign: TextAlign.center,
-                              style:
-                                  TextStyle(fontSize: 12, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              },
-            ),
+            _buildMuseumQuestSection(),
           ],
         ),
       ),
