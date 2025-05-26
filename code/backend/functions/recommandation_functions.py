@@ -1,7 +1,5 @@
 import json
 import redis
-import firebase_admin
-from firebase_admin import credentials, firestore
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
@@ -35,7 +33,7 @@ def get_previous_recommendations(uid, db):
                 print(f"Previous recommendations for user {uid}: {collection}")
                 return collection
             else:
-                print(f"'previous_reco' field for UID {uid} is not a list.")
+                print(f"'collection' field for UID {uid} is not a list.")
                 return []
         else:
             print(f"Document for UID {uid} does not exist.")
@@ -53,7 +51,7 @@ def get_user_collection(uid, db):
             data = doc.to_dict()
             collection = data.get('collection', [])
             if isinstance(collection, list):
-                print(f"Collection for user {uid}: {collection}")
+                print(f"collection for user {uid}: {collection}")
                 return collection
             else:
                 print(f"'collection' field for UID {uid} is not a list.")
@@ -62,7 +60,7 @@ def get_user_collection(uid, db):
             print(f"Document for UID {uid} does not exist.")
             return []
     except Exception as e:
-        print(f"Error retrieving collection for UID {uid}: {e}")
+        print(f"Error retrieving previous recommendations for UID {uid}: {e}")
         return []
 
 def cache_all_artworks(db, ttl=3600):
@@ -70,18 +68,25 @@ def cache_all_artworks(db, ttl=3600):
     Charge toutes les œuvres en cache Redis avec un TTL (1h par défaut).
     """
     try:
+        cache_key = "all_artworks"
+        cached = r.get(cache_key)
+        if cached:
+            print("Loaded artworks from Redis cache.")
+            return json.loads(cached)
+
         artworks_ref = db.collection('artworks')
         artworks = artworks_ref.stream()
         result = []
         for artwork in artworks:
-            data = artwork.to_dict()
-            data['id'] = artwork.id
-            result.append(data)
-        r.setex('all_artworks', ttl, json.dumps(result))
-        print(f"Cached {len(result)} artworks in Redis.")
+            artwork_data = artwork.to_dict()
+            artwork_data['id'] = artwork.id
+            result.append(artwork_data)
+
+        print(f"Successfully retrieved {len(result)} artworks from Firestore.")
+        r.setex(cache_key, 3600, json.dumps(result))  # Cache pendant 1 heure
         return result
     except Exception as e:
-        print(f"Error caching artworks: {e}")
+        print(f"Error retrieving artworks: {e}")
         return []
 
 def get_all_artworks_from_cache(db):
