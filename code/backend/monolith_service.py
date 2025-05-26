@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, json, request, jsonify
 import firebase_admin
 from firebase_admin import auth, credentials, firestore
 
@@ -19,6 +19,8 @@ from functions.prediction_functions import crop_image_with_yolo, find_most_simil
 from functions.recommandation_functions import get_user_preferences, get_artworks, get_previous_recommendations, get_user_collection, update
 from functions.user_functions import get_artworks_by_ids, get_collection, get_artwork_by_id
 
+import redis
+
 #INITIALISATION DE FLASK
 
 key = os.getenv("GEMINI_KEY")
@@ -26,6 +28,7 @@ key = os.getenv("GEMINI_KEY")
 genai.configure(api_key=key)
 
 app = Flask(__name__)
+r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 cred = credentials.Certificate('testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json')
 firebase_admin.initialize_app(cred)
 
@@ -58,20 +61,28 @@ faiss.omp_set_num_threads(1)
 @app.route("/museums", methods=["GET"])
 def get_museums():
     try:
+        cached_museums = r.get("museums_cache")
+        if cached_museums:
+            print("Récupéré depuis le cache Redis.")
+            return jsonify(json.loads(cached_museums))
+
         museums_ref = db.collection('museums')
         museums = museums_ref.stream()
         
         museums_list = []
         for museum in museums:
             museum_data = museum.to_dict()
-            museum_data['id'] = museum.id  # Ajouter l'ID du document
+            museum_data['id'] = museum.id
             museums_list.append(museum_data)
         
-        return jsonify(museums_list)  
+        r.set("museums_cache", json.dumps(museums_list), ex=3600)
+
+        print("Récupéré depuis Firestore et mis en cache.")
+        return jsonify(museums_list)
+
     except Exception as e:
         print(f"Error retrieving museums: {e}")
         return jsonify([])
-
 # @app.route("/museums-in-bounds", methods=["GET"])
 # def get_museums_in_bounds():
 #     try:
@@ -117,18 +128,27 @@ def get_museums():
 @app.route("/museums/<museum_id>/artworks", methods=["GET"])
 def get_artworks_by_museum(museum_id):
     try:
+        cache_key = f"artworks_cache:{museum_id}"
+        cached_artworks = r.get(cache_key)
+
+        if cached_artworks:
+            print(f"Artworks du musée {museum_id} récupérés depuis le cache Redis.")
+            return jsonify(json.loads(cached_artworks))
+
         artworks_ref = db.collection('artworks')
         artworks = artworks_ref.where("id_museum", "==", museum_id).stream()
 
         artworks_list = []
         for artwork in artworks:
             artwork_data = artwork.to_dict()
-            artwork_data['id'] = artwork.id  # Ajouter l'ID du document
+            artwork_data['id'] = artwork.id
             artworks_list.append(artwork_data)
 
-        print(f"Artworks list: {artworks_list}")
+        r.set(cache_key, json.dumps(artworks_list), ex=3600)
 
+        print(f"Artworks du musée {museum_id} récupérés depuis Firestore et mis en cache.")
         return jsonify(artworks_list)
+
     except Exception as e:
         print(f"Error retrieving artworks: {e}")
         return jsonify([])
@@ -385,7 +405,7 @@ def toggle_like(uid, artworkId):
             new_profile = response.json().get("profile")
             doc_ref.update({
                 "brands": current_likes,
-                "profile": new_profile
+                "preferences.movements": new_profile
             })
         except Exception as e:
             app.logger.error(f"Error calling profiling service: {e}")
@@ -659,7 +679,30 @@ def update_profile(uid):
             "uid": uid,
             "error": f"An error occurred while updating the profile: {str(e)}"
         }), 500
+    
+
+@app.route("/users/<uid>", methods=["GET"])
+def get_user(uid):
+    doc_ref = db.collection('accounts').document(uid)
+    doc = doc_ref.get()
+    if doc.exists:
+        user_data = doc.to_dict()
+        user_data['uid'] = uid
+        return jsonify({"success": True, "user": user_data}), 200
+    return jsonify({"success": False, "error": f"User {uid} not found"}), 404
+    
 
 
+@app.route("/profiling/artworks", methods=["GET"])
+def get_5_artworks():
+    
+    ids = [str(random.randint(0, 40000)) for _ in range(5)]
+    artworks = get_artworks_by_ids(ids)
+
+    if artworks:
+        return jsonify({"success": True, "data": artworks})
+    else:
+        return jsonify({"success": False, "message": "Artworks pas générés"}), 404
+    
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
