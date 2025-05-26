@@ -188,9 +188,9 @@ def predict():
 @app.route("/users/<uid>/recommendations", methods=["PUT"])
 def update_recommendations(uid):
     try:
-        user_preferences = get_user_preferences(uid)
-        previous_recommendations = get_previous_recommendations(uid)
-        user_collection = get_user_collection(uid)
+        user_preferences = get_user_preferences(uid, db)
+        previous_recommendations = get_previous_recommendations(uid, db)
+        user_collection = get_user_collection(uid, db)
         artworks = get_artworks()
 
         new_artworks = [art for art in artworks if art["id"] not in previous_recommendations and art["id"] not in user_collection]
@@ -220,7 +220,7 @@ def update_recommendations(uid):
             random_artwork = random.choice(new_artworks2)
             recommendations.append(random_artwork)
 
-        update(uid, previous_recommendations, recommendations)
+        update(uid, previous_recommendations, recommendations, db)
         return {
             "success": True,
             "recommendations": [art["id"] for art in recommendations]
