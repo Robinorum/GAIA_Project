@@ -32,18 +32,31 @@ class RecommendationService {
   }
 
   Future<List<Artwork>> majRecommendations(String uid) async {
-    try {
-      final response = await _httpService.get(IpConfig.recoMaj(uid));
-
-      if (response.statusCode == 200) {
-        throw Exception("Recommendations updated successfully");
-      } else if (response.statusCode == 400) {
-        throw Exception("Missing UID");
+  try {
+    final response = await _httpService.put(
+      IpConfig.recoMaj(uid),
+    );
+    
+    if (response.statusCode == 200) {
+      // Parse the response body
+      Map<String, dynamic> responseData = jsonDecode(response.body);
+      
+      // Check if the update was successful
+      if (responseData['success'] == true) {
+        // After updating, fetch the new recommendations
+        return await fetchRecommendations(uid);
       } else {
-        throw Exception("Failed to fetch recommendations");
+        throw Exception("Failed to update recommendations: ${responseData['error']}");
       }
-    } catch (e) {
-      throw Exception("Error fetching recommendations: $e");
+    } else if (response.statusCode == 400) {
+      throw Exception("Missing UID");
+    } else {
+      throw Exception("Failed to update recommendations. Status code: ${response.statusCode}");
     }
+  } catch (e) {
+    // Make sure to log and properly handle errors
+    developer.log('Error updating recommendations: $e');
+    throw Exception("Error updating recommendations: $e");
   }
+}
 }
