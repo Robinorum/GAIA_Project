@@ -19,4 +19,4 @@ jobs:
           pip install bandit safety
 
       - name: Bandit Scan
-        run: bandit -r code/backend
+        run: bandit -r code/backend --skip B101

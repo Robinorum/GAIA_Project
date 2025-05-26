@@ -1,3 +1,4 @@
+import secrets
 from flask import Flask, request, jsonify
 import firebase_admin
 from firebase_admin import auth, credentials, firestore
@@ -194,10 +195,12 @@ def update_recommendations(uid):
         creative_artworks = [art for art in new_artworks2 if art["movement"] in unexplored_movements]
 
         if creative_artworks:
-            creative_artwork = random.choice(creative_artworks)
+            creative_artwork = secrets.choice(creative_artworks)
+            # creative_artwork = random.choice(creative_artworks)
             recommendations.append(creative_artwork)
         elif new_artworks2:
-            random_artwork = random.choice(new_artworks2)
+            random_artwork = secrets.choice(new_artworks2)
+            # random_artwork = random.choice(new_artworks2)
             recommendations.append(random_artwork)
 
         update(uid, previous_recommendations, recommendations)
@@ -379,7 +382,8 @@ def toggle_like(uid, artworkId):
                     "action": action,
                     "movement": movement,
                     "previous_profile": previous_profile
-                }
+                },
+                timeout=5
             )
             response.raise_for_status()
             new_profile = response.json().get("profile")
@@ -633,4 +637,4 @@ def update_profile(uid):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(debug=False, port=5001)
