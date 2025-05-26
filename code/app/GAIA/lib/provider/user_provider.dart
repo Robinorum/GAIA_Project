@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../model/app_user.dart'; // Ton fichier avec la classe AppUser
-import '../services/user_service.dart';
 
 class UserProvider extends ChangeNotifier {
   AppUser? _user;
@@ -21,13 +20,5 @@ class UserProvider extends ChangeNotifier {
   void clearUser() {
     _user = AppUser.empty();
     notifyListeners();
-  }
-
-  Future<void> updateProfile() async {
-    final updatedUser = await UserService().fetchProfile(_user!.id);
-    if (updatedUser != null) {
-      _user = updatedUser;
-      notifyListeners();
-    }
   }
 }

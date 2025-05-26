@@ -97,7 +97,7 @@ def update(uid, previous_recommendations, new_recommendations):
         new_recommendations (list): Liste des nouvelles recommandations.
     """
     # Ajouter les nouvelles recommandations aux anciennes
-    updated_reco = previous_recommendations[-20000:] + [art['id'] for art in new_recommendations]
+    updated_reco = previous_recommendations[-5:] + [art['id'] for art in new_recommendations]
     
     new_recommendationsid= [art['id'] for art in new_recommendations]
     # Limiter à un nombre raisonnable de recommandations (par exemple 20)
@@ -111,3 +111,19 @@ def update(uid, previous_recommendations, new_recommendations):
     
     return updated_reco
 
+def get_artworks():
+    try:
+        db = firestore.client()
+        artworks_ref = db.collection('artworks')
+        artworks = artworks_ref.stream() 
+        result = []
+        for artwork in artworks:
+            artwork_data = artwork.to_dict()
+            artwork_data['id'] = artwork.id
+            result.append(artwork_data)
+
+        print(f"Successfully retrieved {len(result)} artworks.")
+        return result
+    except Exception as e:
+        print(f"Error retrieving artworks: {e}")
+        return []
