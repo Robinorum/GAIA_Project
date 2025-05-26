@@ -700,7 +700,7 @@ def get_user(uid):
 @app.route("/profiling/artworks", methods=["GET"])
 def get_5_artworks():
     
-    ids = [str(random.randint(0, 40000)) for _ in range(5)]
+    ids = [str(secrets.choice(0, 40000)) for _ in range(5)]
     artworks = get_artworks_by_ids(ids)
 
     if artworks:
