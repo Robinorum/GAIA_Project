@@ -1,16 +1,11 @@
-import firebase_admin
-import random
 import json
 import redis
-from flask import Flask, jsonify
+import firebase_admin
 from firebase_admin import credentials, firestore
-
-db = firestore.client()
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
-
-def get_user_preferences(uid):
+def get_user_preferences(uid, db):
     try:
         doc_ref = db.collection('accounts').document(uid)
         doc = doc_ref.get()
@@ -28,8 +23,7 @@ def get_user_preferences(uid):
         print(f"Error retrieving user preferences for UID {uid}: {e}")
         return {}
 
-
-def get_previous_recommendations(uid):
+def get_previous_recommendations(uid, db):
     try:
         doc_ref = db.collection('accounts').document(uid)
         doc = doc_ref.get()
@@ -50,8 +44,7 @@ def get_previous_recommendations(uid):
         print(f"Error retrieving previous recommendations for UID {uid}: {e}")
         return []
 
-
-def get_user_collection(uid):
+def get_user_collection(uid, db):
     try:
         doc_ref = db.collection('accounts').document(uid)
         doc = doc_ref.get()
@@ -72,8 +65,10 @@ def get_user_collection(uid):
         print(f"Error retrieving previous recommendations for UID {uid}: {e}")
         return []
 
-
-def get_artworks():
+def cache_all_artworks(db, ttl=3600):
+    """
+    Charge toutes les œuvres en cache Redis avec un TTL (1h par défaut).
+    """
     try:
         cache_key = "all_artworks"
         cached = r.get(cache_key)
@@ -96,13 +91,30 @@ def get_artworks():
         print(f"Error retrieving artworks: {e}")
         return []
 
+def get_all_artworks_from_cache(db):
+    cached = r.get('all_artworks')
+    if cached:
+        return json.loads(cached)
+    else:
+        return cache_all_artworks(db)
 
-def update(uid, previous_recommendations, new_recommendations):
-    updated_reco = previous_recommendations[-5:] + [art['id'] for art in new_recommendations]
-    new_recommendationsid = [art['id'] for art in new_recommendations]
+def filter_artworks_by_preferences(artworks, preferences):
+    if not preferences:
+        return artworks
+    preferred_movements = set(preferences.keys())
+    filtered = [art for art in artworks if art.get('movement') in preferred_movements]
+    return filtered
+
+def update(uid, previous_recommendations, new_recommendations, db):
+    """
+    Met à jour les recommandations dans Firestore.
+    """
+
+    updated_reco = previous_recommendations[-20000:] + [art['id'] for art in new_recommendations]
+    new_recommendations_ids = [art['id'] for art in new_recommendations]
 
     doc_ref = db.collection('accounts').document(uid)
     doc_ref.update({'previous_reco': updated_reco})
-    doc_ref.update({'reco': new_recommendationsid})
+    doc_ref.update({'reco': new_recommendations_ids})
 
     return updated_reco
