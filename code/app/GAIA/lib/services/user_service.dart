@@ -28,24 +28,23 @@ class UserService {
     }
   }
 
-  
-    Future<Map<String, dynamic>?> fetchMuseumCollection(String uid) async {
-  try {
-    final response = await _httpService.get(IpConfig.fetchColMuseum(uid));
+  Future<Map<String, dynamic>?> fetchMuseumCollection(String uid) async {
+    try {
+      final response = await _httpService.get(IpConfig.fetchColMuseum(uid));
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> result = jsonDecode(response.body)['result'];
-      return result; // Retourne l'objet complet, map des musées
-    } else {
-      developer.log("Erreur lors de la récupération de la collection: ${response.statusCode}");
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> result = jsonDecode(response.body)['result'];
+        return result; // Retourne l'objet complet, map des musées
+      } else {
+        developer.log(
+            "Erreur lors de la récupération de la collection: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      developer.log("Exception lors de la récupération de la collection: $e");
       return null;
     }
-  } catch (e) {
-    developer.log("Exception lors de la récupération de la collection: $e");
-    return null;
   }
-}
-
 
   Future<bool> fetchStateBrand(String userId, String artworkId) async {
     try {
@@ -65,7 +64,8 @@ class UserService {
         return false;
       }
     } catch (e) {
-      developer.log("Exception lors de la récupération de l'état de la marque: $e");
+      developer
+          .log("Exception lors de la récupération de l'état de la marque: $e");
       return false;
     }
   }
@@ -114,7 +114,8 @@ class UserService {
           body: {"message": "Added to collection"});
 
       if (response.statusCode == 200) {
-        developer.log("Ajout de l'oeuvre à la collection: ${response.statusCode}");
+        developer
+            .log("Ajout de l'oeuvre à la collection: ${response.statusCode}");
         return true;
       } else {
         developer.log(
@@ -122,7 +123,8 @@ class UserService {
         return false;
       }
     } catch (e) {
-      developer.log("Exception lors de l'ajout de l'oeuvre à la collection: $e");
+      developer
+          .log("Exception lors de l'ajout de l'oeuvre à la collection: $e");
       return false;
     }
   }
@@ -160,7 +162,8 @@ class UserService {
         developer.log("début");
 
         for (var item in data) {
-          developer.log("ID: ${item['id']}, Progression: ${item['progression']}");
+          developer
+              .log("ID: ${item['id']}, Progression: ${item['progression']}");
           developer.log("\n");
         }
         return data.map<Map<String, dynamic>>((item) {
@@ -180,7 +183,8 @@ class UserService {
     }
   }
 
-  Future<String> verifQuestMuseum(String userId, String museumId, String artworkId) async {
+  Future<String> verifQuestMuseum(
+      String userId, String museumId, String artworkId) async {
     try {
       final body = {
         'museum_id': museumId,
@@ -209,7 +213,8 @@ class UserService {
             return "UNKNOWN_RESPONSE";
         }
       } else {
-        throw Exception("Erreur inattendue: ${response.statusCode} - ${response.body}");
+        throw Exception(
+            "Erreur inattendue: ${response.statusCode} - ${response.body}");
       }
     } catch (e) {
       return "ERROR:$e";
@@ -242,7 +247,8 @@ class UserService {
     }
   }
 
-  Future<bool> majQuestMuseum(String userId, String museumId, String artworkId) async {
+  Future<bool> majQuestMuseum(
+      String userId, String museumId, String artworkId) async {
     try {
       final body = {
         'museum_id': museumId,
@@ -257,7 +263,8 @@ class UserService {
       if (response.statusCode == 200) {
         return true;
       } else {
-        developer.log("Erreur de mise à jour : ${response.statusCode} - ${response.body}");
+        developer.log(
+            "Erreur de mise à jour : ${response.statusCode} - ${response.body}");
         return false;
       }
     } catch (e) {
@@ -270,7 +277,7 @@ class UserService {
   Future<String?> getCurrentMuseum(String uid) async {
     try {
       final response = await _httpService.get(IpConfig.getCurrentMuseum(uid));
-      
+
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         return responseData['actual_museum'] as String?;
@@ -278,7 +285,8 @@ class UserService {
         // Pas de musée actuel
         return null;
       } else {
-        developer.log('Erreur lors de la récupération du musée actuel: ${response.statusCode}');
+        developer.log(
+            'Erreur lors de la récupération du musée actuel: ${response.statusCode}');
         return null;
       }
     } catch (e) {
@@ -303,7 +311,8 @@ class UserService {
         developer.log('Musée actuel mis à jour: $museumOfficialId');
         return true;
       } else {
-        developer.log('Erreur lors de la définition du musée actuel: ${response.statusCode}');
+        developer.log(
+            'Erreur lors de la définition du musée actuel: ${response.statusCode}');
         return false;
       }
     } catch (e) {
@@ -321,5 +330,20 @@ class UserService {
   /// Sort l'utilisateur du musée actuel
   Future<bool> exitCurrentMuseum(String uid) async {
     return await setCurrentMuseum(uid, null);
+  }
+
+  Future<List<Artwork>> fetchLikedArtworks(uid) async {
+    try {
+      final response = await _httpService.get(IpConfig.fetchLikedArtworks(uid));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((item) => Artwork.fromJson(item)).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
+    }
   }
 }
