@@ -212,11 +212,11 @@ class CollectionPageState extends State<CollectionPage> {
               children: const [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text("Artwork"),
+                  child: Text("Vos œuvres"),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text("Museum"),
+                  child: Text("Musées visités"),
                 ),
               ],
             ),
@@ -380,13 +380,7 @@ class CollectionPageState extends State<CollectionPage> {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'ID: ${museum.officialId}',
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
+                                   
                                     const SizedBox(height: 12),
                                     
                                     // Barre de progression

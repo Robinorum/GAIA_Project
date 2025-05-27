@@ -84,23 +84,7 @@ class _MuseumCollectionDetailPageState extends State<MuseumCollectionDetailPage>
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      artwork.title,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isCompleted ? Colors.black : Colors.grey,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
+              
             ],
           ),
           // Badge de statut
@@ -128,7 +112,7 @@ class _MuseumCollectionDetailPageState extends State<MuseumCollectionDetailPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.museum.title)),
+      appBar: AppBar(),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

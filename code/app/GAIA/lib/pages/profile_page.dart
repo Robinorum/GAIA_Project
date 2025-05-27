@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gaia/provider/user_provider.dart';
 import 'package:gaia/pages/settings_page.dart';
-import 'package:gaia/pages/museum_completion_page.dart';
 import 'package:gaia/pages/profile_picture_page.dart';
 import 'package:gaia/services/profilage_service.dart';
 
@@ -19,32 +18,9 @@ class _ProfilePageState extends State<ProfilePage> {
     final user = Provider.of<UserProvider>(context).user;
 
     // Données fictives pour tester
-    List<Map<String, dynamic>> visitedMuseums = [
-      {
-        "name": "Museum of Modern Art",
-        "city": "New York",
-        "collected": 34,
-        "total": 34
-      },
-      {"name": "Louvre Museum", "city": "Paris", "collected": 26, "total": 60},
-      {"name": "The Met", "city": "New York", "collected": 7, "total": 28},
-      {"name": "National Gallery", "city": "Oslo", "collected": 5, "total": 31},
-      {
-        "name": "Belvedere Museum",
-        "city": "Vienna",
-        "collected": 3,
-        "total": 29
-      },
-      {
-        "name": "Museo Reina Sofia",
-        "city": "Madrid",
-        "collected": 8,
-        "total": 112
-      },
-    ];
+  
 
-    visitedMuseums.sort((a, b) =>
-        (b["collected"] / b["total"]).compareTo(a["collected"] / a["total"]));
+    
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -173,29 +149,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
               },
             ),
-            const SizedBox(height: 20),
-            _buildSectionTitle("Musées visités"),
-            Column(
-              children: visitedMuseums
-                  .take(3)
-                  .map((museum) => _buildMuseumProgress(museum))
-                  .toList(),
-            ),
-            const SizedBox(height: 10),
-            // "See All" Button
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          MuseumCompletionPage(visitedMuseums: visitedMuseums)),
-                );
-              },
-              child: const Text("Tout voir",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ),
-            const SizedBox(height: 20),
+           
+            
           ],
         ),
       ),

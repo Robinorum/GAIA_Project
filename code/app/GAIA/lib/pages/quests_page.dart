@@ -324,13 +324,65 @@ class _QuestsPageState extends State<QuestsPage> {
                     },
                     child: Column(
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            _currentQuestImageUrl!,
-                            fit: BoxFit.cover,
-                            height: 120,
-                            width: double.infinity,
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Stack(
+                              children: [
+                                // Image principale agrandie
+                                Image.network(
+                                  _currentQuestImageUrl!,
+                                  fit: BoxFit.cover,
+                                  height: 180, // Augmenté de 120 à 180
+                                  width: double.infinity,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      height: 180,
+                                      width: double.infinity,
+                                      color: Colors.grey[200],
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.image_not_supported,
+                                          size: 64,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                // Effet de flou
+                                BackdropFilter(
+                                  filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                                  child: Container(
+                                    height: 180,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.25),
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.black.withOpacity(0.3),
+                                          Colors.black.withOpacity(0.15),
+                                        ],
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // Cadenas centré
+                              
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -487,16 +539,13 @@ class _QuestsPageState extends State<QuestsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Quêtes"),
-        automaticallyImplyLeading: false,
-      ),
+     
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Quêtes Générales",
+            const Text("Succès",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Expanded(
@@ -508,7 +557,7 @@ class _QuestsPageState extends State<QuestsPage> {
                   }
 
                   return ListView.builder(
-                    itemCount: _quests.length < 3 ? _quests.length : 3,
+                    itemCount: _quests.length < 2 ? _quests.length : 2,
                     itemBuilder: (context, index) {
                       final quest = _quests[index];
 
@@ -591,7 +640,7 @@ class _QuestsPageState extends State<QuestsPage> {
                 },
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Center(
               child: ElevatedButton(
                 onPressed: () {
