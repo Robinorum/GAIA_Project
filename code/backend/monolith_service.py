@@ -17,7 +17,7 @@ import random
 import google.generativeai as genai
 
 from functions.prediction_functions import crop_image_with_yolo, find_most_similar_image, get_link_with_id, get_by_url
-from functions.recommandation_functions import get_user_preferences, get_artworks, get_previous_recommendations, get_user_collection, update
+from functions.recommandation_functions import get_user_preferences, get_all_artworks_from_cache, get_previous_recommendations, get_user_collection, update
 from functions.user_functions import get_artworks_by_ids, get_collection, get_artwork_by_id
 
 import redis
@@ -186,13 +186,14 @@ def predict():
 
 #RECO_FUNCTIONS
 
+
 @app.route("/users/<uid>/recommendations", methods=["PUT"])
 def update_recommendations(uid):
     try:
         user_preferences = get_user_preferences(uid, db)
         previous_recommendations = get_previous_recommendations(uid, db)
         user_collection = get_user_collection(uid, db)
-        artworks = get_artworks()
+        artworks = get_all_artworks_from_cache(db)
 
         new_artworks = [art for art in artworks if art["id"] not in previous_recommendations and art["id"] not in user_collection]
         
@@ -551,14 +552,16 @@ def init_quest_museum(uid):
         
         else :
             liste_artworks_museum = db.collection('artworks').where('id_museum', '==', museum_id).get()
+            if not any(liste_artworks_museum):
+                print(f"Le musée {museum_id} ne contient aucune œuvre d'art.")
+                return jsonify({"message": "Ce musée ne contient aucune œuvre d'art."}), 404
+                
             liste_artworks = [doc for doc in liste_artworks_museum if doc.id not in collection_user]
+            if not liste_artworks:
+                print(f"Toutes les œuvres du musée {museum_id} sont dans votre collection.")
+                return jsonify({"message": "Vous avez déjà collecté toutes les œuvres de ce musée !"}), 208
 
-            
-            if liste_artworks:
-                artwork_ids = [doc.id for doc in liste_artworks]
-            else:
-                print(" Aucun artwork trouvé pour le musée :", museum_id)
-                return jsonify({"message": f"Quête déjà complétée pour le musée {museum_id}."}), 208
+            artwork_ids = [doc.id for doc in liste_artworks]
 
             random.shuffle(artwork_ids)
             artwork_ids.sort(key=lambda doc_id: 0 if doc_id in liste_recommendations else 1)
@@ -700,13 +703,67 @@ def get_user(uid):
 @app.route("/profiling/artworks", methods=["GET"])
 def get_5_artworks():
     
-    ids = [str(secrets.choice(0, 40000)) for _ in range(5)]
+    ids = [str(secrets.randbelow(40000)) for _ in range(5)]
     artworks = get_artworks_by_ids(ids)
 
     if artworks:
         return jsonify({"success": True, "data": artworks})
     else:
         return jsonify({"success": False, "message": "Artworks pas générés"}), 404
+    
+
+
+
+
+@app.route("/users/<uid>/current-museum", methods=["GET"])
+def get_current_museum(uid):
+    try:
+        doc_ref = db.collection('accounts').document(uid)
+        doc = doc_ref.get()
+
+        if doc.exists:
+            data = doc.to_dict()
+            actual_museum = data.get('visited_museum', None)
+
+            if actual_museum:
+                return jsonify({"actual_museum": actual_museum}), 200
+            else:
+                return "", 204  # Pas de musée actuel
+        else:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+    except Exception as e:
+        print("Erreur lors de la récupération du musée actuel:", e)
+        return jsonify({"error": "Erreur serveur"}), 500
+    
+
+
+
+@app.route("/users/<uid>/current-museum", methods=["PUT"])
+def set_current_museum(uid):
+    try:
+        data = request.get_json()
+        actual_museum = data.get('visited_museum', None)
+
+        if actual_museum is not None and not isinstance(actual_museum, str):
+            return jsonify({"error": "actual_museum doit être une string ou null"}), 400
+
+        doc_ref = db.collection('accounts').document(uid)
+        doc = doc_ref.get()
+
+        if not doc.exists:
+            return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+        doc_ref.update({'visited_museum': actual_museum})
+        return jsonify({
+            "message": "Musée actuel mis à jour",
+            "actual_museum": actual_museum
+        }), 200
+
+    except Exception as e:
+        print("Erreur lors de la mise à jour du musée actuel:", e)
+        return jsonify({"error": "Erreur serveur"}), 500
+
+
     
 if __name__ == "__main__":
     app.run(debug=False, port=5001)

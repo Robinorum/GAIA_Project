@@ -4,6 +4,7 @@ import '../model/museum.dart';
 import 'http_service.dart';
 import 'museum_service.dart';
 import '../config/ip_config.dart';
+import 'dart:developer' as developer;
 
 class ArtworkService {
   final HttpService _httpService = HttpService();
@@ -26,18 +27,26 @@ class ArtworkService {
   }
 
 
-  // Fonction pour récupérer les artworks d'un utilisateur
   Future<List<Artwork>> fetchArtworks() async {
-    final response = await _httpService.get(IpConfig.profilingArtworks);
+    try {
+      developer.log('Fetching artworks from: ${IpConfig.profilingArtworks}');
+      
+      final response = await _httpService.get(
+        IpConfig.profilingArtworks,
+      );
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body)['data'];
+      developer.log('Response status code: ${response.statusCode}');
+      developer.log('Response body: ${response.body}');
 
-      return data.map((item) {
-        return Artwork.fromJson(item);
-      }).toList();
-    } else {
-      throw Exception("Failed to load artworks: ${response.statusCode}");
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body)['data'];
+        return data.map((item) => Artwork.fromJson(item)).toList();
+      } else {
+        throw Exception("Failed to load artworks: ${response.statusCode} - ${response.body}");
+      }
+    } catch (e) {
+      developer.log('Error in fetchArtworks: $e');
+      rethrow;
     }
   }
   

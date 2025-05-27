@@ -74,8 +74,6 @@ class UserService {
     }
   }
 
-
-
   Future<AppUser?> fetchProfile(String uid) async {
     try {
       final response = await _httpService.get(IpConfig.fetchProfile(uid));
@@ -89,7 +87,6 @@ class UserService {
       return null;
     }
   }
-
 
   Future<bool> addArtworks(String userId, String artworkId) async {
     try {
@@ -163,44 +160,42 @@ class UserService {
       return [];
     }
   }
-Future<String> verifQuestMuseum(String userId, String museumId, String artworkId) async {
-  try {
-    final body = {
-      'museum_id': museumId,
-      'artwork_id': artworkId,
-    };
 
-    final response = await _httpService.post(
-      IpConfig.verifQuest(userId),
-      body: body,
-    );
+  Future<String> verifQuestMuseum(String userId, String museumId, String artworkId) async {
+    try {
+      final body = {
+        'museum_id': museumId,
+        'artwork_id': artworkId,
+      };
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-      final message = responseData['message'];
-      developer.log("Réponse de la vérification de la quête: $message");
-      switch (message) {
-        case "Correct":
-          return "CORRECT";
-        case "Incorrect":
-          return "INCORRECT";
-        case "Vide":
-          return "QUEST_FINISHED";
-        case "Not_Initialized":
-          return "MUSEUM_NOT_FOUND_IN_QUESTS";
-        default:
-          return "UNKNOWN_RESPONSE";
+      final response = await _httpService.post(
+        IpConfig.verifQuest(userId),
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final message = responseData['message'];
+        developer.log("Réponse de la vérification de la quête: $message");
+        switch (message) {
+          case "Correct":
+            return "CORRECT";
+          case "Incorrect":
+            return "INCORRECT";
+          case "Vide":
+            return "QUEST_FINISHED";
+          case "Not_Initialized":
+            return "MUSEUM_NOT_FOUND_IN_QUESTS";
+          default:
+            return "UNKNOWN_RESPONSE";
+        }
+      } else {
+        throw Exception("Erreur inattendue: ${response.statusCode} - ${response.body}");
       }
-    } else {
-      throw Exception("Erreur inattendue: ${response.statusCode} - ${response.body}");
+    } catch (e) {
+      return "ERROR:$e";
     }
-  } catch (e) {
-    return "ERROR:$e";
   }
-}
-
-
-
 
   Future<String> initQuestMuseum(String userId, String museumId) async {
     try {
@@ -250,5 +245,62 @@ Future<String> verifQuestMuseum(String userId, String museumId, String artworkId
       developer.log("Exception lors de la mise à jour : $e");
       return false;
     }
+  }
+
+  /// Récupère le musée actuel de l'utilisateur
+  Future<String?> getCurrentMuseum(String uid) async {
+    try {
+      final response = await _httpService.get(IpConfig.getCurrentMuseum(uid));
+      
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        return responseData['actual_museum'] as String?;
+      } else if (response.statusCode == 204) {
+        // Pas de musée actuel
+        return null;
+      } else {
+        developer.log('Erreur lors de la récupération du musée actuel: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      developer.log('Exception lors de la récupération du musée actuel: $e');
+      return null;
+    }
+  }
+
+  /// Définit le musée actuel de l'utilisateur
+  Future<bool> setCurrentMuseum(String uid, String? museumOfficialId) async {
+    try {
+      final body = {
+        'visited_museum': museumOfficialId,
+      };
+
+      final response = await _httpService.put(
+        IpConfig.setCurrentMuseum(uid),
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        developer.log('Musée actuel mis à jour: $museumOfficialId');
+        return true;
+      } else {
+        developer.log('Erreur lors de la définition du musée actuel: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      developer.log('Exception lors de la définition du musée actuel: $e');
+      return false;
+    }
+  }
+
+  /// Vérifie si l'utilisateur est actuellement dans un musée
+  Future<bool> isUserInMuseum(String uid) async {
+    final currentMuseum = await getCurrentMuseum(uid);
+    return currentMuseum != null;
+  }
+
+  /// Sort l'utilisateur du musée actuel
+  Future<bool> exitCurrentMuseum(String uid) async {
+    return await setCurrentMuseum(uid, null);
   }
 }
