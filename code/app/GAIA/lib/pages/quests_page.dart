@@ -30,12 +30,13 @@ class _QuestsPageState extends State<QuestsPage> {
   LatLng? _currentLocation;
   late Future<List<Museum>> _recommendedMuseums;
   
-  // Nouveaux états pour gérer le musée actuel
+
   Museum? _currentMuseum;
   bool _isInMuseum = false;
   String? _currentQuestImageUrl;
   bool _isLoadingQuest = false;
-  List<String> _completedQuests = [];
+
+
 
   @override
   void initState() {
@@ -105,7 +106,6 @@ class _QuestsPageState extends State<QuestsPage> {
 
       if (imageUrl == "QUEST_ALREADY_COMPLETED") {
         // Marquer la quête comme complétée et charger la suivante
-        _completedQuests.add(_currentMuseum!.officialId);
         await _loadCurrentQuest(); // Récursif pour charger la suivante
       } else if (imageUrl == "NO_QUEST") {
         setState(() {
@@ -162,7 +162,6 @@ class _QuestsPageState extends State<QuestsPage> {
         _currentMuseum = null;
         _isInMuseum = false;
         _currentQuestImageUrl = null;
-        _completedQuests.clear();
       });
     } catch (e) {
       developer.log("Erreur lors de la sortie du musée: $e");
@@ -354,34 +353,6 @@ class _QuestsPageState extends State<QuestsPage> {
               ],
             ),
           ),
-          // Afficher les quêtes complétées
-          if (_completedQuests.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            const Text(
-              "Quêtes complétées:",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            ..._completedQuests.map((questId) => Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.green[600]),
-                  const SizedBox(width: 8),
-                  const Text(
-                    "Quête complétée",
-                    style: TextStyle(color: Colors.green),
-                  ),
-                ],
-              ),
-            )),
-          ],
         ],
       );
     } else {

@@ -723,7 +723,7 @@ def get_current_museum(uid):
 
         if doc.exists:
             data = doc.to_dict()
-            actual_museum = data.get('visited-museum', None)
+            actual_museum = data.get('visited_museum', None)
 
             if actual_museum:
                 return jsonify({"actual_museum": actual_museum}), 200
@@ -742,7 +742,7 @@ def get_current_museum(uid):
 def set_current_museum(uid):
     try:
         data = request.get_json()
-        actual_museum = data.get('visitedMuseum', None)
+        actual_museum = data.get('visited_museum', None)
 
         if actual_museum is not None and not isinstance(actual_museum, str):
             return jsonify({"error": "actual_museum doit être une string ou null"}), 400
@@ -753,7 +753,7 @@ def set_current_museum(uid):
         if not doc.exists:
             return jsonify({"error": "Utilisateur non trouvé"}), 404
 
-        doc_ref.update({'visited-museum': actual_museum})
+        doc_ref.update({'visited_museum': actual_museum})
         return jsonify({
             "message": "Musée actuel mis à jour",
             "actual_museum": actual_museum

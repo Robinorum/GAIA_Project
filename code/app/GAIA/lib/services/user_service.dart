@@ -272,7 +272,7 @@ class UserService {
   Future<bool> setCurrentMuseum(String uid, String? museumOfficialId) async {
     try {
       final body = {
-        'visitedMuseum': museumOfficialId,
+        'visited_museum': museumOfficialId,
       };
 
       final response = await _httpService.put(

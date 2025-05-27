@@ -480,7 +480,6 @@ class _RegistrationPageState extends State<RegistrationPage>
         'reco': [],
         'previous_reco': [],
         'collection': [],
-        'visitedMuseum': '',
         'profilePhoto': '',
         'preferences': {'movements': {}},
         'quests': [],
@@ -501,7 +500,6 @@ class _RegistrationPageState extends State<RegistrationPage>
         googleAccount: userData['googleAccount'] ?? false,
         liked: List<String>.from(userData['liked'] ?? []),
         collection: List<String>.from(userData['collection'] ?? []),
-        visitedMuseum: userData['visitedMuseum'] ?? '',
         profilePhoto: userData['profilePhoto'] ?? '',
         preferences: userData['preferences'] ?? {},
         movements: Map<String, double>.from(
