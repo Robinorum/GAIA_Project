@@ -28,6 +28,25 @@ class UserService {
     }
   }
 
+  
+    Future<Map<String, dynamic>?> fetchMuseumCollection(String uid) async {
+  try {
+    final response = await _httpService.get(IpConfig.fetchColMuseum(uid));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> result = jsonDecode(response.body)['result'];
+      return result; // Retourne l'objet complet, map des musées
+    } else {
+      developer.log("Erreur lors de la récupération de la collection: ${response.statusCode}");
+      return null;
+    }
+  } catch (e) {
+    developer.log("Exception lors de la récupération de la collection: $e");
+    return null;
+  }
+}
+
+
   Future<bool> fetchStateBrand(String userId, String artworkId) async {
     try {
       final response =

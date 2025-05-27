@@ -431,6 +431,94 @@ def fetch_collection(uid):
     print(f"No collection found for UID {uid}.")
     return jsonify({"success": True, "data": []}), 200
 
+@app.route('/users/<uid>/museum-collection', methods=['GET'])
+def get_user_museum_artworks(uid):
+    try:
+        print(f"🔍 Récupération des données pour l'utilisateur : {uid}")
+        
+        # 1. Récupérer la collection de l'utilisateur
+        user_doc = db.collection('accounts').document(uid).get()
+        if not user_doc.exists:
+            print("❌ Utilisateur non trouvé.")
+            return jsonify({"message": "User not found"}), 404
+
+
+        user_data = user_doc.to_dict()
+        user_collection_ids = set(user_data.get('collection', []))
+        print(f"📦 IDs des œuvres dans la collection utilisateur : {user_collection_ids}")
+
+        if not user_collection_ids:
+            print("⚠️ Aucune œuvre dans la collection utilisateur.")
+            return jsonify({"message": "No artworks in user collection"}), 404
+
+
+        artworks_ref = db.collection('artworks')
+
+        # 2. Associer les œuvres aux musées
+        user_artworks = artworks_ref.where('__name__', 'in', list(user_collection_ids)).stream()
+        museum_to_artworks = {}
+        for artwork in user_artworks:
+            data = artwork.to_dict()
+            museum_id = data.get('id_museum')
+            if museum_id:
+                museum_to_artworks.setdefault(museum_id, set()).add(artwork.id)
+
+        if not museum_to_artworks:
+            print("⚠️ Aucun musée associé aux œuvres de l'utilisateur.")
+            return jsonify({"message": "No museums associated with user artworks"}), 404
+
+        # 3. Récupérer les données des musées via official_id et ne garder que title, image, official_id
+        museums_data = {}
+        for museum_id in museum_to_artworks.keys():
+            museum_query = db.collection('museums').where("official_id", "==", museum_id).stream()
+            museum_docs = list(db.collection('museums').where("official_id", "==", museum_id).stream())
+            if museum_docs:
+                data = museum_docs[0].to_dict()
+                filtered_data = {
+                    "title": data.get("title"),
+                    "image": data.get("image"),
+                    "official_id": museum_id,
+                    "department": data.get("departement"),
+                    "place": data.get("place"),
+                    "histoire": data.get("histoire"),
+                }
+                museums_data[museum_id] = filtered_data
+            else:
+                print(f"❌ Musée non trouvé pour official_id = {museum_id}")
+
+        # 4. Construire le résultat final : pour chaque musée, inclure les infos filtrées + artworks (id + completed)
+        result = {}
+        for museum_id, museum_data in museums_data.items():
+            artworks_stream = artworks_ref.where("id_museum", "==", museum_id).stream()
+
+            artworks_list = []
+            for artwork in artworks_stream:
+                artworks_list.append({
+                    "id": artwork.id,
+                    "completed": artwork.id in user_collection_ids
+                })
+
+            museum_obj = museum_data.copy()
+            museum_obj["artworks"] = artworks_list
+
+            result[museum_id] = museum_obj
+
+        # Print final clair
+        print("\n📢 Résumé final des musées et leurs œuvres :")
+        for mid, mdata in result.items():
+            print(f"Musée {mid} ({mdata.get('title')}) a ces œuvres :")
+            for art in mdata.get("artworks", []):
+                print(f"  - Œuvre {art['id']} | complétée : {art['completed']}")
+
+        print(result)
+        return jsonify({"result": result}), 200
+
+
+    except Exception as e:
+        print(f"❌ Erreur inattendue : {e}")
+        return jsonify({"message": "Internal server error", "error": str(e)}), 500
+
+
 @app.route("/users/<uid>/quests", methods=["PUT"])
 def update_general_quest_progress(uid):
     data = request.get_json()
