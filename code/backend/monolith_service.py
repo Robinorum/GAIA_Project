@@ -419,7 +419,6 @@ def toggle_like(uid, artworkId):
     data = request.get_json()
     action = data.get("action")
     movement = data.get("movement")
-    previous_profile = data.get("previous_profile", {})
 
     if action not in ["like", "dislike"]:
         return jsonify({"error": "Invalid action"}), 400
@@ -431,7 +430,7 @@ def toggle_like(uid, artworkId):
 
     user_data = doc.to_dict()
     current_likes = user_data.get("brands", [])
-
+    previous_profile = user_data.get("preferences", {}).get("movements", {})
     updated = False
     if action == "like" and artworkId not in current_likes:
         current_likes.append(artworkId)
@@ -765,63 +764,7 @@ def update_quest_museum(uid):
     else:
         print("Utilisateur introuvable.")
         return 0
-
-@app.route("/users/<uid>/profile", methods=["PUT"])
-def update_profile(uid):
-    try:
-        # Récupérer les données JSON envoyées dans la requête
-        data = request.get_json()
-        movements = data.get("movements", {})
-        artwork_id = data.get("liked_artworks")
-        action = data.get("action")
-        print(f"artwork id : {artwork_id}")
-        
-        if not isinstance(movements, dict):  # On vérifie que 'movements' est un dictionnaire
-            return jsonify({"error": "Invalid profile format. 'movements' should be a dictionary."}), 400
-
-        # Accès à la collection Firestore
-        doc_ref = db.collection('accounts').document(uid)
-        doc = doc_ref.get()
-
-        if not doc.exists:
-            app.logger.error(f"User with UID {uid} not found.")
-            return jsonify({"error": "User not found"}), 404
-
-        current_data = doc.to_dict()
-        current_likes = current_data.get("brands", [])
-
-        if action == "like":
-
-            if artwork_id not in current_likes:
-                current_likes.append(artwork_id)
-        
-        if action == "dislike":
-
-            if artwork_id in current_likes:
-                current_likes.remove(artwork_id)
-                print("TABLEAU SUPPR")
-
-        doc_ref.update({
-            "preferences.movements": movements,
-            "brands": current_likes
-        })
-        
-        updated_doc = doc_ref.get()
-        updated_data = updated_doc.to_dict()
-
-        return jsonify({
-            "uid": uid,
-            "movements": updated_data.get('preferences', {}).get('movements', {}),
-            "message": "Profile updated successfully."
-        }), 200
-    except Exception as e:
-        app.logger.error(f"Error updating profile for {uid}: {str(e)}")
-        return jsonify({
-            "uid": uid,
-            "error": f"An error occurred while updating the profile: {str(e)}"
-        }), 500
     
-
 @app.route("/users/<uid>", methods=["GET"])
 def get_user(uid):
     doc_ref = db.collection('accounts').document(uid)
@@ -900,4 +843,4 @@ def set_current_museum(uid):
 
     
 if __name__ == "__main__":
-    app.run(debug=False, port=5001)
+    app.run(debug=True, port=5001)
