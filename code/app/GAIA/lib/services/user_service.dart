@@ -77,7 +77,6 @@ class UserService {
         'uid': user.id,
         'artwork_id': artwork.id,
         'movement': artwork.movement,
-        'previous_profile': user.preferences['movements'],
         'action': action
       };
       final response = await _httpService

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gaia/provider/theme_provider.dart';
-import 'package:gaia/settings/change_email_page.dart';
-import 'package:gaia/settings/change_password_page.dart';
+import 'package:gaia/settings/update_informations.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gaia/login/login_page.dart';
@@ -121,9 +120,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       subtitle: userProvider.user?.username ?? "Non défini",
                       icon: Icons.account_circle,
                       onTap: () {
-                        // Navigation vers une page de modification du nom d'utilisateur
-                        _showComingSoonDialog(
-                            "Modification du nom d'utilisateur");
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const ChangeUsernamePage(),
+                          ),
+                        );
                       },
                     ),
                     _buildModernListTile(
