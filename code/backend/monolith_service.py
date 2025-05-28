@@ -354,6 +354,32 @@ def add_collection(uid, artworkId):
         return "Artwork added successfully", 200
     return f"Document for user {uid} does not exist.", 404
 
+@app.route("/users/<uid>/liked-artworks", methods=["GET"])
+def get_liked_artworks(uid):
+    try:
+        account_doc = db.collection("accounts").document(uid).get()
+        if not account_doc.exists:
+            return jsonify([]), 404
+        
+        account_data = account_doc.to_dict()
+        liked_ids = account_data.get("brands", [])
+        if not liked_ids:
+            return jsonify([])
+
+        artworks_list = []
+        for art_id in liked_ids:
+            artwork_doc = db.collection("artworks").document(art_id).get()
+            if artwork_doc.exists:
+                artwork_data = artwork_doc.to_dict()
+                artwork_data['id'] = artwork_doc.id
+                artworks_list.append(artwork_data)
+
+        return jsonify(artworks_list)
+
+    except Exception as e:
+        print(f"Error retrieving brands artworks for user {uid}: {e}")
+        return jsonify([]), 500
+
 @app.route("/users/<uid>/like/<artworkId>", methods=["GET"])
 def get_like_state(uid, artworkId):
     doc_ref = db.collection('accounts').document(uid)

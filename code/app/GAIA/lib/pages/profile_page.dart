@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gaia/model/artwork.dart';
+import 'package:gaia/pages/all_liked_artwork_page.dart';
 import 'package:provider/provider.dart';
 import 'package:gaia/provider/user_provider.dart';
 import 'package:gaia/pages/settings_page.dart';
@@ -26,14 +27,12 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             _buildHeader(context, user!),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16), // Réduit de 24 à 16
             _buildSectionTitle("Mouvement préféré", Icons.palette),
             const SizedBox(height: 12),
             _buildTopMovements(user.id),
             const SizedBox(height: 32),
-            _buildSectionTitle("Œuvres likées", Icons.favorite),
-            const SizedBox(height: 12),
-            _buildLikedArtworks(user.id),
+            _buildLikedArtworksSection(user.id),
             const SizedBox(height: 30),
           ],
         ),
@@ -314,6 +313,61 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Widget _buildLikedArtworksSection(String userId) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.favorite, color: Theme.of(context).primaryColor, size: 24),
+                  const SizedBox(width: 12),
+                  const Text(
+                    "Œuvres likées",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              FutureBuilder<List<Artwork>>(
+                future: UserService().fetchLikedArtworks(userId),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    return TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AllLikedArtworksPage(userId: userId),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "Tout voir",
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        _buildLikedArtworks(userId),
+      ],
+    );
+  }
+
   Widget _buildLikedArtworks(String userId) {
     return FutureBuilder<List<Artwork>>(
       future: UserService().fetchLikedArtworks(userId),
@@ -365,12 +419,15 @@ class _ProfilePageState extends State<ProfilePage> {
         }
 
         final artworks = snapshot.data!;
+        // Limiter à 2 œuvres maximum
+        final displayedArtworks = artworks.take(2).toList();
+        
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: artworks.length,
+            itemCount: displayedArtworks.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 16,
@@ -378,7 +435,7 @@ class _ProfilePageState extends State<ProfilePage> {
               childAspectRatio: 0.75,
             ),
             itemBuilder: (context, index) {
-              final artwork = artworks[index];
+              final artwork = displayedArtworks[index];
               return _buildArtworkCard(artwork);
             },
           ),
