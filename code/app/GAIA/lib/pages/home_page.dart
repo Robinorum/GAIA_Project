@@ -16,15 +16,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../pages/detail_museum_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/material.dart';
 import 'package:gaia/utils/dialogs.dart';
 
-
-import 'package:provider/provider.dart';
-import '../model/artwork.dart';
-import '../services/user_service.dart';
-import '../provider/user_provider.dart';
-import 'package:gaia/pages/detail_artwork_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

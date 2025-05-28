@@ -3,7 +3,6 @@ import 'package:gaia/model/museum_collection.dart';
 import 'package:gaia/model/artwork.dart';
 import 'package:gaia/services/museum_service.dart';
 import 'package:gaia/pages/detail_artwork_page.dart';
-import 'dart:math';
 import 'dart:ui';
 
 class MuseumCollectionDetailPage extends StatefulWidget {
