@@ -145,7 +145,7 @@ class _AllLikedArtworksPageState extends State<AllLikedArtworksPage> {
               crossAxisCount: 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: 0.75,
+              childAspectRatio: 0.65, // Réduit de 0.75 à 0.65 pour des cards plus hautes
             ),
             itemBuilder: (context, index) {
               final artwork = artworks[index];
@@ -185,7 +185,7 @@ class _AllLikedArtworksPageState extends State<AllLikedArtworksPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              flex: 4,
+              flex: 3, // Réduit de 4 à 3 pour donner plus d'espace au texte
               child: Stack(
                 children: [
                   ClipRRect(
@@ -256,39 +256,34 @@ class _AllLikedArtworksPageState extends State<AllLikedArtworksPage> {
               ),
             ),
             Expanded(
-              flex: 2,
+              flex: 3, // Augmenté de 2 à 3 pour plus d'espace texte
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.start, // Changé pour aligner en haut
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          artwork.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (artwork.artist != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            artwork.artist!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
+                    Text(
+                      artwork.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                      maxLines: 3, // Augmenté de 2 à 3 lignes
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    if (artwork.artist != null) ...[
+                      const SizedBox(height: 6), // Augmenté l'espace
+                      Text(
+                        artwork.artist!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 2, // Augmenté de 1 à 2 lignes
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
                 ),
               ),
