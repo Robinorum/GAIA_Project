@@ -163,16 +163,24 @@ class _HeartIconState extends State<HeartIcon> {
     return liked;
   }
 
-  void toggleLike() {
+  Future<void> toggleLike() async {
     setState(() {
       isLiked = !isLiked;
     });
 
-    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (isLiked) {
-      UserService().toggleLike(widget.artwork, user!, "like");
+      final result = await UserService()
+          .toggleLike(widget.artwork, userProvider.user!, 'like');
+      if (result == "Ok") {
+        await userProvider.updateProfile();
+      }
     } else {
-      UserService().toggleLike(widget.artwork, user!, "dislike");
+      final result = await UserService()
+          .toggleLike(widget.artwork, userProvider.user!, 'dislike');
+      if (result == "Ok") {
+        await userProvider.updateProfile();
+      }
     }
   }
 

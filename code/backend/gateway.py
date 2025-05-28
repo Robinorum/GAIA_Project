@@ -1,18 +1,26 @@
-import subprocess
+# import subprocess
 from flask import Flask, request, jsonify
 import requests
 from config import MICROSERVICES
 import firebase_admin
 from firebase_admin import credentials, auth
+import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+
+load_dotenv()
+key = os.getenv("GEMINI_KEY")
+genai.configure(api_key=key)
 
 
 # UPDATE : auto adb reverse
-def setup_adb_reverse():
-    try:
-        subprocess.run(["adb", "reverse", "tcp:5000", "tcp:5000"], check=True)
-        print("ADB reverse set up successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to set up ADB reverse: {e}")
+# def setup_adb_reverse():
+#     try:
+#         subprocess.run(["adb", "reverse", "tcp:5000", "tcp:5000"], check=True)
+#         print("ADB reverse set up successfully.")
+#     except subprocess.CalledProcessError as e:
+#         print(f"Failed to set up ADB reverse: {e}")
 
 # Initialize Firebase Admin with the service account
 cred = credentials.Certificate("testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json")
@@ -58,6 +66,37 @@ def proxy(service, endpoint):
         return jsonify({"error": f"Error communicating with {service}: {str(e)}"}), 500
 
 
+@app.route('/gemini/generate', methods=["POST"])
+def gemini_generate():
+    try:
+        # Vérifier l'authentification comme pour les autres endpoints
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Missing or invalid JWT token"}), 401
+
+        token = auth_header.split(" ")[1]
+        decoded_token = verify_firebase_jwt(token)
+        if not decoded_token:
+            return jsonify({"error": "Invalid JWT token"}), 401
+            
+        # Récupérer les données de la requête
+        data = request.get_json()
+        prompt = data.get("prompt")
+        
+        if not prompt:
+            return jsonify({"error": "Missing prompt parameter"}), 400
+            
+        # Générer le contenu avec Gemini
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        response = model.generate_content(prompt)
+        
+        return jsonify({"response": response.text})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 if __name__ == "__main__":
-    setup_adb_reverse()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    #setup_adb_reverse()
+    app.run(debug=False, host="127.0.0.1", port=5000)

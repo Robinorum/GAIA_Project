@@ -9,7 +9,6 @@ class AppUser {
   final bool googleAccount;
   final List<String> liked;
   final List<String> collection;
-  final String visitedMuseum;
   String profilePhoto; // Ajout de la photo de profil
   final Map<String, dynamic> preferences; // Ajout des préférences complètes
   final Map<String, double> movements; // Ajout des préférences liées aux mouvements artistiques
@@ -21,7 +20,6 @@ class AppUser {
     required this.googleAccount,
     required this.liked,
     required this.collection,
-    required this.visitedMuseum,
     required this.profilePhoto,
     required this.preferences,
     required this.movements,
@@ -50,7 +48,6 @@ class AppUser {
       googleAccount: false,
       liked: [],
       collection: [],
-      visitedMuseum: '',
       profilePhoto: '',
       preferences: {},
       movements: {},
@@ -80,7 +77,6 @@ class AppUser {
       googleAccount: data['googleAccount'] ?? false,
       liked: List<String>.from(data['liked'] ?? []),
       collection: List<String>.from(data['collection'] ?? []),
-      visitedMuseum: data['visitedMuseum'] ?? '',
       profilePhoto: data['profilePhoto'] ?? '',
       preferences: data['preferences'] ?? {}, // Récupération des préférences
       movements: movementsData, // Récupération des préférences liées aux mouvements

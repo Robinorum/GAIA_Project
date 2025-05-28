@@ -455,7 +455,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             googleAccount: userData['googleAccount'] ?? false,
             liked: List<String>.from(userData['liked'] ?? []),
             collection: List<String>.from(userData['collection'] ?? []),
-            visitedMuseum: userData['visitedMuseum'] ?? '',
             profilePhoto: userData['profilePhoto'] ?? '',
             preferences: userData['preferences'] ?? {},
             movements: Map<String, double>.from(
@@ -521,7 +520,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           googleAccount: true,
           liked: List<String>.from(userData['liked'] ?? []),
           collection: List<String>.from(userData['collection'] ?? []),
-          visitedMuseum: userData['visitedMuseum'] ?? '',
           profilePhoto: userData['profilePhoto'] ?? '',
           preferences: userData['preferences'] ?? {},
           movements: Map<String, double>.from(
