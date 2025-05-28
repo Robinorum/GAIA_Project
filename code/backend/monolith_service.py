@@ -273,6 +273,27 @@ def get_recommendations(uid):
 
 
 #USER_FUNCTIONS
+@app.route("/users/<uid>/username", methods=["PUT"])
+def update_user_username(uid):
+    try:
+        data = request.get_json()
+        new_username = data.get("username")
+
+        if not new_username:
+            return jsonify({"error": "Le nom d'utilisateur est requis."}), 400
+
+        user_ref = db.collection("accounts").document(uid)
+        user_doc = user_ref.get()
+
+        if not user_doc.exists:
+            return jsonify({"error": f"Utilisateur {uid} introuvable dans Firestore."}), 404
+
+        user_ref.update({"username": new_username})
+
+        return jsonify({"message": "Nom d'utilisateur mis à jour avec succès."}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Erreur lors de la mise à jour : {str(e)}"}), 500
 
 @app.route('/users/<uid>/email', methods=['PUT'])
 def update_user_email(uid):
@@ -300,8 +321,8 @@ def update_user_email(uid):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/users/<uid>/change-password", methods=["PUT"])
-def change_password(uid):
+@app.route("/users/<uid>/password", methods=["PUT"])
+def update_user_password(uid):
     data = request.get_json()
     new_password = data.get("new_password")
 
