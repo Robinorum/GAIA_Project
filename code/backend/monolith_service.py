@@ -354,32 +354,6 @@ def add_collection(uid, artworkId):
         return "Artwork added successfully", 200
     return f"Document for user {uid} does not exist.", 404
 
-@app.route("/users/<uid>/liked-artworks", methods=["GET"])
-def get_liked_artworks(uid):
-    try:
-        account_doc = db.collection("accounts").document(uid).get()
-        if not account_doc.exists:
-            return jsonify([]), 404
-        
-        account_data = account_doc.to_dict()
-        liked_ids = account_data.get("brands", [])
-        if not liked_ids:
-            return jsonify([])
-
-        artworks_list = []
-        for art_id in liked_ids:
-            artwork_doc = db.collection("artworks").document(art_id).get()
-            if artwork_doc.exists:
-                artwork_data = artwork_doc.to_dict()
-                artwork_data['id'] = artwork_doc.id
-                artworks_list.append(artwork_data)
-
-        return jsonify(artworks_list)
-
-    except Exception as e:
-        print(f"Error retrieving brands artworks for user {uid}: {e}")
-        return jsonify([]), 500
-
 @app.route("/users/<uid>/like/<artworkId>", methods=["GET"])
 def get_like_state(uid, artworkId):
     doc_ref = db.collection('accounts').document(uid)
@@ -393,6 +367,26 @@ def get_like_state(uid, artworkId):
             return jsonify({"result": True}), 200
     print("tableau non liké")
     return jsonify({"result": False}), 200
+
+@app.route("/users/<uid>/top-movements", methods=["GET"])
+def top_brands(uid):
+    doc_ref = db.collection('accounts').document(uid)
+    doc = doc_ref.get()
+    
+    if doc.exists:
+        data = doc.to_dict()
+        if 'preferences' in data and 'movements' in data['preferences']:
+            movements = data['preferences']['movements']                
+            filtered_movements = {movement: score for movement, score in movements.items() if isinstance(score, (int, float)) and score > 0}
+            sorted_movements = sorted(filtered_movements.items(), key=lambda x: x[1], reverse=True)
+            top_3_movements = [movement for movement, score in sorted_movements[:3]]
+            
+            return jsonify({"top_movements": top_3_movements}), 200
+        
+        else:
+            return jsonify({"message": "No movements data available."}), 404
+    else:
+        return jsonify({"error": "User document not found."}), 404
 
 @app.route("/users/<uid>/like/<artworkId>", methods=["POST"])
 def toggle_like(uid, artworkId):
@@ -880,4 +874,4 @@ def set_current_museum(uid):
 
     
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(debug=False, port=5001)
