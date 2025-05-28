@@ -23,7 +23,7 @@ class _MapPageState extends State<MapPage> {
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  bool _showMap = false;
+  bool _showMap = true;
 
   final MuseumService _museumService = MuseumService();
   final MapController _mapController = MapController();
@@ -177,15 +177,15 @@ class _MapPageState extends State<MapPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildToggleButton(
-                label: 'Liste',
-                selected: !_showMap,
-                onPressed: () => setState(() => _showMap = false),
-              ),
-              const SizedBox(width: 12),
-              _buildToggleButton(
                 label: 'Carte',
                 selected: _showMap,
                 onPressed: () => setState(() => _showMap = true),
+              ),
+              const SizedBox(width: 12),
+              _buildToggleButton(
+                label: 'Liste',
+                selected: !_showMap,
+                onPressed: () => setState(() => _showMap = false),
               ),
             ],
           ),
