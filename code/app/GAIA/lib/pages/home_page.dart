@@ -94,11 +94,10 @@ class _HomeContentState extends State<HomeContent> {
 
   Future<void> _showTutorialIfNeeded(String uid) async {
   final prefs = await SharedPreferences.getInstance();
-  // final hasSeenTutorial = prefs.getBool('seen_navbar_tutorial_$uid') ?? false; // Renommer seen_navbar_tutorial
-  final hasSeenTutorial = false;
+  final hasSeenTutorial = prefs.getBool('seen_tutorial_$uid') ?? false;
 
   if (!hasSeenTutorial) {
-    await prefs.setBool('seen_navbar_tutorial_$uid', true);
+    await prefs.setBool('seen_tutorial_$uid', true);
 
     if (!mounted) return;
 
