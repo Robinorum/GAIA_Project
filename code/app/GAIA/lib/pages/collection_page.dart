@@ -9,10 +9,10 @@ class CollectionPage extends StatefulWidget {
   const CollectionPage({super.key});
 
   @override
-  CollectionPageState createState() => CollectionPageState();
+  _CollectionPageState createState() => _CollectionPageState();
 }
 
-class CollectionPageState extends State<CollectionPage> {
+class _CollectionPageState extends State<CollectionPage> {
   late Future<List<Artwork>> _artworks;
   List<Artwork> _allArtworks = [];
   List<Artwork> _filteredArtworks = [];
@@ -20,39 +20,27 @@ class CollectionPageState extends State<CollectionPage> {
   final TextEditingController _searchController = TextEditingController();
 
   final List<String> _movements = [
-    "Renaissance",
-    "Baroque",
-    "Rococo",
-    "Néoclassicisme",
-    "Romantisme",
-    "Réalisme",
-    "Impressionnisme",
-    "Post-impressionnisme",
-    "Symbolisme",
-    "Art nouveau",
-    "Fauvisme",
-    "Cubisme",
-    "Byzantin",
-    "Expressionnisme",
-    "Surréalisme",
-    "Dadaïsme",
-    "Abstraction",
-    "Art déco",
-    "Pop art",
+    "Renaissance", "Baroque", "Rococo", "Néoclassicisme", "Romantisme",
+    "Réalisme", "Impressionnisme", "Post-impressionnisme", "Symbolisme",
+    "Art nouveau", "Fauvisme", "Cubisme", "Byzantin", "Expressionnisme",
+    "Surréalisme", "Dadaïsme", "Abstraction", "Art déco", "Pop art",
     "Hyperréalisme"
   ];
-
-  String _sortOrder = 'asc'; // 'asc' ou 'desc'
 
   @override
   void initState() {
     super.initState();
+    
+
     final user = Provider.of<UserProvider>(context, listen: false).user;
     final uid = user?.id ?? "default_uid";
-
     _artworks = UserService().fetchCollection(uid);
+
     _searchController.addListener(_filterArtworks);
+
+
   }
+
 
   void _filterArtworks() {
     String query = _searchController.text.toLowerCase();
@@ -67,15 +55,6 @@ class CollectionPageState extends State<CollectionPage> {
 
         return matchesSearch && matchesMovement;
       }).toList();
-
-      _sortArtworks();
-    });
-  }
-
-  void _sortArtworks() {
-    _filteredArtworks.sort((a, b) {
-      int comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
-      return _sortOrder == 'asc' ? comparison : -comparison;
     });
   }
 
@@ -88,7 +67,6 @@ class CollectionPageState extends State<CollectionPage> {
       ),
       builder: (context) {
         List<String> tempSelection = List.from(_selectedMovements);
-        String tempSortOrder = _sortOrder;
 
         return DraggableScrollableSheet(
           expand: false,
@@ -119,45 +97,19 @@ class CollectionPageState extends State<CollectionPage> {
                             selected: isSelected,
                             onSelected: (bool selected) {
                               setModalState(() {
-                                selected
-                                    ? tempSelection.add(movement)
-                                    : tempSelection.remove(movement);
+                                if (selected) {
+                                  tempSelection.add(movement);
+                                } else {
+                                  tempSelection.remove(movement);
+                                }
                               });
                             },
                             selectedColor: Theme.of(context)
                                 .colorScheme
                                 .primary
-                                .withAlpha((0.2 * 255).toInt()),
+                                .withOpacity(0.2),
                           );
                         }).toList(),
-                      ),
-                      const SizedBox(height: 20),
-                      const Divider(),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "Trier les œuvres par nom",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
-                      DropdownButton<String>(
-                        value: tempSortOrder,
-                        isExpanded: true,
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            setModalState(() => tempSortOrder = newValue);
-                          }
-                        },
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'asc',
-                            child: Text('Ordre alphabétique (A → Z)'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'desc',
-                            child: Text('Ordre alphabétique inverse (Z → A)'),
-                          ),
-                        ],
                       ),
                       const SizedBox(height: 20),
                       Row(
@@ -167,7 +119,6 @@ class CollectionPageState extends State<CollectionPage> {
                             onPressed: () {
                               setState(() {
                                 _selectedMovements.clear();
-                                _sortOrder = 'asc';
                                 _filterArtworks();
                               });
                               Navigator.pop(context);
@@ -178,7 +129,6 @@ class CollectionPageState extends State<CollectionPage> {
                             onPressed: () {
                               setState(() {
                                 _selectedMovements = tempSelection;
-                                _sortOrder = tempSortOrder;
                                 _filterArtworks();
                               });
                               Navigator.pop(context);
@@ -218,7 +168,7 @@ class CollectionPageState extends State<CollectionPage> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: "Rechercher une œuvre...",
+                      hintText: "Rechercher...",
                       prefixIcon: const Icon(Icons.search),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
@@ -257,19 +207,18 @@ class CollectionPageState extends State<CollectionPage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return Center(child: Text("Erreur : ${snapshot.error}"));
+                  return Center(child: Text("Error : ${snapshot.error}"));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("Aucune œuvre trouvée."));
+                  return const Center(child: Text("No artworks found."));
                 }
 
                 if (_allArtworks.isEmpty) {
                   _allArtworks = snapshot.data!;
                   _filteredArtworks = _allArtworks;
-                  _sortArtworks();
                 }
 
                 return _filteredArtworks.isEmpty
-                    ? const Center(child: Text("Aucune œuvre trouvée."))
+                    ? const Center(child: Text("Aucune oeuvre trouvée."))
                     : GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
