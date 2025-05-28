@@ -263,6 +263,136 @@ class _QuestsPageState extends State<QuestsPage> {
     );
   }
 
+  Widget _buildSuccessCard(GeneralQuest quest, Map<String, dynamic> progressData) {
+    final int progression = progressData['progression'];
+    final int goal = progressData['goal'];
+    
+    // Détermine le niveau d'étoiles
+    int level = 0;
+    if (progression >= quest.goal[2]) {
+      level = 3;
+    } else if (progression >= quest.goal[1]) {
+      level = 2;
+    } else if (progression >= quest.goal[0]) {
+      level = 1;
+    }
+
+    // Calcul du pourcentage de progression
+    double progressPercentage = goal > 0 ? (progression / goal).clamp(0.0, 1.0) : 0.0;
+    
+    // Couleur basée sur le niveau
+    Color cardColor = level == 3 
+        ? Colors.amber[50]! 
+        : level >= 1 
+            ? Colors.green[50]! 
+            : Colors.grey[50]!;
+    
+    Color accentColor = level == 3 
+        ? Colors.amber 
+        : level >= 1 
+            ? Colors.green 
+            : Colors.grey;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accentColor.withOpacity(0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: accentColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    level == 3 ? Icons.emoji_events : level >= 1 ? Icons.check_circle : Icons.radio_button_unchecked,
+                    color: accentColor,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        quest.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: accentColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        quest.description,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "$progression/$goal",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: accentColor,
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(
+                        3,
+                        (i) => Icon(
+                          i < level ? Icons.star : Icons.star_border,
+                          color: Colors.amber.shade600,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Barre de progression
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: progressPercentage,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                minHeight: 6,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMuseumQuestSection() {
     if (_isInMuseum && _currentMuseum != null) {
       return Column(
@@ -289,24 +419,54 @@ class _QuestsPageState extends State<QuestsPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.blue[50],
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.blue),
+              color: Colors.deepPurple[50],
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.deepPurple.withOpacity(0.3)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.deepPurple.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Musée: ${_currentMuseum!.title}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.blue[800],
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.museum,
+                        color: Colors.deepPurple.shade600,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _currentMuseum!.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.deepPurple[800],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 if (_isLoadingQuest)
-                  const Center(child: CircularProgressIndicator())
+                  Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.deepPurple,
+                    ),
+                  )
                 else if (_currentQuestImageUrl != null)
                   GestureDetector(
                     onTap: () {
@@ -329,7 +489,7 @@ class _QuestsPageState extends State<QuestsPage> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.deepPurple.withOpacity(0.2),
                                 blurRadius: 10,
                                 offset: const Offset(0, 5),
                               ),
@@ -343,7 +503,7 @@ class _QuestsPageState extends State<QuestsPage> {
                                 Image.network(
                                   _currentQuestImageUrl!,
                                   fit: BoxFit.cover,
-                                  height: 180, // Augmenté de 120 à 180
+                                  height: 180,
                                   width: double.infinity,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Container(
@@ -367,11 +527,10 @@ class _QuestsPageState extends State<QuestsPage> {
                                     height: 180,
                                     width: double.infinity,
                                     decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.25),
                                       gradient: LinearGradient(
                                         colors: [
-                                          Colors.black.withOpacity(0.3),
-                                          Colors.black.withOpacity(0.15),
+                                          Colors.deepPurple.withOpacity(0.4),
+                                          Colors.deepPurple.withOpacity(0.2),
                                         ],
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
@@ -379,28 +538,45 @@ class _QuestsPageState extends State<QuestsPage> {
                                     ),
                                   ),
                                 ),
-                                // Cadenas centré
-                              
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          "Appuyez pour voir les détails de la quête",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            fontStyle: FontStyle.italic,
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.deepPurple.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            "Appuyez pour voir les détails de la quête",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.deepPurple.shade600,
+                              fontStyle: FontStyle.italic,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   )
                 else
-                  const Text(
-                    "Aucune quête disponible pour le moment",
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Aucune quête disponible pour le moment",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.deepPurple.shade600,
+                        ),
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -456,12 +632,30 @@ class _QuestsPageState extends State<QuestsPage> {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.green[50],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.green),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.museum, color: Colors.green, size: 40),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.museum,
+                            color: Colors.green,
+                            size: 24,
+                          ),
+                        ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -477,56 +671,71 @@ class _QuestsPageState extends State<QuestsPage> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "Cliquez pour entrer dans le musée ${museum.title}",
-                                style: const TextStyle(fontSize: 14),
+                                "Cliquez pour entrer dans ${museum.title}",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.green.shade600,
+                                ),
                               ),
                             ],
                           ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.green.shade600,
+                          size: 16,
                         ),
                       ],
                     ),
                   ),
                 );
               } else {
-                return Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                        child: Container(
-                          height: 120,
-                          decoration: BoxDecoration(
-                            color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                            borderRadius: BorderRadius.circular(12),
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                  ),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          child: Container(
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const Positioned.fill(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.lock, size: 36, color: Colors.grey),
-                          SizedBox(height: 8),
-                          Text(
-                            "Quête exclusive",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black54,
+                      const Positioned.fill(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.lock, size: 36, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text(
+                              "Quête exclusive",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black54,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            "Veuillez vous rapprocher d'un musée\npour débloquer les quêtes",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
+                            SizedBox(height: 8),
+                            Text(
+                              "Veuillez vous rapprocher d'un musée\npour débloquer les quêtes",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               }
             },
@@ -566,75 +775,7 @@ class _QuestsPageState extends State<QuestsPage> {
                         orElse: () => {'progression': 0, 'goal': quest.goal[0]},
                       );
 
-                      final int progression = progressData['progression'];
-                      final int goal = progressData['goal'];
-
-                      int level = 0;
-                      if (progression >= quest.goal[2]) {
-                        level = 3;
-                      } else if (progression >= quest.goal[1]) {
-                        level = 2;
-                      } else if (progression >= quest.goal[0]) {
-                        level = 1;
-                      }
-
-                      List<Widget> stars = List.generate(
-                        3,
-                        (i) => Icon(
-                          i < level ? Icons.star : Icons.star_border,
-                          color: Colors.amber,
-                        ),
-                      );
-
-                      return Container(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      quest.title,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(quest.description),
-                                    const SizedBox(height: 6),
-                                    Row(children: stars),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    "$progression / $goal",
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    "Progression",
-                                    style: TextStyle(
-                                        fontSize: 12, color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                      return _buildSuccessCard(quest, progressData);
                     },
                   );
                 },
@@ -642,7 +783,7 @@ class _QuestsPageState extends State<QuestsPage> {
             ),
             const SizedBox(height: 10),
             Center(
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -650,7 +791,14 @@ class _QuestsPageState extends State<QuestsPage> {
                         builder: (context) => const AllQuestsPage()),
                   );
                 },
-                child: const Text("Tout voir"),
+                icon: const Icon(Icons.list),
+                label: const Text("Tout voir"),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 24),
