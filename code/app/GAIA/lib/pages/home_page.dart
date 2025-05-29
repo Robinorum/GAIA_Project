@@ -328,7 +328,7 @@ class _HomeContentState extends State<HomeContent> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Salut, ${user != null && user.username.isNotEmpty ? user.username : "Invité"} 👋',
+                    'Salut, ${user != null && user.username.isNotEmpty ? (user.username.length > 8 ? "${user.username.substring(0, 8)}..." : user.username) : "Invité"} 👋',
                     style: const TextStyle(
                         fontSize: 24, fontWeight: FontWeight.bold),
                   ),
@@ -523,8 +523,11 @@ class _HomeContentState extends State<HomeContent> {
           ),
           const SizedBox(height: 8),
           Text(
-            title,
+            title.length > 40 ? '${title.substring(0, 40)}...' : title,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

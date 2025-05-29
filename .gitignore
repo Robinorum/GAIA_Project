@@ -5,3 +5,5 @@ code/backend/testdb-5e14f-firebase-adminsdk-fbsvc-f98fa5131e.json
 
 **/__pycache__
 code/backend/.env
+code/app/GAIA/macos/Flutter/GeneratedPluginRegistrant.swift
+.gitignore
