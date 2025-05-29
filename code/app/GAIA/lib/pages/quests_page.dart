@@ -565,16 +565,36 @@ class _QuestsPageState extends State<QuestsPage> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.deepPurple.withOpacity(0.1),
+                      color: Colors.green.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
-                      child: Text(
-                        "Aucune quête disponible pour le moment",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.deepPurple.shade600,
-                        ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green.shade400,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Félicitations !",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade400,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Vous avez terminé toutes les quêtes du musée",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.green.shade400,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                   ),
