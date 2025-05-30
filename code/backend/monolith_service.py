@@ -500,21 +500,21 @@ def fetch_collection(uid):
 @app.route('/users/<uid>/museum-collection', methods=['GET'])
 def get_user_museum_artworks(uid):
     try:
-        print(f"🔍 Récupération des données pour l'utilisateur : {uid}")
+        print(f" Récupération des données pour l'utilisateur : {uid}")
         
         # 1. Récupérer la collection de l'utilisateur
         user_doc = db.collection('accounts').document(uid).get()
         if not user_doc.exists:
-            print("❌ Utilisateur non trouvé.")
+            print(" Utilisateur non trouvé.")
             return jsonify({"message": "User not found"}), 404
 
 
         user_data = user_doc.to_dict()
         user_collection_ids = set(user_data.get('collection', []))
-        print(f"📦 IDs des œuvres dans la collection utilisateur : {user_collection_ids}")
+        print(f" IDs des œuvres dans la collection utilisateur : {user_collection_ids}")
 
         if not user_collection_ids:
-            print("⚠️ Aucune œuvre dans la collection utilisateur.")
+            print(" Aucune œuvre dans la collection utilisateur.")
             return jsonify({"message": "No artworks in user collection"}), 404
 
 
@@ -530,7 +530,7 @@ def get_user_museum_artworks(uid):
                 museum_to_artworks.setdefault(museum_id, set()).add(artwork.id)
 
         if not museum_to_artworks:
-            print("⚠️ Aucun musée associé aux œuvres de l'utilisateur.")
+            print(" Aucun musée associé aux œuvres de l'utilisateur.")
             return jsonify({"message": "No museums associated with user artworks"}), 404
 
         # 3. Récupérer les données des musées via official_id et ne garder que title, image, official_id
@@ -742,49 +742,42 @@ def init_quest_museum(uid):
 
 @app.route("/users/<uid>/museum-quests", methods=["PUT"])
 def update_quest_museum(uid): 
-    
-    data= request.get_json()
+    data = request.get_json()
     artworkId = data.get("artworkId")
     museum_id = data.get("museum_id")
 
-    
-    doc_ref = firestore.client().collection('accounts').document(uid)
+    doc_ref = db.collection('accounts').document(uid)
     user_db = doc_ref.get()
     
-    if user_db.exists:
-        user_data = user_db.to_dict()
-        quete_museum = user_data.get('quete_museum', [])
+    if not user_db.exists:
+        return jsonify({"error": "Utilisateur introuvable."}), 404
 
-        if not quete_museum:
-            print("Pas de quêtes en cours.")
-            return 0
-        quest = next((q for q in quete_museum if q.get("id") == museum_id), None)
-        if not quest:
-            print(f"Aucune quête trouvée pour le musée {museum_id}.")
-            return 0
+    user_data = user_db.to_dict()
+    quete_museum = user_data.get('quete_museum', [])
 
-        artworks = quest.get("artworks", [])
-        if not artworks:
-            print(f"Aucune œuvre à valider pour le musée {museum_id}.")
-            return 0
+    if not quete_museum:
+        return jsonify({"message": "Pas de quêtes en cours."}), 400
 
-        if artworkId == artworks[0]:
-            artworks.pop(0)
+    quest = next((q for q in quete_museum if q.get("id") == museum_id), None)
+    if not quest:
+        return jsonify({"message": f"Aucune quête trouvée pour le musée {museum_id}."}), 400
 
-            updated_quete_museum = [
-                {**q, "artworks": artworks} if q.get("id") == museum_id else q
-                for q in quete_museum
-            ]
-            doc_ref.set({"quete_museum": updated_quete_museum}, merge=True)
+    artworks = quest.get("artworks", [])
+    if not artworks:
+        return jsonify({"message": f"Aucune œuvre à valider pour le musée {museum_id}."}), 400
 
-            print("Œuvre validée, quête mise à jour.")
-            return 1
-        else:
-            print("Ce n'est pas la bonne œuvre à valider.")
-            return 0
+    if artworkId == artworks[0]:
+        artworks.pop(0)
+
+        updated_quete_museum = [
+            {**q, "artworks": artworks} if q.get("id") == museum_id else q
+            for q in quete_museum
+        ]
+        doc_ref.set({"quete_museum": updated_quete_museum}, merge=True)
+
+        return jsonify({"message": "Œuvre validée, quête mise à jour."}), 200
     else:
-        print("Utilisateur introuvable.")
-        return 0
+        return jsonify({"message": "Ce n'est pas la bonne œuvre à valider."}), 400
     
 @app.route("/users/<uid>", methods=["GET"])
 def get_user(uid):
@@ -810,9 +803,6 @@ def get_5_artworks():
         return jsonify({"success": False, "message": "Artworks pas générés"}), 404
     
 
-
-
-
 @app.route("/users/<uid>/current-museum", methods=["GET"])
 def get_current_museum(uid):
     try:
@@ -832,9 +822,6 @@ def get_current_museum(uid):
     except Exception as e:
         print("Erreur lors de la récupération du musée actuel:", e)
         return jsonify({"error": "Erreur serveur"}), 500
-    
-
-
 
 @app.route("/users/<uid>/current-museum", methods=["PUT"])
 def set_current_museum(uid):

@@ -250,11 +250,11 @@ class _MuseumCollectionDetailPageState extends State<MuseumCollectionDetailPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    "Collection d'œuvres",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    "Collection et œuvres à découvrir",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey.shade300),
                       borderRadius: BorderRadius.circular(8),
