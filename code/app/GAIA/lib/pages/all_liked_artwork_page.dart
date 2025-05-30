@@ -272,18 +272,18 @@ class _AllLikedArtworksPageState extends State<AllLikedArtworksPage> {
                       maxLines: 3, // Augmenté de 2 à 3 lignes
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (artwork.artist != null) ...[
-                      const SizedBox(height: 6), // Augmenté l'espace
-                      Text(
-                        artwork.artist!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
-                        maxLines: 2, // Augmenté de 1 à 2 lignes
-                        overflow: TextOverflow.ellipsis,
+                    ...[
+                    const SizedBox(height: 6), // Augmenté l'espace
+                    Text(
+                      artwork.artist,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
                       ),
-                    ],
+                      maxLines: 2, // Augmenté de 1 à 2 lignes
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                   ],
                 ),
               ),

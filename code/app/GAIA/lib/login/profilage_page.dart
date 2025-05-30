@@ -187,7 +187,9 @@ class _ProfilagePageState extends State<ProfilagePage> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  artwork.title,
+                    artwork.title.length > 40 
+                      ? '${artwork.title.substring(0, 40)}...' 
+                      : artwork.title,
                   style: const TextStyle(
                       fontSize: 22, fontWeight: FontWeight.bold),
                 ),

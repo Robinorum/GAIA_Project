@@ -4,7 +4,6 @@ import 'package:gaia/model/general_quest.dart';
 import 'package:gaia/provider/user_provider.dart';
 import 'package:gaia/services/general_quest_service.dart';
 import 'package:gaia/services/user_service.dart';
-import 'dart:developer' as developer;
 
 class AllQuestsPage extends StatefulWidget {
   const AllQuestsPage({super.key});
@@ -191,7 +190,6 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                       const SizedBox(height: 6),
                       Row(
                         children: quest.goal.asMap().entries.map((entry) {
-                          int index = entry.key;
                           int goalValue = entry.value;
                           bool isAchieved = progression >= goalValue;
                           
