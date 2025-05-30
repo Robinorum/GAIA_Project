@@ -2,6 +2,11 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'prediction_screen.dart';
 import '../services/prediction_service.dart';
+import '../services/user_service.dart';
+import '../services/museum_service.dart';
+import '../provider/user_provider.dart';
+import '../model/museum.dart';
+import 'package:provider/provider.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -13,17 +18,25 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> {
   final PredictionService _predictionService = PredictionService();
+  final UserService _userService = UserService();
   late CameraController _cameraController;
   late List<CameraDescription> _cameras;
   bool _isCameraInitialized = false;
   bool _isFlashOn = false;
   bool _isLoading = false; // État du chargement
   double _cameraAspectRatio = 1.0;
+  
+  // Variables pour la quête
+  Museum? _currentMuseum;
+  String? _currentQuestImageUrl;
+  bool _isLoadingQuest = false;
+  bool _isInMuseum = false;
 
   @override
   void initState() {
     super.initState();
     initializeCamera();
+    _checkCurrentMuseum();
   }
 
   Future<void> initializeCamera() async {
@@ -43,6 +56,175 @@ class _CameraScreenState extends State<CameraScreen> {
         _cameraAspectRatio = 1 / _cameraController.value.aspectRatio;
       });
     }
+  }
+
+  Future<void> _checkCurrentMuseum() async {
+    try {
+      final user = Provider.of<UserProvider>(context, listen: false).user;
+      final uid = user?.id ?? "default_uid";
+      
+      // Récupérer le musée actuel depuis la BDD
+      final currentMuseumId = await _userService.getCurrentMuseum(uid);
+      
+      if (currentMuseumId != null) {
+        // Récupérer les détails du musée
+        final museums = await MuseumService().fetchMuseums();
+        final museum = museums.firstWhere(
+          (m) => m.officialId == currentMuseumId,
+          orElse: () => throw Exception("Musée non trouvé"),
+        );
+        
+        setState(() {
+          _currentMuseum = museum;
+          _isInMuseum = true;
+        });
+        
+        await _loadCurrentQuest();
+      }
+    } catch (e) {
+      debugPrint("Erreur lors de la vérification du musée actuel: $e");
+    }
+  }
+
+  Future<void> _loadCurrentQuest() async {
+    if (!_isInMuseum || _currentMuseum == null) return;
+    
+    setState(() {
+      _isLoadingQuest = true;
+    });
+
+    try {
+      final user = Provider.of<UserProvider>(context, listen: false).user;
+      final uid = user?.id ?? "default_uid";
+
+      final imageUrl = await _userService.initQuestMuseum(
+        uid,
+        _currentMuseum!.officialId,
+      );
+
+      if (!mounted) return;
+
+      if (imageUrl == "QUEST_ALREADY_COMPLETED") {
+        // Marquer la quête comme complétée et charger la suivante
+        await _loadCurrentQuest(); // Récursif pour charger la suivante
+      } else if (imageUrl == "NO_QUEST") {
+        setState(() {
+          _currentQuestImageUrl = null;
+          _isLoadingQuest = false;
+        });
+      } else if (!imageUrl.startsWith("Erreur")) {
+        setState(() {
+          _currentQuestImageUrl = imageUrl;
+          _isLoadingQuest = false;
+        });
+      } else {
+        setState(() {
+          _currentQuestImageUrl = null;
+          _isLoadingQuest = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _currentQuestImageUrl = null;
+        _isLoadingQuest = false;
+      });
+    }
+  }
+
+  Widget _buildQuestOverlay() {
+    if (!_isInMuseum || _currentMuseum == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Positioned(
+      top: 110,
+      left: 16,
+      right: 16,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.8),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.blue.shade300, width: 2),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.museum, color: Colors.blue, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Quête - ${_currentMuseum!.title}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (_isLoadingQuest)
+              const Center(
+                child: SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                  ),
+                ),
+              )
+            else if (_currentQuestImageUrl != null)
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      _currentQuestImageUrl!,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 60,
+                          height: 60,
+                          color: Colors.grey,
+                          child: const Icon(Icons.error, color: Colors.white),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      "Trouvez cette œuvre dans le musée",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else
+              const Text(
+                "Aucune quête disponible",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> toggleFlash() async {
@@ -99,7 +281,12 @@ class _CameraScreenState extends State<CameraScreen> {
               artworkData: artworkData,
             ),
           ),
-        );
+        ).then((_) {
+          // Recharger la quête quand on revient de PredictionScreen
+          if (_isInMuseum) {
+            _loadCurrentQuest();
+          }
+        });
       } else {
         showDialog(
           // ignore: use_build_context_synchronously
@@ -159,6 +346,8 @@ class _CameraScreenState extends State<CameraScreen> {
               onPressed: () => Navigator.pop(context),
             ),
           ),
+          // Overlay de la quête
+          _buildQuestOverlay(),
           Positioned(
             bottom: 80,
             left: 20,

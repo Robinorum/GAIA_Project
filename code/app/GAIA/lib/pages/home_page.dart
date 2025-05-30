@@ -15,6 +15,9 @@ import '../model/museum.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../pages/detail_museum_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gaia/utils/dialogs.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -79,7 +82,146 @@ class _HomeContentState extends State<HomeContent> {
     super.initState();
     _loadRecommendations();
     _getUserLocation();
+
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final uid = user?.id ?? "default_uid";
+
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    _showTutorialIfNeeded(uid);
+  });
   }
+
+  Future<void> _showTutorialIfNeeded(String uid) async {
+  final prefs = await SharedPreferences.getInstance();
+  final hasSeenTutorial = prefs.getBool('seen_tutorial_$uid') ?? false;
+
+  if (!hasSeenTutorial) {
+    await prefs.setBool('seen_tutorial_$uid', true);
+
+    if (!mounted) return;
+
+    // 1️⃣ Premier pop-up : Bouton Profile (en haut à droite)
+    await showBlurryDialog(
+      context: context,
+      title: const Row(
+        children: [
+          Icon(Icons.account_circle, color: Colors.blue),
+          SizedBox(width: 8),
+          Text("Votre Profil"),
+        ],
+      ),
+      content: "Cliquez sur votre avatar pour accéder à votre profil et consulter vos oevres et monvements préférés.",
+      buttonText: "Suivant",
+      triangleAlignment: 0.93, // Pointage vers le profil en haut à droite
+      verticalAlignment: -0.5, // Positionnement pour pointer vers le profil
+      pointUp: true, // Triangle pointant vers le haut
+    );
+
+    // 2️⃣ Deuxième pop-up : Onglet Accueil
+    if (!mounted) return;
+    await showBlurryDialog(
+      context: context,
+      title: const Row(
+        children: [
+          Icon(Icons.home, color: Colors.blue),
+          SizedBox(width: 8),
+          Text("Accueil"),
+        ],
+      ),
+      content: "Vous êtes déjà sur la page d'accueil ! Ici vous trouverez vos œuvres recommandées et les musées proches de vous.",
+      buttonText: "Suivant",
+      triangleAlignment: 0.05, // Premier onglet de la navbar
+      verticalAlignment: 0.6,
+    );
+
+    // 3️⃣ Troisième pop-up : Onglet Explorer/Carte
+    if (!mounted) return;
+    await showBlurryDialog(
+      context: context,
+      title: const Row(
+        children: [
+          Icon(Icons.map, color: Colors.blue),
+          SizedBox(width: 8),
+          Text("Explorer"),
+        ],
+      ),
+      content: "Dans l'onglet Explorer, découvrez tous les musées sur une carte interactive pour planifiez vos visites.",
+      buttonText: "Suivant",
+      triangleAlignment: 0.26, // Deuxième onglet de la navbar
+      verticalAlignment: 0.6,
+    );
+
+    // 4️⃣ Quatrième pop-up : Bouton Scanner (centre)
+    if (!mounted) return;
+    await showBlurryDialog(
+      context: context,
+      title: const Row(
+        children: [
+          Icon(Icons.camera_alt, color: Colors.blue),
+          SizedBox(width: 8),
+          Text("Scanner"),
+        ],
+      ),
+      content: "Utilisez le bouton scanner pour photographier des œuvres et les ajouter automatiquement à votre collection !",
+      buttonText: "Suivant",
+      triangleAlignment: 0.5, // Bouton central de scan
+      verticalAlignment: 0.6,
+    );
+
+    // 5️⃣ Cinquième pop-up : Onglet Quêtes
+    if (!mounted) return;
+    await showBlurryDialog(
+      context: context,
+      title: const Row(
+        children: [
+          Icon(Icons.assignment, color: Colors.blue),
+          SizedBox(width: 8),
+          Text("Quêtes"),
+        ],
+      ),
+      content: "Relevez des défis amusants et découvrez l'art de manière ludique avec nos quêtes spécialement conçues pour vous.",
+      buttonText: "Suivant",
+      triangleAlignment: 0.74, // Troisième onglet de la navbar
+      verticalAlignment: 0.6,
+    );
+
+    // 6️⃣ Sixième pop-up : Onglet Collection
+    if (!mounted) return;
+    await showBlurryDialog(
+      context: context,
+      title: const Row(
+        children: [
+          Icon(Icons.apps, color: Colors.blue),
+          SizedBox(width: 8),
+          Text("Ma Collection"),
+        ],
+      ),
+      content: "Retrouvez toutes les œuvres que vous avez découvertes et ajoutées à votre collection personnelle.",
+      buttonText: "Suivant",
+      triangleAlignment: 0.95, // Quatrième onglet de la navbar
+      verticalAlignment: 0.6,
+    );
+
+    // Pop-up de bienvenue final
+    if (!mounted) return;
+    await showBlurryDialog(
+      context: context,
+      title: const Row(
+        children: [
+          Icon(Icons.celebration, color: Colors.green),
+          SizedBox(width: 8),
+          Text("Prêt à explorer !"),
+        ],
+      ),
+      content: "Vous êtes maintenant prêt à découvrir l'art ! Commencez par explorer les recommandations ci-dessous.",
+      buttonText: "C'est parti !",
+      triangleAlignment: -1,
+      verticalAlignment: 0.0,
+    );
+  }
+}
+
 
   void _loadRecommendations() {
     final user = Provider.of<UserProvider>(context, listen: false).user;
@@ -186,7 +328,7 @@ class _HomeContentState extends State<HomeContent> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Salut, ${user != null && user.username.isNotEmpty ? user.username : "Invité"} 👋',
+                    'Salut, ${user != null && user.username.isNotEmpty ? (user.username.length > 8 ? "${user.username.substring(0, 8)}..." : user.username) : "Invité"} 👋',
                     style: const TextStyle(
                         fontSize: 24, fontWeight: FontWeight.bold),
                   ),
@@ -268,7 +410,7 @@ class _HomeContentState extends State<HomeContent> {
           ),
           const SizedBox(height: 24),
           const Text(
-            "Musées Recommandés",
+            "Musées Proches",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -381,8 +523,11 @@ class _HomeContentState extends State<HomeContent> {
           ),
           const SizedBox(height: 8),
           Text(
-            title,
+            title.length > 40 ? '${title.substring(0, 40)}...' : title,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -474,7 +619,7 @@ class _HomeContentState extends State<HomeContent> {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                "À ${(distance / 1000).toStringAsFixed(2)} km",
+                "À ${(distance / 1000).toStringAsFixed(2)} km", 
                 style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
             ),

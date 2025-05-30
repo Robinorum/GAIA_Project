@@ -153,10 +153,13 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text(artwork.title,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
+                            Text(
+                              artwork.title.length > 40
+                                ? '${artwork.title.substring(0, 40)}...'
+                                : artwork.title,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       );

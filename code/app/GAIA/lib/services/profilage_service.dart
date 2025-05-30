@@ -33,8 +33,7 @@ class ProfilageService {
 
   Future<List<String>> fetchTopMovements(String uid) async {
     try {
-      final response = await _httpService.get('${IpConfig.topBrands}$uid');
-
+      final response = await _httpService.get(IpConfig.topMovements(uid));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         // Assurer que 'top_movements' est bien une liste de strings
