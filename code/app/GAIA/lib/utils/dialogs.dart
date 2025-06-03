@@ -8,7 +8,7 @@ Future<void> showBlurryDialog({
   required String buttonText,
   required double triangleAlignment,
   required double verticalAlignment,
-  bool pointUp = false, // Nouveau paramètre
+  bool pointUp = false,
 }) async {
   await showGeneralDialog(
     context: context,
@@ -18,9 +18,9 @@ Future<void> showBlurryDialog({
       return Stack(
         children: [
           BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0), // Légère augmentation du flou
+            filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
             child: Container(
-              color: Colors.black.withOpacity(0.4), // Assombrir légèrement l'arrière-plan
+              color: Colors.black.withOpacity(0.4),
             ),
           ),
           Align(
@@ -30,71 +30,69 @@ Future<void> showBlurryDialog({
                 triangleAlignment: triangleAlignment,
                 pointUp: pointUp,
               ),
-              child: Container(
-                width: 320,
-                padding: const EdgeInsets.all(20), // Augmenter le padding
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Titre avec meilleur styling
-                    DefaultTextStyle(
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  width: 320,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
                       ),
-                      child: title,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Texte avec meilleur alignement
-                    Text(
-                      content,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: Colors.black87,
-                        height: 1.4, // Meilleur espacement des lignes
-                      ),
-                      textAlign: TextAlign.left,
-                      softWrap: true,
-                      overflow: TextOverflow.visible,
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Bouton avec meilleur styling
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(buttonText),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DefaultTextStyle(
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
-                      ],
-                    ),
-                  ],
+                        child: title,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        content,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Colors.black87,
+                          height: 1.4,
+                        ),
+                        textAlign: TextAlign.left,
+                        softWrap: true,
+                        overflow: TextOverflow.visible,
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(buttonText),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -104,6 +102,7 @@ Future<void> showBlurryDialog({
     },
   );
 }
+
 
 
 class BubblePainter extends CustomPainter {
