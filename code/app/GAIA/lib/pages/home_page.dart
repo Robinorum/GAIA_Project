@@ -88,8 +88,10 @@ class _HomeContentState extends State<HomeContent> {
 
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+  if (ModalRoute.of(context)?.isCurrent ?? false) {
     _showTutorialIfNeeded(uid);
-  });
+  }
+});
   }
 
   Future<void> _showTutorialIfNeeded(String uid) async {

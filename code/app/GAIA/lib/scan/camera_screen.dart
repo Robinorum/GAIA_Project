@@ -7,6 +7,7 @@ import '../services/museum_service.dart';
 import '../provider/user_provider.dart';
 import '../model/museum.dart';
 import 'package:provider/provider.dart';
+import 'dart:ui';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -23,10 +24,9 @@ class _CameraScreenState extends State<CameraScreen> {
   late List<CameraDescription> _cameras;
   bool _isCameraInitialized = false;
   bool _isFlashOn = false;
-  bool _isLoading = false; // État du chargement
+  bool _isLoading = false;
   double _cameraAspectRatio = 1.0;
   
-  // Variables pour la quête
   Museum? _currentMuseum;
   String? _currentQuestImageUrl;
   bool _isLoadingQuest = false;
@@ -63,11 +63,9 @@ class _CameraScreenState extends State<CameraScreen> {
       final user = Provider.of<UserProvider>(context, listen: false).user;
       final uid = user?.id ?? "default_uid";
       
-      // Récupérer le musée actuel depuis la BDD
       final currentMuseumId = await _userService.getCurrentMuseum(uid);
       
       if (currentMuseumId != null) {
-        // Récupérer les détails du musée
         final museums = await MuseumService().fetchMuseums();
         final museum = museums.firstWhere(
           (m) => m.officialId == currentMuseumId,
@@ -185,19 +183,34 @@ class _CameraScreenState extends State<CameraScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      _currentQuestImageUrl!,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
+                    child: Stack(
+                      children: [
+                        Image.network(
+                          _currentQuestImageUrl!,
                           width: 60,
                           height: 60,
-                          color: Colors.grey,
-                          child: const Icon(Icons.error, color: Colors.white),
-                        );
-                      },
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 60,
+                              height: 60,
+                              color: Colors.grey,
+                              child: const Icon(Icons.error, color: Colors.white),
+                            );
+                          },
+                        ),
+                        Positioned.fill(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -244,10 +257,10 @@ class _CameraScreenState extends State<CameraScreen> {
         _isLoading = true;
       });
 
-      // Affiche une boîte de dialogue avec un indicateur de chargement
+
       showDialog(
         context: context,
-        barrierDismissible: false, // Empêche la fermeture en cliquant à côté
+        barrierDismissible: false, 
         builder: (context) => const AlertDialog(
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -264,7 +277,6 @@ class _CameraScreenState extends State<CameraScreen> {
       final Map<String, dynamic> artworkData =
           await _predictionService.predictArtwork(photo.path);
 
-      // Ferme la boîte de dialogue de chargement
       // ignore: use_build_context_synchronously
       Navigator.pop(context);
 
@@ -282,7 +294,7 @@ class _CameraScreenState extends State<CameraScreen> {
             ),
           ),
         ).then((_) {
-          // Recharger la quête quand on revient de PredictionScreen
+
           if (_isInMuseum) {
             _loadCurrentQuest();
           }
@@ -304,7 +316,6 @@ class _CameraScreenState extends State<CameraScreen> {
         );
       }
     } catch (e) {
-      // Ferme la boîte de dialogue en cas d'erreur
       // ignore: use_build_context_synchronously
       Navigator.pop(context);
 
@@ -332,7 +343,7 @@ class _CameraScreenState extends State<CameraScreen> {
             Center(
               child: ClipRect(
                 child: AspectRatio(
-                  aspectRatio: _cameraAspectRatio, // Garde un carré
+                  aspectRatio: _cameraAspectRatio,
                   child: CameraPreview(_cameraController),
                 ),
               ),
@@ -346,7 +357,7 @@ class _CameraScreenState extends State<CameraScreen> {
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          // Overlay de la quête
+
           _buildQuestOverlay(),
           Positioned(
             bottom: 80,
@@ -384,7 +395,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   ),
                   onPressed: _isLoading
                       ? null
-                      : capturePhoto, // Désactive le bouton si en chargement
+                      : capturePhoto,
                   child: const Icon(Icons.camera_alt,
                       size: 36, color: Colors.black),
                 ),

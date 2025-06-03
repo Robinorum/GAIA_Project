@@ -1,7 +1,5 @@
-import requests
-from flask import Flask, jsonify, request
-
-app = Flask(__name__)
+import pika
+import json
 
 ALL_MOVEMENTS = [
     "Abstraction", "Art déco", "Art naïf", "Art nouveau", "Baroque", "Byzantin",
@@ -16,7 +14,7 @@ def init_profile():
 
 def update_profile(profile, movement, action, alpha=0.1):
     if movement not in profile:
-        print(f"Mouvement inconnu : {movement}. Ajout au profil.")
+        print(f"[WARN] Unknown movement : {movement}.")
         profile[movement] = 0.0
 
     for m in profile:
@@ -34,33 +32,40 @@ def update_profile(profile, movement, action, alpha=0.1):
 
     return profile
 
+def callback(ch, method, properties, body):
+    try:
+        data = json.loads(body)
+        uid = data.get("uid")
+        movement = data.get("movement")
+        action = data.get("action")
+        previous_profile = data.get("previous_profile", {}) or init_profile()
 
+        new_profile = update_profile(previous_profile, movement, action)
 
-@app.route("/profilage", methods=["POST"])
-def profilage():
-    data = request.get_json()
-
-    uid = data.get("uid")
-    movement = data.get("movement")
-    previous_profile = data.get("previous_profile", {})
-    action = data.get("action")
-
-    if not previous_profile:
-        previous_profile = init_profile()
-
-    if not movement:
-        return jsonify({
+        response = {
             "uid": uid,
-            "profile": previous_profile,
-            "message": "Aucun mouvement valide trouvé."
-        })
+            "new_profile": new_profile
+        }
 
-    profile = update_profile(previous_profile, movement, action)
+        ch.basic_publish(
+            exchange='',
+            routing_key='profiling_completed',
+            body=json.dumps(response)
+        )
+        print(f"Updated profile for {uid}")
+    except Exception as e:
+        print(f"Error while updating : {e}")
 
-    return jsonify({
-        "uid": uid,
-        "profile": profile
-    }), 200
+def start_worker():
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    channel = connection.channel()
+
+    channel.queue_declare(queue='profiling_requested')
+    channel.queue_declare(queue='profiling_completed')
+
+    channel.basic_consume(queue='profiling_requested', on_message_callback=callback, auto_ack=True)
+    print("Listening messages...")
+    channel.start_consuming()
 
 if __name__ == "__main__":
-    app.run(debug=False, port=5002)
+    start_worker()
