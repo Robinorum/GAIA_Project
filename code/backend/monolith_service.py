@@ -1,3 +1,4 @@
+from multiprocessing import Process
 import secrets
 from flask import Flask, json, request, jsonify
 import firebase_admin
@@ -5,7 +6,9 @@ from firebase_admin import auth, credentials, firestore
 
 import os
 
+import pika
 import requests
+
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 from PIL import Image
 import io
@@ -461,28 +464,56 @@ def toggle_like(uid, artworkId):
         updated = True
 
     if updated:
-        try:
-            response = requests.post(
-                "http://localhost:5002/profilage",
-                json={
-                    "uid": uid,
-                    "action": action,
-                    "movement": movement,
-                    "previous_profile": previous_profile
-                },
-                timeout=5
-            )
-            response.raise_for_status()
-            new_profile = response.json().get("profile")
-            doc_ref.update({
-                "brands": current_likes,
-                "preferences.movements": new_profile
-            })
-        except Exception as e:
-            app.logger.error(f"Error calling profiling service: {e}")
-            return jsonify({"error": "Profiling failed"}), 500
+        doc_ref.update({"brands": current_likes})
+        publish_profiling_message(uid, action, movement, previous_profile)
+        # try:
+        #     response = requests.post(
+        #         "http://localhost:5002/profilage",
+        #         json={
+        #             "uid": uid,
+        #             "action": action,
+        #             "movement": movement,
+        #             "previous_profile": previous_profile
+        #         },
+        #         timeout=5
+        #     )
+        #     response.raise_for_status()
+        #     new_profile = response.json().get("profile")
+        #     doc_ref.update({
+        #         "brands": current_likes,
+        #         "preferences.movements": new_profile
+        #     })
+        # except Exception as e:
+        #     app.logger.error(f"Error calling profiling service: {e}")
+        #     return jsonify({"error": "Profiling failed"}), 500
 
     return jsonify({"likes": current_likes}), 200
+
+def publish_profiling_message(uid, action, movement, previous_profile):
+    message = {
+        "uid": uid,
+        "action": action,
+        "movement": movement,
+        "previous_profile": previous_profile
+    }
+
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue='profiling_requested')
+    channel.basic_publish(exchange='', routing_key='profiling_requested', body=json.dumps(message))
+    connection.close()
+
+
+def handle_profiling_completed(ch, method, properties, body):
+    data = json.loads(body)
+    uid = data["uid"]
+    profile = data["new_profile"]
+
+    db.collection("accounts").document(uid).update({
+        "preferences.movements": profile
+    })
+
+    print(f"[✔] Profil mis à jour pour {uid}")
 
 @app.route("/users/<uid>/collection", methods=["GET"])
 def fetch_collection(uid):
@@ -849,6 +880,21 @@ def set_current_museum(uid):
         return jsonify({"error": "Erreur serveur"}), 500
 
 
+def start_worker():
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    channel = connection.channel()
+    channel.queue_declare(queue='profiling_completed')
+    channel.basic_consume(queue='profiling_completed',
+                          on_message_callback=handle_profiling_completed,
+                          auto_ack=True)
+    print("Listening for messages...")
+    channel.start_consuming()
+
+
     
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    rabbit_process = Process(target=start_worker)
+    rabbit_process.start()
+    
+    app.run(debug=False, port=5001)
+    rabbit_process.join()
