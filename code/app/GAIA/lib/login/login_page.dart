@@ -86,8 +86,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   const SizedBox(height: 30),
                   _buildLoginForm(theme),
                   const SizedBox(height: 20),
-                  _buildFooter(theme),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -101,28 +99,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     return Column(
       children: [
         Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                theme.colorScheme.primary,
-                theme.colorScheme.secondary,
-              ],
-            ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.primary.withAlpha((0.3 * 255).toInt()),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.palette,
-            size: 50,
-            color: Colors.white,
+          width: 120,
+          height: 120,
+          child: Image.asset(
+            'assets/images/logo.png',
+            fit: BoxFit.contain,
           ),
         ),
         const SizedBox(height: 24),
@@ -380,30 +361,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildFooter(ThemeData theme) {
-    return TextButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.error.withAlpha((0.1 * 255).toInt()),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          "🚧 Mode Développeur",
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.error,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
 
   Future<void> login(BuildContext context) async {
     setState(() {
