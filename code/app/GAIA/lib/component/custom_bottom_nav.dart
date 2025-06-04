@@ -18,87 +18,143 @@ class CustomBottomNav extends StatelessWidget {
       clipBehavior: Clip.none,
       alignment: Alignment.bottomCenter,
       children: [
-        // Background navigation bar
+        // Background navigation bar avec dégradé
         Container(
           height: 70,
           decoration: BoxDecoration(
-            color: Colors.white,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white,
+                Colors.purple.shade50,
+              ],
+            ),
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(25),
-              topRight: Radius.circular(25),
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                color: Colors.purple.withAlpha((0.15 * 255).toInt()),
+                blurRadius: 20,
+                offset: const Offset(0, -2),
+                spreadRadius: 0,
+              ),
+              BoxShadow(
+                color: Colors.black.withAlpha((0.05 * 255).toInt()),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
+                spreadRadius: 0,
               ),
             ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(
-                icon: Icon(
-                  Icons.home,
-                  size: 28,
-                  color: currentIndex == 0 ? Colors.blue : Colors.grey,
-                ),
-                onPressed: () => onTap(0),
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.location_on,
-                  size: 28,
-                  color: currentIndex == 1 ? Colors.blue : Colors.grey,
-                ),
-                onPressed: () => onTap(1),
-              ),
-              const SizedBox(width: 60), // Spacer for central button
-              IconButton(
-                icon: Icon(
-                  Icons.assignment,
-                  size: 28,
-                  color: currentIndex == 2 ? Colors.blue : Colors.grey,
-                ),
-                onPressed: () => onTap(2),
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.apps,
-                  size: 28,
-                  color: currentIndex == 3 ? Colors.blue : Colors.grey,
-                ),
-                onPressed: () => onTap(3),
-              ),
+              _buildNavItem(Icons.home, 0, ),
+              _buildNavItem(Icons.location_on, 1, ),
+              const SizedBox(width: 70), // Spacer pour le bouton central
+              _buildNavItem(Icons.assignment, 2, ),
+              _buildNavItem(Icons.apps, 3, ),
             ],
           ),
         ),
-        // Central floating button
+        // Bouton central flottant avec effet glassmorphism
         Positioned(
-          bottom: 25,
+          bottom: 30,
           child: GestureDetector(
             onTap: onScan,
             child: Container(
-              width: 70,
-              height: 70,
+              width: 75,
+              height: 75,
               decoration: BoxDecoration(
-                color: Colors.blue,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.purple.shade400,
+                    Colors.purple.shade600,
+                  ],
+                ),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: Colors.white,
-                  width: 4,
+                  width: 3,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.withAlpha((0.4 * 255).toInt()),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                    spreadRadius: 0,
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withAlpha((0.2 * 255).toInt()),
+                    blurRadius: 5,
+                    offset: const Offset(0, -2),
+                    spreadRadius: 0,
+                  ),
+                ],
               ),
               child: const Icon(
                 Icons.add_a_photo,
-                size: 32,
+                size: 34,
                 color: Colors.white,
               ),
             ),
           ),
         ),
+        // Indicateur de l'onglet actif
+     
       ],
     );
+  }
+
+  Widget _buildNavItem(IconData icon, int index) {
+    final isActive = currentIndex == index;
+    
+    return GestureDetector(
+      onTap: () => onTap(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: isActive 
+            ? Colors.purple.shade100.withAlpha((0.3 * 255).toInt())
+            : Colors.transparent,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: isActive ? 30 : 26,
+              color: isActive 
+                ? Colors.purple.shade600 
+                : Colors.grey.shade600,
+            ),            
+          ],
+        ),
+      ),
+    );
+  }
+
+  double _getIndicatorPosition() {
+    final screenWidth = 375.0; // Largeur approximative
+    final itemWidth = screenWidth / 5;
+    
+    switch (currentIndex) {
+      case 0:
+        return itemWidth * 0.5;
+      case 1:
+        return itemWidth * 1.5;
+      case 2:
+        return itemWidth * 3.5;
+      case 3:
+        return itemWidth * 4.5;
+      default:
+        return itemWidth * 0.5;
+    }
   }
 }

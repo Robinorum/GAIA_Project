@@ -49,6 +49,11 @@ class DetailArtworkPage extends StatelessWidget {
               "Year: ${artwork.date}",
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
+            Text(
+              "Mouvement: ${artwork.movement}",
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
+
+            ),
             const SizedBox(height: 16),
             Text(
               artwork.description,

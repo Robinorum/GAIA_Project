@@ -108,7 +108,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black87,
-        title: Text("Quête actuelle "),
+        title: const Text("Quête actuelle "),
       ),
       body: isLoading
           ? _buildLoadingView()
