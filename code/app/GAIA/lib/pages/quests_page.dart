@@ -529,8 +529,8 @@ class _QuestsPageState extends State<QuestsPage> {
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [
-                                          Colors.deepPurple.withOpacity(0.4),
-                                          Colors.deepPurple.withOpacity(0.2),
+                                          Colors.deepPurple.withAlpha((0.4 * 255).toInt()),
+                                          Colors.deepPurple.withAlpha((0.2 * 255).toInt()),
                                         ],
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
@@ -546,7 +546,7 @@ class _QuestsPageState extends State<QuestsPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Colors.deepPurple.withOpacity(0.1),
+                            color: Colors.deepPurple.withAlpha((0.1 * 255).toInt()),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -565,7 +565,7 @@ class _QuestsPageState extends State<QuestsPage> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
+                      color: Colors.green.withAlpha((0.1 * 255).toInt()),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
@@ -653,10 +653,10 @@ class _QuestsPageState extends State<QuestsPage> {
                     decoration: BoxDecoration(
                       color: Colors.green[50],
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                      border: Border.all(color: Colors.green.withAlpha((0.3 * 255).toInt())),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.green.withAlpha((0.1 * 255).toInt()),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -667,7 +667,7 @@ class _QuestsPageState extends State<QuestsPage> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.2),
+                            color: Colors.green.withAlpha((0.2 * 255).toInt()),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -714,7 +714,7 @@ class _QuestsPageState extends State<QuestsPage> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                    border: Border.all(color: Colors.grey.withAlpha((0.3 * 255).toInt())),
                   ),
                   child: Stack(
                     children: [
