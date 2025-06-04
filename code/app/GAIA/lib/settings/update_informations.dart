@@ -381,7 +381,7 @@ Widget _buildModernLayout({
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
+                  color: iconColor.withAlpha((0.1 * 255).toInt()),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(
@@ -401,7 +401,7 @@ Widget _buildModernLayout({
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withAlpha((0.08 * 255).toInt()),
                       blurRadius: 20,
                       offset: const Offset(0, 4),
                     ),
@@ -450,7 +450,7 @@ Widget _buildModernLayout({
                             backgroundColor: iconColor,
                             foregroundColor: Colors.white,
                             elevation: loading ? 0 : 2,
-                            shadowColor: iconColor.withOpacity(0.3),
+                            shadowColor: iconColor.withAlpha((0.3 * 255).toInt()),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -508,13 +508,13 @@ Widget _buildModernLayout({
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: isSuccess
-                                ? Colors.green.withOpacity(0.1)
-                                : Colors.red.withOpacity(0.1),
+                                ? Colors.green.withAlpha((0.1 * 255).toInt())
+                                : Colors.red.withAlpha((0.1 * 255).toInt()),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isSuccess
-                                  ? Colors.green.withOpacity(0.3)
-                                  : Colors.red.withOpacity(0.3),
+                                  ? Colors.green.withAlpha((0.3 * 255).toInt())
+                                  : Colors.red.withAlpha((0.3 * 255).toInt()),
                             ),
                           ),
                           child: Row(
@@ -593,7 +593,7 @@ Widget _buildModernTextField({
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withAlpha((0.1 * 255).toInt()),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(

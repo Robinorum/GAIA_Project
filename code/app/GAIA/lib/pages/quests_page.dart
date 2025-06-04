@@ -298,10 +298,10 @@ class _QuestsPageState extends State<QuestsPage> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accentColor.withOpacity(0.3), width: 1),
+        border: Border.all(color: accentColor.withAlpha((0.3 * 255).toInt())),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withOpacity(0.1),
+            color: accentColor.withAlpha((0.1 * 255).toInt()),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -317,7 +317,7 @@ class _QuestsPageState extends State<QuestsPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.2),
+                    color: accentColor.withAlpha((0.2 * 255).toInt()),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -421,10 +421,10 @@ class _QuestsPageState extends State<QuestsPage> {
             decoration: BoxDecoration(
               color: Colors.deepPurple[50],
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.deepPurple.withOpacity(0.3)),
+              border: Border.all(color: Colors.deepPurple.withAlpha((0.3 * 255).toInt())),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.deepPurple.withOpacity(0.1),
+                  color: Colors.deepPurple.withAlpha((0.1 * 255).toInt()),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -438,7 +438,7 @@ class _QuestsPageState extends State<QuestsPage> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.deepPurple.withOpacity(0.2),
+                        color: Colors.deepPurple.withAlpha((0.2 * 255).toInt()),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -489,7 +489,7 @@ class _QuestsPageState extends State<QuestsPage> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.deepPurple.withOpacity(0.2),
+                                color: Colors.deepPurple.withAlpha((0.2 * 255).toInt()),
                                 blurRadius: 10,
                                 offset: const Offset(0, 5),
                               ),
@@ -768,63 +768,62 @@ class _QuestsPageState extends State<QuestsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("Succès",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              FutureBuilder<void>(
+     
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Succès",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Expanded(
+              child: FutureBuilder<void>(
                 future: _combinedFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  return Column(
-                    children: List.generate(
-                      _quests.length < 2 ? _quests.length : 2,
-                      (index) {
-                        final quest = _quests[index];
+                  return ListView.builder(
+                    itemCount: _quests.length < 2 ? _quests.length : 2,
+                    itemBuilder: (context, index) {
+                      final quest = _quests[index];
 
-                        final progressData = _questProgressData.firstWhere(
-                          (element) => element['id'] == quest.id,
-                          orElse: () => {'progression': 0, 'goal': quest.goal[0]},
-                        );
+                      final progressData = _questProgressData.firstWhere(
+                        (element) => element['id'] == quest.id,
+                        orElse: () => {'progression': 0, 'goal': quest.goal[0]},
+                      );
 
-                        return _buildSuccessCard(quest, progressData);
-                      },
-                    ),
+                      return _buildSuccessCard(quest, progressData);
+                    },
                   );
                 },
               ),
-              const SizedBox(height: 10),
-              Center(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const AllQuestsPage()),
-                    );
-                  },
-                  icon: const Icon(Icons.list),
-                  label: const Text("Tout voir"),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+            ),
+            const SizedBox(height: 10),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AllQuestsPage()),
+                  );
+                },
+                icon: const Icon(Icons.list),
+                label: const Text("Tout voir"),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-              _buildMuseumQuestSection(),
-            ],
-          ),
+            ),
+            const SizedBox(height: 24),
+            _buildMuseumQuestSection(),
+          ],
         ),
       ),
     );

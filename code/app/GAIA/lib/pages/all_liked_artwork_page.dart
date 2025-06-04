@@ -23,11 +23,11 @@ class _AllLikedArtworksPageState extends State<AllLikedArtworksPage> {
         leading: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withAlpha((0.9 * 255).toInt()),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withAlpha((0.1 * 255).toInt()),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -175,7 +175,7 @@ class _AllLikedArtworksPageState extends State<AllLikedArtworksPage> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withAlpha((0.08 * 255).toInt()),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -242,7 +242,7 @@ class _AllLikedArtworksPageState extends State<AllLikedArtworksPage> {
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.9),
+                        color: Colors.red.withAlpha((0.9 * 255).toInt()),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Icon(

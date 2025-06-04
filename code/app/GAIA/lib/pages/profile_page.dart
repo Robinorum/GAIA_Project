@@ -47,7 +47,7 @@ class _ProfilePageState extends State<ProfilePage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Theme.of(context).primaryColor.withOpacity(0.1),
+            Theme.of(context).primaryColor.withAlpha((0.1 * 255).toInt()),
             Colors.transparent,
           ],
         ),
@@ -62,11 +62,11 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withAlpha((0.9 * 255).toInt()),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -79,11 +79,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withAlpha((0.9 * 255).toInt()),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -113,7 +113,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withAlpha((0.2 * 255).toInt()),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -139,13 +139,13 @@ class _ProfilePageState extends State<ProfilePage> {
                       gradient: LinearGradient(
                         colors: [
                           Theme.of(context).primaryColor,
-                          Theme.of(context).primaryColor.withOpacity(0.8),
+                          Theme.of(context).primaryColor.withAlpha((0.8 * 255).toInt()),
                         ],
                       ),
                       border: Border.all(color: Colors.white, width: 3),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withAlpha((0.2 * 255).toInt()),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -233,7 +233,7 @@ class _ProfilePageState extends State<ProfilePage> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withAlpha((0.08 * 255).toInt()),
                 blurRadius: 20,
                 offset: const Offset(0, 4),
               ),
@@ -462,7 +462,7 @@ class _ProfilePageState extends State<ProfilePage> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withAlpha((0.08 * 255).toInt()),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -529,7 +529,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.9),
+                        color: Colors.red.withAlpha((0.9 * 255).toInt()),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Icon(

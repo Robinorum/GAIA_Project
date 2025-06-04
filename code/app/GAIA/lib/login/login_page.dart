@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   Widget _buildHeader(ThemeData theme) {
     return Column(
       children: [
-        Container(
+        SizedBox(
           width: 120,
           height: 120,
           child: Image.asset(

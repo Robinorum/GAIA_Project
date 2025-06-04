@@ -91,10 +91,10 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accentColor.withOpacity(0.3), width: 1),
+        border: Border.all(color: accentColor.withAlpha((0.3 * 255).toInt())),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withOpacity(0.1),
+            color: accentColor.withAlpha((0.1 * 255).toInt()),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -110,7 +110,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.2),
+                    color: accentColor.withAlpha((0.2 * 255).toInt()),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -198,8 +198,8 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: isAchieved 
-                                  ? Colors.amber.withOpacity(0.2)
-                                  : Colors.grey.withOpacity(0.1),
+                                  ? Colors.amber.withAlpha((0.2 * 255).toInt())
+                                  : Colors.grey.withAlpha((0.1 * 255).toInt()),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: isAchieved 
@@ -308,7 +308,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.deepPurple.withOpacity(0.2)),
+        border: Border.all(color: Colors.deepPurple.withAlpha((0.2 * 255).toInt())),
       ),
       child: Row(
         children: [
@@ -323,7 +323,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
           Container(
             height: 40,
             width: 1,
-            color: Colors.deepPurple.withOpacity(0.3),
+            color: Colors.deepPurple.withAlpha((0.3 * 255).toInt()),
           ),
           Expanded(
             child: _buildStatItem(
@@ -336,7 +336,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
           Container(
             height: 40,
             width: 1,
-            color: Colors.deepPurple.withOpacity(0.3),
+            color: Colors.deepPurple.withAlpha((0.3 * 255).toInt()),
           ),
           Expanded(
             child: _buildStatItem(

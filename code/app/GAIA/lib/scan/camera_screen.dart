@@ -141,7 +141,7 @@ class _CameraScreenState extends State<CameraScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.8),
+          color: Colors.black.withAlpha((0.8 * 255).toInt()),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.blue.shade300, width: 2),
         ),
@@ -204,7 +204,7 @@ class _CameraScreenState extends State<CameraScreen> {
                             filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withAlpha((0.1 * 255).toInt()),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),

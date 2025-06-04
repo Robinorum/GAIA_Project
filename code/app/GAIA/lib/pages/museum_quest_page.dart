@@ -134,7 +134,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withAlpha((0.1 * 255).toInt()),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -169,7 +169,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withAlpha((0.1 * 255).toInt()),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -181,7 +181,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withAlpha((0.1 * 255).toInt()),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -230,8 +230,8 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.deepPurple.withOpacity(0.8),
-                    Colors.indigo.withOpacity(0.8),
+                    Colors.deepPurple.withAlpha((0.8 * 255).toInt()),
+                    Colors.indigo.withAlpha((0.8 * 255).toInt()),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -239,7 +239,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.deepPurple.withOpacity(0.3),
+                    color: Colors.deepPurple.withAlpha((0.3 * 255).toInt()),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -253,7 +253,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withAlpha((0.2 * 255).toInt()),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -305,7 +305,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
                 border: Border.all(color: Colors.grey.shade200),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withAlpha((0.05 * 255).toInt()),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   ),
@@ -316,7 +316,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.1),
+                      color: Colors.amber.withAlpha((0.1 * 255).toInt()),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -362,7 +362,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withAlpha((0.1 * 255).toInt()),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -421,11 +421,11 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
                         height: 350,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withAlpha((0.3 * 255).toInt()),
                           gradient: LinearGradient(
                             colors: [
-                              Colors.black.withOpacity(0.4),
-                              Colors.black.withOpacity(0.2),
+                              Colors.black.withAlpha((0.4 * 255).toInt()),
+                              Colors.black.withAlpha((0.2 * 255).toInt()),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -457,7 +457,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withAlpha((0.1 * 255).toInt()),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -469,7 +469,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withAlpha((0.1 * 255).toInt()),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -511,8 +511,8 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.amber.withOpacity(0.1),
-              Colors.orange.withOpacity(0.1),
+              Colors.amber.withAlpha((0.1 * 255).toInt()),
+              Colors.orange.withAlpha((0.1 * 255).toInt()),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -520,7 +520,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.amber.withOpacity(0.2),
+              color: Colors.amber.withAlpha((0.2 * 255).toInt()),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -532,7 +532,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.2),
+                color: Colors.amber.withAlpha((0.2 * 255).toInt()),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -564,7 +564,7 @@ class _MuseumQuestPageState extends State<MuseumQuestPage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.2),
+                color: Colors.amber.withAlpha((0.2 * 255).toInt()),
                 borderRadius: BorderRadius.circular(20),
               ),
              
