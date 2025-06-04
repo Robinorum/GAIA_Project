@@ -56,6 +56,13 @@ class _RegistrationPageState extends State<RegistrationPage>
     super.dispose();
   }
 
+  // Méthodes de validation du mot de passe
+  bool _hasMinLength() => passwordController.text.length >= 14;
+  bool _hasUppercase() => RegExp(r'[A-Z]').hasMatch(passwordController.text);
+  bool _hasLowercase() => RegExp(r'[a-z]').hasMatch(passwordController.text);
+  bool _hasDigit() => RegExp(r'\d').hasMatch(passwordController.text);
+  bool _hasSpecialChar() => RegExp(r'[@$!%*?&]').hasMatch(passwordController.text);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -263,14 +270,16 @@ class _RegistrationPageState extends State<RegistrationPage>
         ),
       ),
       onChanged: (value) {
-        // Clear errors when user starts typing
-        if (controller == emailController && emailError != null) {
-          setState(() => emailError = null);
-        } else if (controller == usernameController && usernameError != null) {
-          setState(() => usernameError = null);
-        } else if (controller == passwordController && passwordError != null) {
-          setState(() => passwordError = null);
-        }
+        // Clear errors when user starts typing and trigger rebuild for password validation
+        setState(() {
+          if (controller == emailController && emailError != null) {
+            emailError = null;
+          } else if (controller == usernameController && usernameError != null) {
+            usernameError = null;
+          } else if (controller == passwordController && passwordError != null) {
+            passwordError = null;
+          }
+        });
       },
     );
   }
@@ -296,32 +305,37 @@ class _RegistrationPageState extends State<RegistrationPage>
             ),
           ),
           const SizedBox(height: 4),
-          _buildRequirement('Au moins 14 caractères', theme),
-          _buildRequirement('Une lettre majuscule', theme),
-          _buildRequirement('Une lettre minuscule', theme),
-          _buildRequirement('Un chiffre', theme),
-          _buildRequirement('Un caractère spécial (@\$!%*?&)', theme),
+          _buildRequirement('Au moins 14 caractères', _hasMinLength(), theme),
+          _buildRequirement('Une lettre majuscule', _hasUppercase(), theme),
+          _buildRequirement('Une lettre minuscule', _hasLowercase(), theme),
+          _buildRequirement('Un chiffre', _hasDigit(), theme),
+          _buildRequirement('Un caractère spécial (@\$!%*?&)', _hasSpecialChar(), theme),
         ],
       ),
     );
   }
 
-  Widget _buildRequirement(String text, ThemeData theme) {
+  Widget _buildRequirement(String text, bool isValid, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.only(top: 2),
       child: Row(
         children: [
           Icon(
-            Icons.circle,
-            size: 4,
-            color: theme.colorScheme.onSurface.withAlpha((0.6 * 255).toInt()),
+            isValid ? Icons.check_circle : Icons.circle,
+            size: isValid ? 16 : 4,
+            color: isValid 
+                ? Colors.green 
+                : theme.colorScheme.onSurface.withAlpha((0.6 * 255).toInt()),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
+                color: isValid 
+                    ? Colors.green 
+                    : theme.colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
+                fontWeight: isValid ? FontWeight.w500 : FontWeight.normal,
               ),
             ),
           ),
@@ -449,12 +463,8 @@ class _RegistrationPageState extends State<RegistrationPage>
         return;
       }
 
-      // Validate password
-      if (passwordController.text.length < 14 ||
-          !RegExp(r'[A-Z]').hasMatch(passwordController.text) ||
-          !RegExp(r'[a-z]').hasMatch(passwordController.text) ||
-          !RegExp(r'\d').hasMatch(passwordController.text) ||
-          !RegExp(r'[@$!%*?&]').hasMatch(passwordController.text)) {
+      // Validate password using the same methods
+      if (!_hasMinLength() || !_hasUppercase() || !_hasLowercase() || !_hasDigit() || !_hasSpecialChar()) {
         setState(() {
           passwordError = "Le mot de passe ne respecte pas les exigences";
           _isLoading = false;

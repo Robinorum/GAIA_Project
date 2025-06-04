@@ -126,7 +126,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                     children: [
                       Text(
                         quest.title,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                           color: Colors.black87,
@@ -135,7 +135,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                       const SizedBox(height: 4),
                       Text(
                         quest.description,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 13,
                           color: Colors.grey,
                         ),
@@ -148,7 +148,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                   children: [
                     Text(
                       "$progression/$goal",
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                         color: Colors.black87,
@@ -179,7 +179,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         "Objectifs:",
                         style: TextStyle(
                           fontSize: 12,
@@ -248,7 +248,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    const Text(
                       "Progression",
                       style: TextStyle(
                         fontSize: 12,
@@ -358,7 +358,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
@@ -366,7 +366,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
         ),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
             color: Colors.grey,
           ),
@@ -426,7 +426,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                   final quests = _quests;
                   
                   if (quests.isEmpty) {
-                    return Center(
+                    return const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -435,7 +435,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                             size: 64,
                             color: Colors.grey,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           Text(
                             "Aucune quête disponible",
                             style: TextStyle(
@@ -444,7 +444,7 @@ class _AllQuestsPageState extends State<AllQuestsPage> {
                               color: Colors.grey,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Text(
                             "Les quêtes se chargeront bientôt",
                             style: TextStyle(

@@ -67,7 +67,7 @@ class MuseumMapView extends StatelessWidget {
       builder: (_) => Transform.translate(
         offset: Offset(0, -markerSize / 2),
         child:
-            Icon(Icons.person_pin_circle, size: markerSize, color: Colors.blue),
+            Icon(Icons.person_pin_circle, size: markerSize, color: const Color.fromARGB(255, 154, 78, 172)),
       ),
     );
   }
@@ -122,7 +122,7 @@ class MuseumMapView extends StatelessWidget {
               right: 20,
               child: FloatingActionButton(
                 onPressed: () => mapController.move(currentLocation!, 12.0),
-                backgroundColor: Colors.blue,
+                backgroundColor: const Color.fromARGB(255, 154, 78, 172),
                 child: const Icon(Icons.my_location),
               ),
             ),
