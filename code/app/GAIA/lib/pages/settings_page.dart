@@ -144,7 +144,7 @@ class _SettingsPageState extends State<SettingsPage> {
               end: Alignment.bottomRight,
               colors: [
                 Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withAlpha((0.8 * 255).toInt()),
               ],
             ),
           ),
@@ -153,7 +153,7 @@ class _SettingsPageState extends State<SettingsPage> {
       leading: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withAlpha((0.2 * 255).toInt()),
           borderRadius: BorderRadius.circular(12),
         ),
         child: IconButton(
@@ -173,7 +173,7 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withAlpha((0.08 * 255).toInt()),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -183,7 +183,7 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+            backgroundColor: Theme.of(context).primaryColor.withAlpha((0.1 * 255).toInt()),
             backgroundImage: user?.profilePhoto != null
                 ? AssetImage(user!.profilePhoto)
                 : null,
@@ -221,7 +221,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              color: Theme.of(context).primaryColor.withAlpha((0.1 * 255).toInt()),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -243,7 +243,7 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withAlpha((0.08 * 255).toInt()),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -259,7 +259,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    color: Theme.of(context).primaryColor.withAlpha((0.1 * 255).toInt()),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -368,7 +368,7 @@ class _SettingsPageState extends State<SettingsPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.red.withOpacity(0.3),
+            color: Colors.red.withAlpha((0.3 * 255).toInt()),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),

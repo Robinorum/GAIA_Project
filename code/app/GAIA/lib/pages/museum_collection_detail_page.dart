@@ -66,7 +66,7 @@ class _MuseumCollectionDetailPageState extends State<MuseumCollectionDetailPage>
                         BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                           child: Container(
-                            color: Colors.grey.withOpacity(0.6),
+                            color: Colors.grey.withAlpha((0.6 * 255).toInt()),
                           ),
                         ),
                         // Icône de verrouillage
@@ -189,10 +189,10 @@ class _MuseumCollectionDetailPageState extends State<MuseumCollectionDetailPage>
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  color: Theme.of(context).colorScheme.primaryContainer.withAlpha((0.3 * 255).toInt()),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    color: Theme.of(context).colorScheme.primary.withAlpha((0.3).toInt()),
                   ),
                 ),
                 child: Column(

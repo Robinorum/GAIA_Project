@@ -50,7 +50,7 @@ model.to(device)
 
 
 
-index = faiss.read_index("AI_tools/index_joconde2.faiss")
+index = faiss.read_index("index_joconde2.faiss")
 faiss.omp_set_num_threads(1)
 
 
@@ -881,7 +881,7 @@ def set_current_museum(uid):
 
 
 def start_worker():
-    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
     channel.queue_declare(queue='profiling_completed')
     channel.basic_consume(queue='profiling_completed',

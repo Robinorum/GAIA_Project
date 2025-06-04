@@ -140,7 +140,7 @@ class CustomBottomNav extends StatelessWidget {
     );
   }
 
-  double _getIndicatorPosition() {
+  /*double _getIndicatorPosition() {
     final screenWidth = 375.0; // Largeur approximative
     final itemWidth = screenWidth / 5;
     
@@ -156,5 +156,5 @@ class CustomBottomNav extends StatelessWidget {
       default:
         return itemWidth * 0.5;
     }
-  }
+  }*/
 }

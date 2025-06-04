@@ -20,7 +20,7 @@ Future<void> showBlurryDialog({
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
             child: Container(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withAlpha((0.4 * 255).toInt()),
             ),
           ),
           Align(
@@ -40,7 +40,7 @@ Future<void> showBlurryDialog({
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
