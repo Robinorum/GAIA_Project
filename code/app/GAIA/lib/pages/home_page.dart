@@ -539,7 +539,7 @@ class _HomeContentState extends State<HomeContent> {
 
   Widget _buildCarouselItemWithDistance(
       Image image, String title, double? distance) {
-    bool isFar = distance != null && distance > 5000;
+    bool isFar = distance != null && distance > 500;
 
     return InkWell(
       onTap: () {
