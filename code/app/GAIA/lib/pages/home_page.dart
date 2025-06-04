@@ -108,16 +108,17 @@ class _HomeContentState extends State<HomeContent> {
       context: context,
       title: const Row(
         children: [
-          Icon(Icons.account_circle, color: Colors.blue),
+          Icon(Icons.account_circle, color: Color.fromARGB(255, 154, 78, 172)),
           SizedBox(width: 8),
           Text("Votre Profil"),
         ],
       ),
-      content: "Cliquez sur votre avatar pour accéder à votre profil et consulter vos oevres et monvements préférés.",
+      content: "Cliquez sur votre avatar pour accéder à votre profil et consulter vos œuvres et mouvements préférés.",
       buttonText: "Suivant",
       triangleAlignment: 0.93, // Pointage vers le profil en haut à droite
       verticalAlignment: -0.5, // Positionnement pour pointer vers le profil
       pointUp: true, // Triangle pointant vers le haut
+    
     );
 
     // 2️⃣ Deuxième pop-up : Onglet Accueil
@@ -126,7 +127,7 @@ class _HomeContentState extends State<HomeContent> {
       context: context,
       title: const Row(
         children: [
-          Icon(Icons.home, color: Colors.blue),
+          Icon(Icons.home, color: Color.fromARGB(255, 154, 78, 172)),
           SizedBox(width: 8),
           Text("Accueil"),
         ],
@@ -143,7 +144,7 @@ class _HomeContentState extends State<HomeContent> {
       context: context,
       title: const Row(
         children: [
-          Icon(Icons.map, color: Colors.blue),
+          Icon(Icons.map, color:Color.fromARGB(255, 154, 78, 172)),
           SizedBox(width: 8),
           Text("Explorer"),
         ],
@@ -160,7 +161,7 @@ class _HomeContentState extends State<HomeContent> {
       context: context,
       title: const Row(
         children: [
-          Icon(Icons.camera_alt, color: Colors.blue),
+          Icon(Icons.camera_alt, color:Color.fromARGB(255, 154, 78, 172)),
           SizedBox(width: 8),
           Text("Scanner"),
         ],
@@ -177,7 +178,7 @@ class _HomeContentState extends State<HomeContent> {
       context: context,
       title: const Row(
         children: [
-          Icon(Icons.assignment, color: Colors.blue),
+          Icon(Icons.assignment, color: Color.fromARGB(255, 154, 78, 172)),
           SizedBox(width: 8),
           Text("Quêtes"),
         ],
@@ -194,7 +195,7 @@ class _HomeContentState extends State<HomeContent> {
       context: context,
       title: const Row(
         children: [
-          Icon(Icons.apps, color: Colors.blue),
+          Icon(Icons.apps, color:Color.fromARGB(255, 154, 78, 172)),
           SizedBox(width: 8),
           Text("Ma Collection"),
         ],
@@ -538,7 +539,7 @@ class _HomeContentState extends State<HomeContent> {
 
   Widget _buildCarouselItemWithDistance(
       Image image, String title, double? distance) {
-    bool isFar = distance != null && distance > 5000;
+    bool isFar = distance != null && distance > 500;
 
     return InkWell(
       onTap: () {

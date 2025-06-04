@@ -246,44 +246,54 @@ class _MuseumCollectionDetailPageState extends State<MuseumCollectionDetailPage>
               const SizedBox(height: 24),
               
               // Filtre et titre des œuvres
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     "Collection et œuvres à découvrir",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: DropdownButton<String>(
-                      value: _filterStatus,
-                      underline: const SizedBox(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            _filterStatus = newValue;
-                          });
-                        }
-                      },
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'all',
-                          child: Text('Toutes'),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const Text(
+                        "Filtre : ",
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        DropdownMenuItem(
-                          value: 'completed',
-                          child: Text('Complétées'),
+                        child: DropdownButton<String>(
+                          value: _filterStatus,
+                          underline: const SizedBox(),
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              setState(() {
+                                _filterStatus = newValue;
+                              });
+                            }
+                          },
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'all',
+                              child: Text('Toutes'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'completed',
+                              child: Text('Complétées'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'incomplete',
+                              child: Text('À découvrir'),
+                            ),
+                          ],
                         ),
-                        DropdownMenuItem(
-                          value: 'incomplete',
-                          child: Text('À découvrir'),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),

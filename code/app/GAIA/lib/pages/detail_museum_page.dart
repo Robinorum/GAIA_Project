@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:gaia/model/museum.dart';
-import 'package:gaia/model/artwork.dart';
-import 'package:gaia/services/museum_service.dart';
-import 'package:gaia/pages/detail_artwork_page.dart';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart'; // Ajout de cette import
+import '../model/artwork.dart';
+import '../model/museum.dart';
+import '../services/museum_service.dart';
+import 'detail_artwork_page.dart';
 
 class DetailMuseumPage extends StatefulWidget {
   final Museum museum;
@@ -92,6 +93,83 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
                 ],
               ),
               const SizedBox(height: 16),
+              
+              // Encart Contact
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.contact_phone, color: Colors.blue.shade600),
+                        const SizedBox(width: 8),
+                        const Text(
+                          "Contact",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Téléphone
+                    if (widget.museum.telephone.isNotEmpty) ...[
+                      InkWell(
+                        onTap: () => _launchPhone(widget.museum.telephone),
+                        child: Row(
+                          children: [
+                            Icon(Icons.phone, size: 20, color: Colors.blue.shade600),
+                            const SizedBox(width: 8),
+                            Text(
+                              widget.museum.telephone,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.blue.shade700,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    
+                    // Site web
+                    if (widget.museum.officialLink.isNotEmpty) ...[
+                      InkWell(
+                        onTap: () => _launchWebsite(widget.museum.officialLink),
+                        child: Row(
+                          children: [
+                            Icon(Icons.language, size: 20, color: Colors.blue.shade600),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "Visiter le site web",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.blue.shade700,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              
               Text("Histoire: ${widget.museum.histoire}",
                   style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 16),
@@ -126,41 +204,28 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 8.0,
                     ),
                     itemCount: displayedArtworks.length,
                     itemBuilder: (context, index) {
                       final artwork = displayedArtworks[index];
-
-                      return InkWell(
+                      return GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  DetailArtworkPage(artwork: artwork),
+                              builder: (context) => DetailArtworkPage(
+                                artwork: artwork,
+                              ),
                             ),
                           );
                         },
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: artwork.toImage(),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              artwork.title.length > 40
-                                ? '${artwork.title.substring(0, 40)}...'
-                                : artwork.title,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
-                          ],
+                        child: GridTile(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: artwork.toImage(),
+                          ),
                         ),
                       );
                     },
@@ -172,5 +237,63 @@ class _DetailMuseumPageState extends State<DetailMuseumPage> {
         ),
       ),
     );
+  }
+
+  // Nouvelle méthode pour lancer un appel téléphonique
+  Future<void> _launchPhone(String phoneNumber) async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+    try {
+      if (await canLaunchUrl(phoneUri)) {
+        await launchUrl(phoneUri);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Impossible d'ouvrir l'application téléphone"),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Erreur lors de l'ouverture du téléphone : $e"),
+          ),
+        );
+      }
+    }
+  }
+
+  // Nouvelle méthode pour lancer le site web
+  Future<void> _launchWebsite(String url) async {
+    // S'assurer que l'URL commence par http:// ou https://
+    String formattedUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      formattedUrl = 'https://$url';
+    }
+    
+    final Uri websiteUri = Uri.parse(formattedUrl);
+    try {
+      if (await canLaunchUrl(websiteUri)) {
+        await launchUrl(websiteUri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Impossible d'ouvrir le site web"),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Erreur lors de l'ouverture du site web : $e"),
+          ),
+        );
+      }
+    }
   }
 }

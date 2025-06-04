@@ -221,8 +221,8 @@ Widget _buildToggleButton({
   return ElevatedButton(
     onPressed: onPressed,
     style: ElevatedButton.styleFrom(
-      backgroundColor: selected ? Colors.blue : Colors.transparent,
-      side: const BorderSide(color: Colors.blue),
+      backgroundColor: selected ? const Color.fromARGB(255, 154, 78, 172) : Colors.transparent,
+      side: const BorderSide(color:  Color.fromARGB(255, 154, 78, 172)),
       elevation: selected ? 4 : 0,
       padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
       shape: RoundedRectangleBorder(
@@ -233,7 +233,7 @@ Widget _buildToggleButton({
       label,
       style: TextStyle(
         fontSize: 16,
-        color: selected ? Colors.white : Colors.blue,
+        color: selected ? Colors.white : const Color.fromARGB(255, 154, 78, 172),
         fontWeight: FontWeight.w600,
       ),
     ),

@@ -14,16 +14,43 @@ class ProfilagePage extends StatefulWidget {
   State<ProfilagePage> createState() => _ProfilagePageState();
 }
 
-class _ProfilagePageState extends State<ProfilagePage> {
+class _ProfilagePageState extends State<ProfilagePage>
+    with TickerProviderStateMixin {
   late Future<List<Artwork>> _recommendedArtworks;
   int currentIndex = 0;
   double offset = 0;
   double angle = 0;
+  
+  late AnimationController _museumController;
+  late Animation<double> _fillAnimation;
 
   @override
   void initState() {
     super.initState();
     _recommendedArtworks = ArtworkService().fetchArtworks();
+    
+    // Animation pour le musée
+    _museumController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    
+    _fillAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _museumController,
+      curve: Curves.easeInOut,
+    ));
+    
+    // Démarre l'animation en boucle
+    _museumController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _museumController.dispose();
+    super.dispose();
   }
 
   void handleSwipe(String direction, Artwork artwork) async {
@@ -45,11 +72,11 @@ class _ProfilagePageState extends State<ProfilagePage> {
   }
 
   Future<void> _handleProfilageCompleted() async {
-    // Affiche une roue de chargement
+    // Affiche une roue de chargement avec animation musée
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
+      builder: (context) => _buildMuseumLoadingDialog(),
     );
 
     final user = Provider.of<UserProvider>(context, listen: false).user;
@@ -57,7 +84,6 @@ class _ProfilagePageState extends State<ProfilagePage> {
 
     // Met à jour les recommandations
     final newArtworks = await RecommendationService().majRecommendations(uid);
-
 
     // Ferme le loader
     if (mounted) Navigator.of(context).pop();
@@ -79,6 +105,56 @@ class _ProfilagePageState extends State<ProfilagePage> {
     }
   }
 
+  Widget _buildMuseumLoadingDialog() {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Animation du musée
+            AnimatedBuilder(
+              animation: _fillAnimation,
+              builder: (context, child) {
+                return _buildMuseumAnimation(_fillAnimation.value);
+              },
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "Chargement de votre profil",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const LinearProgressIndicator(
+              backgroundColor: Colors.grey,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMuseumAnimation(double fillValue) {
+    return SizedBox(
+      width: 120,
+      height: 80,
+      child: CustomPaint(
+        painter: MuseumPainter(fillValue),
+        child: Container(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
@@ -91,7 +167,31 @@ class _ProfilagePageState extends State<ProfilagePage> {
         future: _recommendedArtworks,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Animation du musée pour le chargement initial
+                  AnimatedBuilder(
+                    animation: _fillAnimation,
+                    builder: (context, child) {
+                      return _buildMuseumAnimation(_fillAnimation.value);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Chargement de votre profil",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const CircularProgressIndicator(),
+                ],
+              ),
+            );
           } else if (snapshot.hasError) {
             return Center(
               child: Text("Erreur lors du chargement: ${snapshot.error}",
@@ -127,7 +227,28 @@ class _ProfilagePageState extends State<ProfilagePage> {
                         buildArtworkCard(artworks[currentIndex], offset, angle),
                   ),
                 )
-              : const Center(child: Text("Chargement..."));
+              : Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _fillAnimation,
+                        builder: (context, child) {
+                          return _buildMuseumAnimation(_fillAnimation.value);
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        "Chargement de votre profil",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
         },
       ),
     );
@@ -187,8 +308,8 @@ class _ProfilagePageState extends State<ProfilagePage> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                    artwork.title.length > 40 
-                      ? '${artwork.title.substring(0, 40)}...' 
+                    artwork.title.length > 30 
+                      ? '${artwork.title.substring(0, 30)}...' 
                       : artwork.title,
                   style: const TextStyle(
                       fontSize: 22, fontWeight: FontWeight.bold),
@@ -222,5 +343,83 @@ class _ProfilagePageState extends State<ProfilagePage> {
         ),
       ),
     );
+  }
+}
+
+// CustomPainter pour dessiner le musée avec animation de remplissage
+class MuseumPainter extends CustomPainter {
+  final double fillValue;
+
+  MuseumPainter(this.fillValue);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.brown
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+  
+
+    // Dessine la structure du musée
+    final path = Path();
+    
+    // Base du musée
+    path.moveTo(10, size.height - 10);
+    path.lineTo(size.width - 10, size.height - 10);
+    path.lineTo(size.width - 10, size.height * 0.4);
+    path.lineTo(size.width * 0.8, size.height * 0.4);
+    path.lineTo(size.width * 0.5, size.height * 0.1);
+    path.lineTo(size.width * 0.2, size.height * 0.4);
+    path.lineTo(10, size.height * 0.4);
+    path.close();
+
+    // Dessine le remplissage animé
+    if (fillValue > 0) {
+      final fillPath = Path();
+      final fillHeight = (size.height - 20) * fillValue;
+      
+      fillPath.moveTo(12, size.height - 10);
+      fillPath.lineTo(size.width - 12, size.height - 10);
+      fillPath.lineTo(size.width - 12, size.height - 10 - fillHeight);
+      fillPath.lineTo(12, size.height - 10 - fillHeight);
+      fillPath.close();
+      
+     
+    }
+
+    // Dessine le contour du musée
+    canvas.drawPath(path, paint);
+
+    // Dessine les colonnes
+    for (int i = 0; i < 3; i++) {
+      final x = size.width * (0.25 + i * 0.25);
+      canvas.drawLine(
+        Offset(x, size.height * 0.4),
+        Offset(x, size.height - 10),
+        paint,
+      );
+    }
+
+    // Dessine la porte
+    final doorRect = Rect.fromLTWH(
+      size.width * 0.45,
+      size.height * 0.6,
+      size.width * 0.1,
+      size.height * 0.3,
+    );
+    canvas.drawRect(doorRect, paint);
+
+    // Dessine quelques œuvres d'art flottantes si le musée se remplit
+    if (fillValue > 0.3) {
+     
+      
+   
+    }
+  }
+
+  @override
+  bool shouldRepaint(MuseumPainter oldDelegate) {
+    return oldDelegate.fillValue != fillValue;
   }
 }

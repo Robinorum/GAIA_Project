@@ -462,7 +462,7 @@ class _QuestsPageState extends State<QuestsPage> {
                 ),
                 const SizedBox(height: 16),
                 if (_isLoadingQuest)
-                  Center(
+                  const Center(
                     child: CircularProgressIndicator(
                       color: Colors.deepPurple,
                     ),
@@ -768,62 +768,63 @@ class _QuestsPageState extends State<QuestsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Succès",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Expanded(
-              child: FutureBuilder<void>(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Succès",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              FutureBuilder<void>(
                 future: _combinedFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  return ListView.builder(
-                    itemCount: _quests.length < 2 ? _quests.length : 2,
-                    itemBuilder: (context, index) {
-                      final quest = _quests[index];
+                  return Column(
+                    children: List.generate(
+                      _quests.length < 2 ? _quests.length : 2,
+                      (index) {
+                        final quest = _quests[index];
 
-                      final progressData = _questProgressData.firstWhere(
-                        (element) => element['id'] == quest.id,
-                        orElse: () => {'progression': 0, 'goal': quest.goal[0]},
-                      );
+                        final progressData = _questProgressData.firstWhere(
+                          (element) => element['id'] == quest.id,
+                          orElse: () => {'progression': 0, 'goal': quest.goal[0]},
+                        );
 
-                      return _buildSuccessCard(quest, progressData);
-                    },
+                        return _buildSuccessCard(quest, progressData);
+                      },
+                    ),
                   );
                 },
               ),
-            ),
-            const SizedBox(height: 10),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AllQuestsPage()),
-                  );
-                },
-                icon: const Icon(Icons.list),
-                label: const Text("Tout voir"),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 10),
+              Center(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AllQuestsPage()),
+                    );
+                  },
+                  icon: const Icon(Icons.list),
+                  label: const Text("Tout voir"),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            _buildMuseumQuestSection(),
-          ],
+              const SizedBox(height: 24),
+              _buildMuseumQuestSection(),
+            ],
+          ),
         ),
       ),
     );

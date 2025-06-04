@@ -16,9 +16,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _isNotificationsEnabled = true;
-  String _selectedLanguage = 'Français';
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -56,45 +53,6 @@ class _SettingsPageState extends State<SettingsPage> {
                           activeColor: Theme.of(context).primaryColor,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _buildSettingsSection(
-                  "Notifications",
-                  Icons.notifications,
-                  [
-                    _buildModernListTile(
-                      title: "Notifications push",
-                      subtitle: "Recevoir des notifications",
-                      icon: _isNotificationsEnabled
-                          ? Icons.notifications_active
-                          : Icons.notifications_off,
-                      trailing: Transform.scale(
-                        scale: 0.8,
-                        child: Switch(
-                          value: _isNotificationsEnabled,
-                          onChanged: (value) {
-                            setState(() {
-                              _isNotificationsEnabled = value;
-                            });
-                          },
-                          activeColor: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _buildSettingsSection(
-                  "Langue",
-                  Icons.language,
-                  [
-                    _buildModernListTile(
-                      title: "Langue de l'application",
-                      subtitle: _selectedLanguage,
-                      icon: Icons.translate,
-                      onTap: () => _showLanguageDialog(),
                     ),
                   ],
                 ),
@@ -146,18 +104,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   "Support",
                   Icons.help,
                   [
-                    _buildModernListTile(
-                      title: "Centre d'aide",
-                      subtitle: "FAQ et assistance",
-                      icon: Icons.help_center,
-                      onTap: () => _showComingSoonDialog("Centre d'aide"),
-                    ),
-                    _buildModernListTile(
-                      title: "Nous contacter",
-                      subtitle: "Envoyer un message",
-                      icon: Icons.contact_support,
-                      onTap: () => _showComingSoonDialog("Contact"),
-                    ),
                     _buildModernListTile(
                       title: "À propos",
                       subtitle: "Informations sur l'application",
@@ -510,123 +456,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
               child: const Text("Se déconnecter"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _showLanguageDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Row(
-            children: [
-              Icon(Icons.language,
-                  color: Theme.of(context).primaryColor, size: 24),
-              const SizedBox(width: 12),
-              const Text(
-                "Sélectionner une langue",
-                style: TextStyle(fontSize: 16),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildLanguageOption("Français", "🇫🇷"),
-              const SizedBox(height: 8),
-              _buildLanguageOption("English", "🇺🇸"),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildLanguageOption(String language, String flag) {
-    final isSelected = _selectedLanguage == language;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedLanguage = language;
-        });
-        Navigator.of(context).pop();
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.1)
-              : null,
-          borderRadius: BorderRadius.circular(12),
-          border: isSelected
-              ? Border.all(color: Theme.of(context).primaryColor)
-              : null,
-        ),
-        child: Row(
-          children: [
-            Text(flag, style: const TextStyle(fontSize: 24)),
-            const SizedBox(width: 12),
-            Text(
-              language,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? Theme.of(context).primaryColor : null,
-              ),
-            ),
-            const Spacer(),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: Theme.of(context).primaryColor,
-                size: 20,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showComingSoonDialog(String feature) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Row(
-            children: [
-              Icon(Icons.construction, color: Colors.orange, size: 24),
-              SizedBox(width: 12),
-              Text("Bientôt disponible"),
-            ],
-          ),
-          content: Text(
-            "$feature sera disponible dans une prochaine mise à jour !",
-            style: const TextStyle(fontSize: 16),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text("Compris"),
             ),
           ],
         );
