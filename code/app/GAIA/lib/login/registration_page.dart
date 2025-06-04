@@ -61,7 +61,8 @@ class _RegistrationPageState extends State<RegistrationPage>
   bool _hasUppercase() => RegExp(r'[A-Z]').hasMatch(passwordController.text);
   bool _hasLowercase() => RegExp(r'[a-z]').hasMatch(passwordController.text);
   bool _hasDigit() => RegExp(r'\d').hasMatch(passwordController.text);
-  bool _hasSpecialChar() => RegExp(r'[@$!%*?&]').hasMatch(passwordController.text);
+  bool _hasSpecialChar() =>
+      RegExp(r'[@$!%*?&]').hasMatch(passwordController.text);
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +200,8 @@ class _RegistrationPageState extends State<RegistrationPage>
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  color: theme.colorScheme.onSurface.withAlpha((0.6* 255).toInt()),
+                  color: theme.colorScheme.onSurface
+                      .withAlpha((0.6 * 255).toInt()),
                 ),
                 onPressed: () {
                   setState(() {
@@ -274,9 +276,11 @@ class _RegistrationPageState extends State<RegistrationPage>
         setState(() {
           if (controller == emailController && emailError != null) {
             emailError = null;
-          } else if (controller == usernameController && usernameError != null) {
+          } else if (controller == usernameController &&
+              usernameError != null) {
             usernameError = null;
-          } else if (controller == passwordController && passwordError != null) {
+          } else if (controller == passwordController &&
+              passwordError != null) {
             passwordError = null;
           }
         });
@@ -309,7 +313,8 @@ class _RegistrationPageState extends State<RegistrationPage>
           _buildRequirement('Une lettre majuscule', _hasUppercase(), theme),
           _buildRequirement('Une lettre minuscule', _hasLowercase(), theme),
           _buildRequirement('Un chiffre', _hasDigit(), theme),
-          _buildRequirement('Un caractère spécial (@\$!%*?&)', _hasSpecialChar(), theme),
+          _buildRequirement(
+              'Un caractère spécial (@\$!%*?&)', _hasSpecialChar(), theme),
         ],
       ),
     );
@@ -323,8 +328,8 @@ class _RegistrationPageState extends State<RegistrationPage>
           Icon(
             isValid ? Icons.check_circle : Icons.circle,
             size: isValid ? 16 : 4,
-            color: isValid 
-                ? Colors.green 
+            color: isValid
+                ? Colors.green
                 : theme.colorScheme.onSurface.withAlpha((0.6 * 255).toInt()),
           ),
           const SizedBox(width: 8),
@@ -332,9 +337,10 @@ class _RegistrationPageState extends State<RegistrationPage>
             child: Text(
               text,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isValid 
-                    ? Colors.green 
-                    : theme.colorScheme.onSurface.withAlpha((0.7 * 255).toInt()),
+                color: isValid
+                    ? Colors.green
+                    : theme.colorScheme.onSurface
+                        .withAlpha((0.7 * 255).toInt()),
                 fontWeight: isValid ? FontWeight.w500 : FontWeight.normal,
               ),
             ),
@@ -464,7 +470,11 @@ class _RegistrationPageState extends State<RegistrationPage>
       }
 
       // Validate password using the same methods
-      if (!_hasMinLength() || !_hasUppercase() || !_hasLowercase() || !_hasDigit() || !_hasSpecialChar()) {
+      if (!_hasMinLength() ||
+          !_hasUppercase() ||
+          !_hasLowercase() ||
+          !_hasDigit() ||
+          !_hasSpecialChar()) {
         setState(() {
           passwordError = "Le mot de passe ne respecte pas les exigences";
           _isLoading = false;
@@ -547,7 +557,7 @@ class _RegistrationPageState extends State<RegistrationPage>
       );
     } catch (e) {
       setState(() {
-        passwordError = "Erreur lors de l'inscription : $e";
+        passwordError = "Erreur lors de l'inscription.";
         _isLoading = false;
       });
     }

@@ -425,7 +425,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         email = snapshot.docs[0]['email'];
       } else {
         setState(() {
-          emailError = "Nom d'utilisateur non trouvé";
+          emailError = "Vérifiez vos informations";
           _isLoading = false;
         });
         return;
@@ -475,7 +475,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       }
     } catch (e) {
       setState(() {
-        passwordError = "Erreur de connexion : $e";
+        passwordError = "Erreur de connexion, réessayez.";
         _isLoading = false;
       });
     }
